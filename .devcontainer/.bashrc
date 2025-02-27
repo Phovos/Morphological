@@ -56,35 +56,42 @@ git config --global core.fsmonitor 'true'
 # Git configuration
 git config --global rerere.enabled true
 # Reverse git add (takes off git add <file> from staging area)
-unstage() {
-    git reset HEAD -- $1
+function unstage() {
+    if [ $# -eq 0 ]; then
+        git restore --staged .
+    else
+        git restore --staged "$@"
+    fi
+    echo "✅ Unstaged: $@"
 }
-: <<'GIT_DOC'
+gunadd() {
+    git reset HEAD -- "$@"
+    echo "✅ Unstaged: $@"
+}
+gitdoc() {
+    cat <<'GIT_DOC'
     ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-    ┃                ⚡ Git Staging & Reset Cheat Sheet ⚡            ┃
+    ┃ ⚡ Git Staging & Reset Cheat Sheet ⚡ ┃
     ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
-    ┃ Command                         ┃ Effect                       ┃
+    ┃ Command ┃ Effect ┃
     ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
-    ┃ git add <file>                   ┃ Stage changes for commit    ┃
-    ┃ gunadd <file>                     ┃ Unstage, keep changes      ┃
-    ┃ git reset HEAD <file>             ┃ (Same as gunadd)           ┃
-    ┃ git checkout -- <file>            ┃ Discard local changes      ┃
-    ┃ git restore --staged <file>       ┃ Unstage, keep changes      ┃
-    ┃ git restore <file>                ┃ Discard local changes      ┃
-    ┃ git reset --soft HEAD~1           ┃ Undo commit, keep staged   ┃
-    ┃ git reset --mixed HEAD~1          ┃ Undo commit, unstage files ┃
-    ┃ git reset --hard HEAD~1           ┃ Undo commit & changes! ⚠   ┃
+    ┃ git add <file> ┃ Stage changes for commit ┃
+    ┃ gunadd <file> ┃ Unstage, keep changes ┃
+    ┃ git reset HEAD <file> ┃ (Same as gunadd) ┃
+    ┃ git checkout -- <file> ┃ Discard local changes ┃
+    ┃ git restore --staged <file> ┃ Unstage, keep changes ┃
+    ┃ git restore <file> ┃ Discard local changes ┃
+    ┃ git reset --soft HEAD~1 ┃ Undo commit, keep staged ┃
+    ┃ git reset --mixed HEAD~1 ┃ Undo commit, unstage files ┃
+    ┃ git reset --hard HEAD~1 ┃ Undo commit & changes! ⚠ ┃
     ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
     🔥 `gunadd` is an alias for:
-       git reset HEAD <file>    # Unstages, but keeps file changes
+    git reset HEAD <file> # Unstages, but keeps file changes
 
-    ⚠  Use `git reset --hard` with caution—it nukes all changes!
-
+    ⚠ Use `git reset --hard` with caution—it nukes all changes!
 GIT_DOC
-alias gitdoc='cat <<EOF
-# (Paste the docstring here)
-EOF'
+}
 # ==========================================================
 # Shell Behavior Enhancements
 # ==========================================================
@@ -157,7 +164,7 @@ ct() {
     shift
     echo -e "${color_code}$*${NC}"
 }
-echo "$(purple "demiurge spectral #'s:.")"
+echo "$(green "demiurge spectral #'s:.")"
 cpick
 # ==========================================================
 # Custom Functions
@@ -191,10 +198,10 @@ cr() {
   if [ $# -eq 0 ]; then
     last_cmd="$(fc -ln -1 | sed "s/^\s*//")"
     if [ -n "$last_cmd" ]; then
-      HISTTIMEFORMAT= histunique | grep -i "$last_cmd"
+      history | grep -i "$last_cmd" | uniq
     fi
   else
-    HISTTIMEFORMAT= histunique | grep -i "$@"
+    history | grep -i "$@" | uniq
   fi
   echo -ne "\033[32m(reverse-i-search)\033[0m"': '
 }
@@ -259,6 +266,43 @@ function backup() {
 # This will execute the `sleep 10` command and print "Command completed: sleep 10" when it finishes.
 #
 alias alert='echo "Command completed: $(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
+# ----------------------------------------------------
+cherry() {
+    local YELLOW="\033[1;33m"
+    local GREEN="\033[1;32m"
+    local RED="\033[1;31m"
+    local BLUE="\033[1;34m"
+    local CYAN="\033[1;36m"
+    local RESET="\033[0m"
+
+    echo -e "${YELLOW}🔍 Last 10 Commits:${RESET}"
+    git log --oneline -n 10 --graph --color
+
+    if [ -z "$1" ]; then
+        echo -e "${CYAN}📌 Usage: cpick <commit-hash>${RESET}"
+        return 1
+    fi
+
+    echo -e "${GREEN}🌱 Cherry-picking commit: $1${RESET}"
+    git cherry-pick "$1"
+
+    if [ $? -eq 0 ]; then
+        echo -e "${BLUE}✅ Successfully applied $1${RESET}"
+    else
+        echo -e "${RED}❌ Cherry-pick failed! Resolve conflicts and run:${RESET}"
+        echo -e "${CYAN}   git cherry-pick --continue${RESET} or ${CYAN}git cherry-pick --abort${RESET}"
+    fi
+}
+# ----------------------------------------------------
+# Reverse 'git add' (unstage files)
+function gunadd() {
+    if [ $# -eq 0 ]; then
+        git reset HEAD .
+    else
+        git reset HEAD "$@"
+    fi
+    echo "✅ Unstaged: $*"
+}
 # ----------------------------------------------------
 # popx - Pop multiple directories from the directory stack
 #
@@ -330,25 +374,32 @@ bp() {
 #   .bp
 #
 .bp() {
-    local current_dir="$(pwd)"
-    local parent_dir="$(dirname "$current_dir")"
-    # Check if the current directory is not the root directory
-    if [[ "$current_dir" == "/" ]]; then
-        echo "Cannot move the root directory."
-        return 1
+  local current_dir="$(pwd)"
+  local parent_dir="$(dirname "$current_dir")"
+  if [[ "$current_dir" == "/" ]]; then
+    echo "Cannot move the root directory."
+    return 1
+  fi
+  shopt -s dotglob
+  for item in ./*; do
+    if [[ -e "$item" ]]; then
+      cp -rv "$item" "$parent_dir" || return
+      rm -rf "$item"
     fi
-    # Copy all files and directories (including hidden ones)
-    shopt -s dotglob # Enable matching dotfiles
-    for item in ./*; do
-        if [[ -e "$item" ]]; then
-            cp -rv --no-preserve=mode "$item" "$parent_dir" || return
-            rm -rf "$item"
-        fi
-    done
-    shopt -u dotglob # Disable matching dotfiles
-    # Change to the parent directory
+  done
+  shopt -u dotglob
+  if [[ "$(ls -A "$current_dir")" == "" ]]; then
+    read -r -p "Delete empty current directory? [y/N] " response
+    if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+      rmdir "$current_dir" && cd "$parent_dir" || return
+      echo "Directory deleted and changed to parent."
+    else
+      cd "$parent_dir" || return
+      echo "Files moved, directory not deleted, changed to parent"
+    fi
+  else
     cd "$parent_dir" || return
-
-    echo "All files and directories copied and deleted from the current directory."
+    echo "Files moved, current directory not empty, changed to parent."
+  fi
 }
 fi
