@@ -1,9 +1,11 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
+from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, List, Union, Generic, TypeVar, Mapping, Optional
 import hashlib
 import inspect
 import ast
+import time
 import logging
 import json
 import pathlib
@@ -177,7 +179,46 @@ def jsonload_file(file_path: pathlib.Path, mapping_description: dict):
     with file_path.open('r') as file:
         data = json.load(file)
     return mapper(mapping_description, data)
+class PyObjectLike(ABC):
+    @abstractmethod
+    def __getattribute__(self, name: str) -> Any:
+        return object.__getattribute__(self, name)
 
+    @abstractmethod
+    def __setattr__(self, name: str, value: Any) -> None:
+        object.__setattr__(self, name, value)
+
+    @abstractmethod
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        raise NotImplementedError
+
+    @abstractmethod
+    def __repr__(self) -> str:
+        raise NotImplementedError
+
+    @abstractmethod
+    def __str__(self) -> str:
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def ob_refcnt(self) -> int:
+        raise NotImplementedError
+
+    @ob_refcnt.setter
+    @abstractmethod
+    def ob_refcnt(self, value: int) -> None:
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def ob_ttl(self) -> Optional[int]:
+        raise NotImplementedError
+
+    @ob_ttl.setter
+    @abstractmethod
+    def ob_ttl(self, value: Optional[int]) -> None:
+        raise NotImplementedError
 AccessLevel = Enum('AccessLevel', 'READ WRITE EXECUTE ADMIN USER')
 
 @dataclass
@@ -241,6 +282,41 @@ class SecurityValidator(ast.NodeVisitor):
             self.security_context.log_access(node.func.id, "execute", True)
         self.generic_visit(node)
 #------------------------------------------------------------------------------
+# FrameModel and CustomDelimiterFrame
+#------------------------------------------------------------------------------
+class FrameModel(Generic[T, V, C], ABC):
+    def init(self, start_delimiter: str = "<<CONTENT>>", end_delimiter: str = "<<END_CONTENT>>") -> None:
+        self.start_delimiter = start_delimiter
+        self.end_delimiter = end_delimiter
+
+    @abstractmethod
+    def to_bytes(self) -> bytes:
+        pass
+
+    @abstractmethod
+    def parse_content(self, raw_content: str) -> str:
+        pass
+
+    def validate_content(self, content: str) -> bool:
+        return content.startswith(self.start_delimiter) and content.endswith(self.end_delimiter)
+
+@dataclass
+class CustomDelimiterFrame(FrameModel):
+    content: str
+
+    def __post_init__(self):
+        self.init()
+
+    def to_bytes(self) -> bytes:
+        return self.content.encode()
+
+    def parse_content(self, raw_content: str) -> str:
+        start_index = raw_content.find(self.start_delimiter)
+        end_index = raw_content.rfind(self.end_delimiter)
+        if start_index == -1 or end_index == -1 or start_index >= end_index:
+            raise ValueError("Invalid content format: Missing or mismatched delimiters.")
+        return raw_content[start_index + len(self.start_delimiter):end_index]
+#------------------------------------------------------------------------------
 # Runtime Namespace Management
 #------------------------------------------------------------------------------
 def register_models(models: Dict[str, BaseModel], target_globals=None):
@@ -269,17 +345,15 @@ class RuntimeNamespace:
     def __init__(self, name: str = "root", parent: Optional['RuntimeNamespace'] = None):
         self._name = name
         self._parent = parent
-        self._children = {}
+        self._children: Dict[str, 'RuntimeNamespace'] = {}
         self._content = SimpleNamespace()
         self._security_context = None
         self.available_modules = {}
+        self.frame_model: Optional[FrameModel] = None
     
     @property
     def full_path(self) -> str:
-        """Get the full path of this namespace."""
-        if self._parent:
-            return f"{self._parent.full_path}.{self._name}"
-        return self._name
+        return f"{self._parent.full_path}.{self._name}" if self._parent else self._name
     
     def add_child(self, name: str) -> 'RuntimeNamespace':
         """Add a child namespace."""
@@ -300,7 +374,7 @@ class RuntimeNamespace:
         
         if first_part not in self._children:
             return None
-            
+
         child = self._children[first_part]
         if len(parts) == 1:
             return child
@@ -334,8 +408,23 @@ class RuntimeNamespace:
                 raise PermissionError(f"Access denied to modify attribute: {name}")
         
         setattr(self._content, name, value)
+
+    def set_frame_model(self, frame_model: FrameModel) -> None:
+        self.frame_model = frame_model
+
+    def embed_content(self, raw_content: str) -> None:
+        if not self.frame_model:
+            raise ValueError("No FrameModel configured for this namespace.")
+        if not self.frame_model.validate_content(raw_content):
+            raise ValueError("Content validation failed. Invalid delimiters or format.")
+        self._content.embedded_data = self.frame_model.parse_content(raw_content)
+
+    def retrieve_content(self) -> str:
+        if hasattr(self._content, "embedded_data"):
+            return self.frame_model.start_delimiter + self._content.embedded_data + self.frame_model.end_delimiter
+        raise ValueError("No content embedded in this namespace.")
 #------------------------------------------------------------------------------
-# Homoiconic-Atomic-logic
+# The __Atom__ Class: Code as Data and Data as Code
 #------------------------------------------------------------------------------
 """
 This module implements a runtime system inspired by homoiconic principles and S-expression logic,
@@ -390,7 +479,43 @@ class CustomEncoder(json.JSONEncoder):
 
 
 @dataclass
-class __Atom__(Generic[T, V, C]):
+class __Atom__(Generic[T, V, C], PyObjectLike):
+    """
+    def __getattribute__(self, name: str) -> Any:
+        # Direct access for special attributes
+        if name.startswith('_'):
+            return object.__getattribute__(self, name)
+        return super().__getattribute__(name)
+    """
+    def __init__(self, code: str, value: Optional[Any] = None, ttl: Optional[int] = None,
+                 request_data: Optional[Dict[str, Any]] = None):
+        # Initialize basic attributes first using direct object.__setattr__
+        self._initialize_base_attributes(code, value, ttl, request_data)
+        """
+        # Set up initial state directly
+        object.__setattr__(self, '_local_env', {})
+        object.__setattr__(self, '_code', code)
+        object.__setattr__(self, '_value', value)
+        object.__setattr__(self, '_refcount', 1)
+        object.__setattr__(self, '_ttl', ttl)
+        object.__setattr__(self, '_created_at', time.time())
+        object.__setattr__(self, 'request_data', request_data or {})
+        object.__setattr__(self, 'session', (request_data or {}).get("session", {}))
+        object.__setattr__(self, 'runtime_namespace', None)
+        """
+
+    def _initialize_base_attributes(self, code, value, ttl, request_data):
+        # Direct attribute setting to bypass __getattribute__ during initialization
+        object.__setattr__(self, '_code', code)
+        object.__setattr__(self, '_value', value)
+        object.__setattr__(self, '_local_env', {})
+        object.__setattr__(self, '_refcount', 1)
+        object.__setattr__(self, '_ttl', ttl)
+        object.__setattr__(self, '_created_at', time.time())
+        object.__setattr__(self, 'request_data', request_data or {})
+        object.__setattr__(self, '_local_env', {'request_data': request_data or {}})
+        object.__setattr__(self, 'session', (request_data or {}).get("session", {}))
+        object.__setattr__(self, 'runtime_namespace', None)
     """
     Abstract Base Class for all __Atom__ types.
     
@@ -431,6 +556,110 @@ class __Atom__(Generic[T, V, C]):
         for key, value in mapped_data.items():
             if hasattr(self, key):
                 setattr(self, key, value)
+    def __getattribute__(self, name: str) -> Any:
+        # For internal attributes, bypass dynamic lookup
+        if name in ('_code', '_value', '_local_env', '_refcount', '_ttl', '_created_at'):
+            return super().__getattribute__(name)
+        # Check local environment first
+        local_env = super().__getattribute__('_local_env')
+        if name in local_env:
+            return local_env[name]
+        # Otherwise, try to dynamically execute the code to resolve the attribute
+        try:
+            exec(self._code, globals(), local_env)
+            return local_env[name]
+        except Exception as e:
+            raise AttributeError(f"Attribute '{name}' not found: {e}")
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        if name in ('_code', '_value', '_local_env', '_refcount', '_ttl', '_created_at', 'request_data', 'session', 'runtime_namespace'):
+            super().__setattr__(name, value)
+        else:
+            self._local_env[name] = value
+
+    def handle_request(self, *args: Any, **kwargs: Any) -> Dict[str, Any]:
+        # Stub implementation; implement is_authenticated, log_request, etc.
+        if not getattr(self, 'is_authenticated', lambda: True)():
+            return {"status": "error", "message": "Authentication failed"}
+        try:
+            if "operation" in self.request_data:
+                operation = self.request_data["operation"]
+                if operation == "execute_atom":
+                    # Include code in request_data
+                    self.request_data["code"] = "return some_operation()"
+                    result = self.execute_atom({"runtime_namespace": self.runtime_namespace})
+                elif operation == "query_memory":
+                    result = self.query_memory({"runtime_namespace": self.runtime_namespace})
+                else:
+                    result = {"status": "error", "message": "Unknown operation"}
+            else:
+                result = {"status": "success", "message": "Standard processing"}
+        except Exception as e:
+            result = {"status": "error", "message": str(e)}
+        return result
+
+    def execute_atom(self, request_context: Dict[str, Any]) -> Dict[str, Any]:
+        ns: RuntimeNamespace = request_context.get("runtime_namespace")
+        if ns:
+            atom_ns = ns.get_child(self.request_data.get("atom_name", ""))
+            atom_ns = ns.get_child("some_atom")
+            if atom_ns:
+                # Add code parameter
+                atom = __Atom__(code="return 42", request_data=self.request_data, session=self.session, runtime_namespace=ns)
+                atom_ns.set_attribute("atom", atom)
+        return {"status": "error", "message": "Atom not found"}
+
+    def query_memory(self, request_context: Dict[str, Any]) -> Dict[str, Any]:
+        ns: RuntimeNamespace = request_context.get("runtime_namespace")
+        if ns:
+            # Placeholder: Implement measure_memory_state in RuntimeNamespace
+            return {"status": "success", "result": "memory_state_placeholder"}
+        return {"status": "error", "message": "Memory not found"}
+
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        local_env = self._local_env.copy()
+        try:
+            sig = inspect.signature(eval(self._code))
+            bound_args = sig.bind(*args, **kwargs)
+            bound_args.apply_defaults()
+            local_env.update(bound_args.arguments)
+        except Exception as e:
+            raise RuntimeError(f"Error binding arguments: {e}")
+        try:
+            exec(self._code, globals(), local_env)
+            for k, v in local_env.items():
+                if k.startswith('__return__'):
+                    return v
+            return None
+        except Exception as e:
+            raise RuntimeError(f"Error executing __Atom__ code: {e}")
+
+    def __repr__(self) -> str:
+        return f"__Atom__(code='{self._code}', value={self._value})"
+
+    def __str__(self) -> str:
+        return self.__repr__()
+
+    @property
+    def ob_refcnt(self) -> int:
+        return self._refcount
+
+    @ob_refcnt.setter
+    def ob_refcnt(self, value: int) -> None:
+        self._refcount = value
+
+    @property
+    def ob_ttl(self) -> Optional[int]:
+        return self._ttl
+
+    @ob_ttl.setter
+    def ob_ttl(self, value: Optional[int]) -> None:
+        self._ttl = value
+
+    def is_expired(self) -> bool:
+        if self._ttl is None:
+            return False
+        return time.time() - self._created_at > self._ttl
 
     def encode(self) -> bytes:
         """
@@ -464,11 +693,8 @@ class {self.__class__.__name__}(__Atom__):
 """
             return ast.dump(ast.parse(fallback_source))
 
-    def __repr__(self) -> str:
+    def __strrpr__(self) -> str:
         return f"{self.value} : {self.type}"
-
-    def __str__(self) -> str:
-        return str(self.value)
 
     def __eq__(self, other: Any) -> bool:
         return isinstance(other, __Atom__) and self.hash == other.hash
@@ -493,9 +719,6 @@ class {self.__class__.__name__}(__Atom__):
 
     def __contains__(self, item):
         return item in self.value
-
-    def __call__(self, *args, **kwargs):
-        return self.value(*args, **kwargs)
 
     def __bytes__(self) -> bytes:
         return bytes(self.value)
@@ -575,22 +798,29 @@ def __Decorator__(cls):
     """
     class EnhancedAtom(__Atom__, cls):
         def __init__(self, *args, **kwargs):
+            # Create code string from class name and kwargs
+            code_str = f"class {cls.__name__}:\n"
+            for k, v in kwargs.items():
+                code_str += f"    {k} = {repr(v)}\n"
+            kwargs['code'] = code_str
             super().__init__(*args, **kwargs)
 
     return EnhancedAtom
+    
 def main():
     """Access enhanced __Atom__ features"""
     @__Decorator__
     class MyCustomClass:
         def __init__(self, value: int):
             self.value = value
-    custom_atom = MyCustomClass(value=69)
+            
+    custom_atom = MyCustomClass(code="value = 69", value=69)
     print(custom_atom.introspect())
     print(custom_atom.encode())
-    # print(custom_atom.memory_view)
     custom_atom.subscribe(custom_atom)
     custom_atom.send_message("Ayylmao")
     custom_atom.unsubscribe(custom_atom)
+    # print(custom_atom.memory_view)
     # print(custom_atom.decode(custom_atom.encode()))
 
 if __name__ == "__main__":
