@@ -72,30 +72,6 @@ class BaseModel:
         return self.__class__(**self.dict())
 
 
-def frozen(cls):
-    """
-    Decorator to make a class immutable after initialization.
-    More consistent with improved initialization protection.
-    """
-    original_init = cls.__init__
-    original_setattr = cls.__setattr__
-    
-    @wraps(original_init)
-    def __init__(self, *args, **kwargs):
-        self._initialized = False
-        original_init(self, *args, **kwargs)
-        self._initialized = True
-    
-    def __setattr__(self, name, value):
-        if getattr(self, '_initialized', False) and name != '_initialized':
-            raise AttributeError(f"Cannot modify frozen attribute '{name}'")
-        original_setattr(self, name, value)
-        
-    cls.__init__ = __init__
-    cls.__setattr__ = __setattr__
-    return cls
-
-
 def validate(validator: Callable[[Any], Any]):
     """
     Decorator for validation functions that allows returning the validated value.
@@ -107,7 +83,6 @@ def validate(validator: Callable[[Any], Any]):
         return wrapper
     return decorator
 
-
 class FileModel(BaseModel):
     file_name: str
     file_content: str
@@ -118,20 +93,6 @@ class FileModel(BaseModel):
         with target_path.open('w') as file:
             file.write(self.file_content)
         return target_path
-
-
-@frozen
-class Module(BaseModel):
-    file_path: pathlib.Path
-    module_name: str
-    
-    @validate(lambda x: x if x.endswith('.py') else None)
-    def validate_file_path(self, value):
-        return value
-    
-    @validate(lambda x: x if x.isidentifier() else None)
-    def validate_module_name(self, value):
-        return value
 
 
 def create_model_from_file(file_path: pathlib.Path):
@@ -155,13 +116,11 @@ def load_files_as_models(root_dir: pathlib.Path, file_extensions: List[str]) -> 
     models = {}
     
     for ext in file_extensions:
-        # This is more efficient than rglob('*') and checking extensions
         for file_path in root_dir.rglob(f'*{ext}'):
             if file_path.is_file():  # Double-check it's a file
                 model_name, instance = create_model_from_file(file_path)
                 if model_name and instance:
                     models[model_name] = instance
-                    # Consider if you really want to modify sys.modules here
                     sys.modules[model_name] = instance
     
     return models
@@ -219,9 +178,7 @@ def jsonload_file(file_path: pathlib.Path, mapping_description: dict):
         data = json.load(file)
     return mapper(mapping_description, data)
 
-
 AccessLevel = Enum('AccessLevel', 'READ WRITE EXECUTE ADMIN USER')
-
 
 @dataclass
 class AccessPolicy:
@@ -405,11 +362,6 @@ Ultimately, this model enables the creation of a "runtime of runtimes," where so
 rewritten dynamically, limited only by hardware and operating system constraints.
 """
 
-# Type variables for generic usage
-T = TypeVar("T")
-V = TypeVar("V")
-C = TypeVar("C")
-
 @dataclass
 class GrammarRule:
     """
@@ -581,6 +533,42 @@ class {self.__class__.__name__}(__Atom__):
         self.children.remove(atom)
         logging.info(f"__Atom__ {self.id} unsubscribed from {atom.id}")
 
+def frozen(cls):
+    """
+    Decorator to make a class immutable after initialization.
+    """
+    original_init = cls.__init__
+    original_setattr = cls.__setattr__
+    
+    @wraps(original_init)
+    def __init__(self, *args, **kwargs):
+        self._initialized = False
+        original_init(self, *args, **kwargs)
+        self._initialized = True
+    
+    def __setattr__(self, name, value):
+        if getattr(self, '_initialized', False) and name != '_initialized':
+            raise AttributeError(f"Cannot modify frozen attribute '{name}'")
+        original_setattr(self, name, value)
+        
+    cls.__init__ = __init__
+    cls.__setattr__ = __setattr__
+    return cls
+
+@frozen
+class Module(BaseModel):
+    file_path: pathlib.Path
+    module_name: str
+    
+    @validate(lambda x: x if x.endswith('.py') else None)
+    def validate_file_path(self, value):
+        return value
+    
+    @validate(lambda x: x if x.isidentifier() else None)
+    def validate_module_name(self, value):
+        return value
+
+
 def __Decorator__(cls):
     """
     Decorator to enhance a class with __Atom__ behavior.
@@ -601,7 +589,7 @@ def main():
     print(custom_atom.encode())
     # print(custom_atom.memory_view)
     custom_atom.subscribe(custom_atom)
-    custom_atom.send_message("Hello, World!")
+    custom_atom.send_message("Ayylmao")
     custom_atom.unsubscribe(custom_atom)
     # print(custom_atom.decode(custom_atom.encode()))
 
