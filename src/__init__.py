@@ -42,7 +42,7 @@ The idea of "runtime as quanta" transcends the diminutive associations one might
 
 This hierarchical richness inherently provides a scaffold for representing intricate realities, from probabilistic field theories to distributed decision-making systems. However, this framework does not merely simulate quantum phenomena but reinterprets them within a meta-reality that operates above and beyond their foundational constraints. It is this capacity for layered abstraction and emergent behavior that makes "runtime as quanta" a viable and transformative concept for the simulation of any conceivable reality.
 
-Quinic Statistical Dynamics challenges conventional notions of runtime behavior, state resolution, and distributed systems. By embracing recursion, entanglement, "Quinic-behavior" and probabilistic action, this architecture aims to quantize classical hardware for agentic 'AGI' on any/all plaforms/scales. 
+Quinic Statistical Dynamics challenges conventional notions of runtime behavior, state resolution, and distributed systems. By embracing recursion, entanglement, "Quinic-behavior" and probabilistic action, this architecture aims to quantize classical hardware for agentic 'AGI' on any/all plaforms/scales.
 
 ____
 ### CAP Theorem Overview
@@ -71,11 +71,11 @@ class TemporalMRO:
         self.O = O
 ___
 1. **Linearization**:
-    
+
     - In Python, MRO is determined by **C3 linearization** (also called C3 superclass linearization), which creates a linear order of classes in a multiple inheritance tree while preserving the hierarchy. This is much like a **partially ordered set**, where Python resolves methods by following a predictable, deterministic path through the hierarchy.
     - The MRO in Python respects class precedence, preserving the relationship between the superclass and subclass methods.
 2. **Poset Structure**:
-    
+
     - If you think of each class as a node, inheritance as directed edges, and the MRO as a linear path through the directed acyclic graph (DAG) of classes, Python’s MRO creates a directed path. This ensures that each class’s methods are called only once and in the correct sequence, even in complex hierarchies.
 
 ### `super()` as a Traversal Mechanism in the MRO Graph
@@ -83,6 +83,8 @@ ___
 When you use `super()`, you’re not just calling the “parent” class; instead, you're invoking the **next class in the MRO**, following the hierarchy Python calculated. This makes `super()` incredibly flexible and avoids hardcoding which superclass to call. It operates in a **context-aware way**, adapting based on the MRO, which is why it’s sometimes described as a “contextual `super()`.”
 ____
 """
+
+
 @dataclass
 class PyObType(Generic[T, V, C]):
     """Quantum-like object representation mimicking PyObject structure"""
@@ -91,36 +93,39 @@ class PyObType(Generic[T, V, C]):
     _refcount: int = field(default=1)
     _ttl: Optional[int] = None
     _state: QuantumState = field(default=QuantumState.SUPERPOSITION)
-    
+
     def __post_init__(self):
         self._birth_timestamp = sys.timestamp()
-    
+
     @property
     def refcount(self) -> int:
         return self._refcount
-    
+
     @property
     def state(self) -> QuantumState:
         return self._state
-    
+
     def collapse(self) -> V:
         """Force state resolution"""
         if self._state != QuantumState.COLLAPSED:
             self._state = QuantumState.COLLAPSED
         return self._value
-    
+
     def entangle(self, other: 'PyObjectLike') -> None:
         """Create quantum-like entanglement between objects"""
         self._state = QuantumState.ENTANGLED
         other._state = QuantumState.ENTANGLED
 
+
 LSB_MASK = 0b00001111  # Mask for Least Significant Bits
 MSB_MASK = 0b11110000  # Mask for Most Significant Bits
+
 
 class ByteWordChirality(Enum):
     """Defines computational chirality for byte-word representation"""
     LITTLE_ENDIAN = auto()  # LSB-first, canonical smaller representation
     BIG_ENDIAN = auto()     # MSB-first, extended representation
+
 
 class ByteWordEncoding:
     """Flexible byte-word encoding strategy"""
@@ -131,8 +136,8 @@ class ByteWordEncoding:
             return state[-1] if isinstance(state, str) else str(state)[-1]
         elif word_size == 2:
             return (
-                state & 0xFF if isinstance(state, int) else 
-                state[-1] if isinstance(state, bytes) else 
+                state & 0xFF if isinstance(state, int) else
+                state[-1] if isinstance(state, bytes) else
                 state.encode()[-1]
             )
         elif word_size >= 3:
@@ -143,22 +148,25 @@ class ByteWordEncoding:
                 ).digest()[-1]
             return hash(state) & 0xFF  # Fallback hash strategy
 
+
 class WordSize(enum.IntEnum):
     """Standard word sizes with scaling properties"""
     BYTE = 1   # 8-bit (1-byte)
-    SHORT = 2  # 16-bit 
+    SHORT = 2  # 16-bit
     INT = 4    # 32-bit
     LONG = 8   # 64-bit
 
+
 @dataclass
-class Morphologic(ABC, ABCMeta):
+class Morphologic(ABC):
     """
     Rules that map structural transformations in code morphologies.
     """
     symmetry: str  # e.g., "Translation", "Rotation", "Phase"
     conservation: str  # e.g., "Information", "Coherence", "Behavioral"
     lhs: str  # Left-hand side element (morphological pattern)
-    rhs: List[Union[str, 'Morphologic']]  # Right-hand side after transformation
+    # Right-hand side after transformation
+    rhs: List[Union[str, 'Morphologic']]
 
     def apply(self, input_seq: List[str]) -> List[str]:
         """
@@ -205,7 +213,7 @@ class Morphologic(ABC, ABCMeta):
         resolve_future(self) → Resolves and predicts future states using participial logic.
         evolve_state(self, future: str) → Evolves system behavior according to meta-future-participle predictions.
         Interaction with _Atom: MetaFutureParticiple leverages future-participle syntax to predict the evolution of _Atom entities and their states, feeding this into broader system-level behaviors.
-        
+
     4. Speculation (Kernel)
 
         __init__(self, num_arenas: int)
@@ -229,5 +237,4 @@ class Morphologic(ABC, ABCMeta):
         raise_query(self, task: Task) → Raises a meta-question from a task for system resolution.
         resolve_meta_state(self, state: str) → Resolves high-level system states using task feedback.
         traceback_resolution(self) → Tracks down causes of failure and triggers resolution strategies.
-        """
-"""
+    """

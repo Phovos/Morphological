@@ -3,6 +3,7 @@ import math
 import operator
 import sys
 
+
 class MathQuine:
     def __init__(self):
         self.result = 0
@@ -12,7 +13,6 @@ class MathQuine:
             'multiply': operator.mul,
             'divide': operator.truediv,
             'power': operator.pow,
-            'sqrt': math.sqrt
         }
         self.load_state()
 
@@ -51,21 +51,18 @@ class MathQuine:
         self.save_state()
         print(f"Operation '{operation}' performed. New result: {self.result}")
 
+
 if __name__ == "__main__":
     quine = MathQuine()
-    
+
     if len(sys.argv) > 1:
         operation = sys.argv[1]
         if operation not in quine.operations:
             print(f"Unknown operation: {operation}")
-            print("Available operations: add, subtract, multiply, divide, power, sqrt")
+            print("Available operations: add, subtract, multiply, divide, power")
             sys.exit(1)
-        
-        # Only operations other than 'sqrt' need a value
+
         if operation != 'sqrt':
-            if len(sys.argv) < 3:
-                print(f"Operation '{operation}' requires a value.")
-                sys.exit(1)
             value = float(sys.argv[2])
         else:
             value = None
@@ -73,7 +70,7 @@ if __name__ == "__main__":
         quine.run(operation, value)
     else:
         print("Usage: python script.py <operation> <value>")
-        print("Available operations: add, subtract, multiply, divide, power, sqrt")
-    
+        print("Available operations: add, subtract, multiply, divide, power")
+
 # Result placeholder
-result_value = -5.0
+result_value = 85.0
