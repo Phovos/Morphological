@@ -14,120 +14,9 @@ from datetime import datetime
 from enum import Enum
 from functools import wraps
 from types import SimpleNamespace
-
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # BaseModel (no-copy immutable dataclasses for data models)
-#------------------------------------------------------------------------------
-# Type variables for generic usage
-T = TypeVar("T")
-V = TypeVar("V")
-C = TypeVar("C")
-class BaseModel:
-    __slots__ = ('__dict__', '__weakref__')
-    
-    def __init__(self, **data):
-        for name, value in data.items():
-            setattr(self, name, value)
-            
-    def __setattr__(self, name, value):
-        if hasattr(self.__class__, '__annotations__') and name in self.__class__.__annotations__:
-            expected_type = self.__class__.__annotations__[name]
-            if not isinstance(value, expected_type):
-                raise TypeError(f"Expected {expected_type} for {name}, got {type(value)}")
-            
-            validator = getattr(self.__class__, f'validate_{name}', None)
-            if validator:
-                value = validator(self, value)  # Store the validated value
-        
-        super().__setattr__(name, value)
-        
-    @classmethod
-    def create(cls, **kwargs):
-        return cls(**kwargs)
-        
-    def dict(self):
-        if hasattr(self.__class__, '__annotations__'):
-            return {name: getattr(self, name, None) for name in self.__class__.__annotations__}
-        return self.__dict__.copy()
-        
-    def __repr__(self):
-        if hasattr(self.__class__, '__annotations__'):
-            attrs = ', '.join(
-                f"{name}={getattr(self, name, None)!r}" 
-                for name in self.__class__.__annotations__
-            )
-        else:
-            attrs = ', '.join(f"{name}={value!r}" for name, value in self.__dict__.items())
-        return f"{self.__class__.__name__}({attrs})"
-        
-    def __str__(self):
-        if hasattr(self.__class__, '__annotations__'):
-            attrs = ', '.join(
-                f"{name}={getattr(self, name, None)}" 
-                for name in self.__class__.__annotations__
-            )
-        else:
-            attrs = ', '.join(f"{name}={value}" for name, value in self.__dict__.items())
-        return f"{self.__class__.__name__}({attrs})"
-        
-    def clone(self):
-        return self.__class__(**self.dict())
-
-
-def validate(validator: Callable[[Any], Any]):
-    """
-    Decorator for validation functions that allows returning the validated value.
-    """
-    def decorator(func):
-        @wraps(func)
-        def wrapper(self, value):
-            return validator(value)
-        return wrapper
-    return decorator
-
-class FileModel(BaseModel):
-    file_name: str
-    file_content: str
-    
-    def save(self, directory: pathlib.Path):
-        """Save the file content to the specified directory."""
-        target_path = directory / self.file_name
-        with target_path.open('w') as file:
-            file.write(self.file_content)
-        return target_path
-
-
-def create_model_from_file(file_path: pathlib.Path):
-    """Create a FileModel instance from a file path."""
-    try:
-        with file_path.open('r', encoding='utf-8', errors='ignore') as file:
-            content = file.read()
-        
-        model_name = file_path.stem.capitalize() + 'Model'
-        model_class = type(model_name, (FileModel,), {})
-        instance = model_class.create(file_name=file_path.name, file_content=content)
-        logging.info(f"Created {model_name} from {file_path}")
-        return model_name, instance
-    except Exception as e:
-        logging.error(f"Failed to create model from {file_path}: {e}")
-        return None, None
-
-
-def load_files_as_models(root_dir: pathlib.Path, file_extensions: List[str]) -> Dict[str, BaseModel]:
-    """Load all files with specified extensions as models."""
-    models = {}
-    
-    for ext in file_extensions:
-        for file_path in root_dir.rglob(f'*{ext}'):
-            if file_path.is_file():  # Double-check it's a file
-                model_name, instance = create_model_from_file(file_path)
-                if model_name and instance:
-                    models[model_name] = instance
-                    sys.modules[model_name] = instance
-    
-    return models
-
-
+# ------------------------------------------------------------------------------
 def mapper(mapping_description, input_data):
     """Transform input data according to a mapping description."""
     def transform(xform, value):
@@ -137,12 +26,10 @@ def mapper(mapping_description, input_data):
             return {k: transform(v, value) for k, v in xform.items()}
         else:
             raise ValueError(f"Invalid transformation: {xform}")
-    
     def get_value(key):
         if isinstance(key, str) and key.startswith(":"):
             return input_data.get(key[1:])
         return input_data.get(key)
-    
     def process_mapping(mapping_desc):
         result = {}
         for key, xform in mapping_desc.items():
@@ -170,77 +57,145 @@ def mapper(mapping_description, input_data):
             else:
                 result[key] = xform
         return result
-    
     return process_mapping(mapping_description)
-
-
 def jsonload_file(file_path: pathlib.Path, mapping_description: dict):
     """Load a JSON file and transform it according to a mapping description."""
     with file_path.open('r') as file:
         data = json.load(file)
     return mapper(mapping_description, data)
-class PyObjectLike(ABC):
+class PyObject(ABC):
     @abstractmethod
     def __getattribute__(self, name: str) -> Any:
         return object.__getattribute__(self, name)
-
     @abstractmethod
     def __setattr__(self, name: str, value: Any) -> None:
         object.__setattr__(self, name, value)
-
     @abstractmethod
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
         raise NotImplementedError
-
     @abstractmethod
     def __repr__(self) -> str:
         raise NotImplementedError
-
     @abstractmethod
     def __str__(self) -> str:
         raise NotImplementedError
-
     @property
     @abstractmethod
     def ob_refcnt(self) -> int:
         raise NotImplementedError
-
     @ob_refcnt.setter
     @abstractmethod
     def ob_refcnt(self, value: int) -> None:
         raise NotImplementedError
-
     @property
     @abstractmethod
     def ob_ttl(self) -> Optional[int]:
         raise NotImplementedError
-
     @ob_ttl.setter
     @abstractmethod
     def ob_ttl(self, value: Optional[int]) -> None:
         raise NotImplementedError
-AccessLevel = Enum('AccessLevel', 'READ WRITE EXECUTE ADMIN USER')
+# Type variables for generic usage
+T = TypeVar("T")
+V = TypeVar("V")
+C = TypeVar("C")
+class BaseModel:
+    __slots__ = ('__dict__', '__weakref__')
+    def __init__(self, **data):
+        for name, value in data.items():
+            setattr(self, name, value)
+    def __setattr__(self, name, value):
+        if hasattr(self.__class__, '__annotations__') and name in self.__class__.__annotations__:
+            expected_type = self.__class__.__annotations__[name]
+            if not isinstance(value, expected_type):
+                raise TypeError(
+                    f"Expected {expected_type} for {name}, got {type(value)}")
+            validator = getattr(self.__class__, f'validate_{name}', None)
+            if validator:
+                value = validator(self, value)  # Store the validated value
+        super().__setattr__(name, value)
+    @classmethod
+    def create(cls, **kwargs):
+        return cls(**kwargs)
+    def dict(self):
+        if hasattr(self.__class__, '__annotations__'):
+            return {name: getattr(self, name, None) for name in self.__class__.__annotations__}
+        return self.__dict__.copy()
+    def __repr__(self):
+        if hasattr(self.__class__, '__annotations__'):
+            attrs = ', '.join(
+                f"{name}={getattr(self, name, None)!r}"
+                for name in self.__class__.__annotations__
+            )
+        else:
+            attrs = ', '.join(f"{name}={value!r}" for name,
+                              value in self.__dict__.items())
+        return f"{self.__class__.__name__}({attrs})"
+    def __str__(self):
+        if hasattr(self.__class__, '__annotations__'):
+            attrs = ', '.join(
+                f"{name}={getattr(self, name, None)}"
+                for name in self.__class__.__annotations__
+            )
+        else:
+            attrs = ', '.join(f"{name}={value}" for name,
+                              value in self.__dict__.items())
+        return f"{self.__class__.__name__}({attrs})"
+    def clone(self):
+        return self.__class__(**self.dict())
 
+class FileModel(BaseModel):
+    file_name: str
+    file_content: str
+    def save(self, directory: pathlib.Path):
+        """Save the file content to the specified directory."""
+        target_path = directory / self.file_name
+        with target_path.open('w') as file:
+            file.write(self.file_content)
+        return target_path
+def create_model_from_file(file_path: pathlib.Path):
+    """Create a FileModel instance from a file path."""
+    try:
+        with file_path.open('r', encoding='utf-8', errors='ignore') as file:
+            content = file.read()
+        model_name = file_path.stem.capitalize() + 'Model'
+        model_class = type(model_name, (FileModel,), {})
+        instance = model_class.create(
+            file_name=file_path.name, file_content=content)
+        logging.info(f"Created {model_name} from {file_path}")
+        return model_name, instance
+    except Exception as e:
+        logging.error(f"Failed to create model from {file_path}: {e}")
+        return None, None
+def load_files_as_models(root_dir: pathlib.Path, file_extensions: List[str]) -> Dict[str, BaseModel]:
+    """Load all files with specified extensions as models."""
+    models = {}
+    for ext in file_extensions:
+        for file_path in root_dir.rglob(f'*{ext}'):
+            if file_path.is_file():  # Double-check it's a file
+                model_name, instance = create_model_from_file(file_path)
+                if model_name and instance:
+                    models[model_name] = instance
+                    sys.modules[model_name] = instance
+    return models
+AccessLevel = Enum('AccessLevel', 'READ WRITE EXECUTE ADMIN USER')
 @dataclass
 class AccessPolicy:
     """Defines access control policies for runtime operations."""
     level: AccessLevel
     namespace_patterns: list[str] = field(default_factory=list)
     allowed_operations: list[str] = field(default_factory=list)
-    
+
     def can_access(self, namespace: str, operation: str) -> bool:
         """Check if access is allowed for the given namespace and operation."""
         return any(pattern in namespace for pattern in self.namespace_patterns) and \
-               operation in self.allowed_operations
-
-
+            operation in self.allowed_operations
 class SecurityContext:
     """Manages security context and audit logging for runtime operations."""
     def __init__(self, user_id: str, access_policy: AccessPolicy):
         self.user_id = user_id
         self.access_policy = access_policy
         self._audit_log = []
-    
     def log_access(self, namespace: str, operation: str, success: bool):
         """Log an access attempt."""
         self._audit_log.append({
@@ -250,19 +205,15 @@ class SecurityContext:
             "success": success,
             "timestamp": datetime.now().timestamp()
         })
-    
     @property
     def audit_log(self):
         """Return a copy of the audit log."""
         return self._audit_log.copy()
-
-
 class SecurityValidator(ast.NodeVisitor):
     """Validates AST nodes against security policies."""
     def __init__(self, security_context: SecurityContext):
         self.security_context = security_context
         self.violations = []
-    
     def visit_Name(self, node):
         if not self.security_context.access_policy.can_access(node.id, "read"):
             violation = f"Access denied to name: {node.id}"
@@ -271,66 +222,52 @@ class SecurityValidator(ast.NodeVisitor):
             raise PermissionError(violation)
         self.security_context.log_access(node.id, "read", True)
         self.generic_visit(node)
-    
     def visit_Call(self, node):
         if isinstance(node.func, ast.Name):
             if not self.security_context.access_policy.can_access(node.func.id, "execute"):
                 violation = f"Access denied to function: {node.func.id}"
                 self.violations.append(violation)
-                self.security_context.log_access(node.func.id, "execute", False)
+                self.security_context.log_access(
+                    node.func.id, "execute", False)
                 raise PermissionError(violation)
             self.security_context.log_access(node.func.id, "execute", True)
         self.generic_visit(node)
-#------------------------------------------------------------------------------
-# FrameModel and CustomDelimiterFrame
-#------------------------------------------------------------------------------
+
 class FrameModel(Generic[T, V, C], ABC):
     def init(self, start_delimiter: str = "<<CONTENT>>", end_delimiter: str = "<<END_CONTENT>>") -> None:
         self.start_delimiter = start_delimiter
         self.end_delimiter = end_delimiter
-
     @abstractmethod
     def to_bytes(self) -> bytes:
         pass
-
     @abstractmethod
     def parse_content(self, raw_content: str) -> str:
         pass
-
     def validate_content(self, content: str) -> bool:
         return content.startswith(self.start_delimiter) and content.endswith(self.end_delimiter)
-
 @dataclass
-class CustomDelimiterFrame(FrameModel):
+class CustomDelimiterFrame(Generic(FrameModel)):
     content: str
-
     def __post_init__(self):
         self.init()
-
     def to_bytes(self) -> bytes:
         return self.content.encode()
-
     def parse_content(self, raw_content: str) -> str:
         start_index = raw_content.find(self.start_delimiter)
         end_index = raw_content.rfind(self.end_delimiter)
         if start_index == -1 or end_index == -1 or start_index >= end_index:
-            raise ValueError("Invalid content format: Missing or mismatched delimiters.")
+            raise ValueError(
+                "Invalid content format: Missing or mismatched delimiters.")
         return raw_content[start_index + len(self.start_delimiter):end_index]
-#------------------------------------------------------------------------------
-# Runtime Namespace Management
-#------------------------------------------------------------------------------
 def register_models(models: Dict[str, BaseModel], target_globals=None):
     """Register models in the specified globals dictionary or the caller's globals."""
     if target_globals is None:
         import inspect
         frame = inspect.currentframe().f_back
         target_globals = frame.f_globals
-        
     for model_name, instance in models.items():
         target_globals[model_name] = instance
         logging.info(f"Registered {model_name} in the global namespace")
-
-
 def runtime(root_dir: pathlib.Path, extensions=None):
     """Initialize the runtime with models from the specified directory."""
     if extensions is None:
@@ -338,8 +275,6 @@ def runtime(root_dir: pathlib.Path, extensions=None):
     file_models = load_files_as_models(root_dir, extensions)
     register_models(file_models)
     return file_models
-
-
 class RuntimeNamespace:
     """Manages hierarchical runtime namespaces with security controls."""
     def __init__(self, name: str = "root", parent: Optional['RuntimeNamespace'] = None):
@@ -350,88 +285,76 @@ class RuntimeNamespace:
         self._security_context = None
         self.available_modules = {}
         self.frame_model: Optional[FrameModel] = None
-    
     @property
     def full_path(self) -> str:
         return f"{self._parent.full_path}.{self._name}" if self._parent else self._name
-    
     def add_child(self, name: str) -> 'RuntimeNamespace':
         """Add a child namespace."""
         if not isinstance(name, str) or not name.isidentifier():
             raise ValueError(f"Invalid namespace name: {name}")
-            
         child = RuntimeNamespace(name, self)
         self._children[name] = child
         return child
-    
     def get_child(self, path: str) -> Optional['RuntimeNamespace']:
         """Get a child namespace by path."""
         if not path:
             return self
-            
         parts = path.split(".", 1)
         first_part = parts[0]
-        
         if first_part not in self._children:
             return None
-
         child = self._children[first_part]
         if len(parts) == 1:
             return child
-        
         return child.get_child(parts[1])
-    
     def set_security_context(self, context: SecurityContext):
         """Set the security context for this namespace."""
         self._security_context = context
-        
     def get_attribute(self, name: str, default=None):
         """Get an attribute with security validation."""
         if self._security_context:
             can_access = self._security_context.access_policy.can_access(
                 f"{self.full_path}.{name}", "read"
             )
-            self._security_context.log_access(f"{self.full_path}.{name}", "read", can_access)
+            self._security_context.log_access(
+                f"{self.full_path}.{name}", "read", can_access)
             if not can_access:
                 raise PermissionError(f"Access denied to attribute: {name}")
-        
         return getattr(self._content, name, default)
-    
     def set_attribute(self, name: str, value: Any):
         """Set an attribute with security validation."""
         if self._security_context:
             can_access = self._security_context.access_policy.can_access(
                 f"{self.full_path}.{name}", "write"
             )
-            self._security_context.log_access(f"{self.full_path}.{name}", "write", can_access)
+            self._security_context.log_access(
+                f"{self.full_path}.{name}", "write", can_access)
             if not can_access:
-                raise PermissionError(f"Access denied to modify attribute: {name}")
-        
+                raise PermissionError(
+                    f"Access denied to modify attribute: {name}")
         setattr(self._content, name, value)
-
-    def set_frame_model(self, frame_model: FrameModel) -> None:
+    def set_frame_model(self, frame_model: Generic(FrameModel)) -> None:
         self.frame_model = frame_model
-
     def embed_content(self, raw_content: str) -> None:
         if not self.frame_model:
             raise ValueError("No FrameModel configured for this namespace.")
         if not self.frame_model.validate_content(raw_content):
-            raise ValueError("Content validation failed. Invalid delimiters or format.")
-        self._content.embedded_data = self.frame_model.parse_content(raw_content)
-
+            raise ValueError(
+                "Content validation failed. Invalid delimiters or format.")
+        self._content.embedded_data = self.frame_model.parse_content(
+            raw_content)
     def retrieve_content(self) -> str:
         if hasattr(self._content, "embedded_data"):
             return self.frame_model.start_delimiter + self._content.embedded_data + self.frame_model.end_delimiter
         raise ValueError("No content embedded in this namespace.")
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # The __Atom__ Class: Code as Data and Data as Code
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 """
 This module implements a runtime system inspired by homoiconic principles and S-expression logic,
 where source code is treated as both data and executable instructions. The system dynamically
 composes, evaluates, and reflects on code configurations at runtime, enabling non-deterministic
 behavior akin to quantum mechanics' wave function collapse.
-
 Key Features:
 1. **Dynamic Composition**: Functions and values are nested and evaluated like S-expressions,
    allowing runtime code generation and modification.
@@ -441,16 +364,13 @@ Key Features:
    structural constraints, simulating multi-threaded or quantum-like behavior.
 4. **State Preservation**: Maintains consistency across configurations, ensuring predictable
    execution paths.
-
 The core abstraction is the `__Atom__` class, which encapsulates data, logic, and metadata.
 Instances of `__Atom__` can be nested, manipulated, and executed dynamically, forming a
 self-modifying runtime environment. This approach synthesizes static and dynamic paradigms,
 drawing inspiration from lambda calculus, LISP, and modern programming techniques.
-
 Ultimately, this model enables the creation of a "runtime of runtimes," where source code is
 rewritten dynamically, limited only by hardware and operating system constraints.
 """
-
 @dataclass
 class GrammarRule:
     """
@@ -458,12 +378,9 @@ class GrammarRule:
     """
     lhs: str
     rhs: List[Union[str, 'GrammarRule']]
-
     def __repr__(self) -> str:
         rhs_str = " ".join(str(elem) for elem in self.rhs)
         return f"{self.lhs} -> {rhs_str}"
-
-
 class CustomEncoder(json.JSONEncoder):
     """
     Custom JSON encoder to handle non-serializable types.
@@ -474,12 +391,11 @@ class CustomEncoder(json.JSONEncoder):
         elif hasattr(obj, '__dict__'):
             return obj.__dict__  # Serialize objects with __dict__
         elif callable(obj):
-            return f"<function {obj.__name__}>"  # Represent functions as strings
+            # Represent functions as strings
+            return f"<function {obj.__name__}>"
         return super().default(obj)
-
-
 @dataclass
-class __Atom__(Generic[T, V, C], PyObjectLike):
+class __Atom__(Generic[T, V, C], PyObject):
     """
     def __getattribute__(self, name: str) -> Any:
         # Direct access for special attributes
@@ -503,7 +419,6 @@ class __Atom__(Generic[T, V, C], PyObjectLike):
         object.__setattr__(self, 'session', (request_data or {}).get("session", {}))
         object.__setattr__(self, 'runtime_namespace', None)
         """
-
     def _initialize_base_attributes(self, code, value, ttl, request_data):
         # Direct attribute setting to bypass __getattribute__ during initialization
         object.__setattr__(self, '_code', code)
@@ -513,12 +428,13 @@ class __Atom__(Generic[T, V, C], PyObjectLike):
         object.__setattr__(self, '_ttl', ttl)
         object.__setattr__(self, '_created_at', time.time())
         object.__setattr__(self, 'request_data', request_data or {})
-        object.__setattr__(self, '_local_env', {'request_data': request_data or {}})
-        object.__setattr__(self, 'session', (request_data or {}).get("session", {}))
+        object.__setattr__(self, '_local_env', {
+                           'request_data': request_data or {}})
+        object.__setattr__(
+            self, 'session', (request_data or {}).get("session", {}))
         object.__setattr__(self, 'runtime_namespace', None)
     """
     Abstract Base Class for all __Atom__ types.
-    
     __Atom__ is the smallest unit of data or executable code, and this interface
     defines common operations such as encoding, decoding, execution, and conversion
     to data classes.
@@ -531,12 +447,10 @@ class __Atom__(Generic[T, V, C], PyObjectLike):
     children: List[__Atom__] = field(default_factory=list)
     hash: str = field(init=False)
     tag: str = field(default="")
-
     def __post_init__(self):
         # Generate a unique ID and hash based on the value
         self.id = f"__Atom__-{id(self)}"
         self.hash = hashlib.sha256(repr(self.value).encode()).hexdigest()
-
         # Define logical operators as part of the case base
         self.case_base = {
             "⊤": lambda x, _: x,
@@ -547,7 +461,6 @@ class __Atom__(Generic[T, V, C], PyObjectLike):
             "→": lambda a, b: (not a) or b,
             "↔": lambda a, b: (a and b) or (not a and not b),
         }
-
     def process_attributes(self, mapping_description: Dict[str, Any], input_data: Dict[str, Any]) -> None:
         """
         Use the `mapper` function to process input data and map it to attributes.
@@ -570,13 +483,11 @@ class __Atom__(Generic[T, V, C], PyObjectLike):
             return local_env[name]
         except Exception as e:
             raise AttributeError(f"Attribute '{name}' not found: {e}")
-
     def __setattr__(self, name: str, value: Any) -> None:
         if name in ('_code', '_value', '_local_env', '_refcount', '_ttl', '_created_at', 'request_data', 'session', 'runtime_namespace'):
             super().__setattr__(name, value)
         else:
             self._local_env[name] = value
-
     def handle_request(self, *args: Any, **kwargs: Any) -> Dict[str, Any]:
         # Stub implementation; implement is_authenticated, log_request, etc.
         if not getattr(self, 'is_authenticated', lambda: True)():
@@ -587,17 +498,20 @@ class __Atom__(Generic[T, V, C], PyObjectLike):
                 if operation == "execute_atom":
                     # Include code in request_data
                     self.request_data["code"] = "return some_operation()"
-                    result = self.execute_atom({"runtime_namespace": self.runtime_namespace})
+                    result = self.execute_atom(
+                        {"runtime_namespace": self.runtime_namespace})
                 elif operation == "query_memory":
-                    result = self.query_memory({"runtime_namespace": self.runtime_namespace})
+                    result = self.query_memory(
+                        {"runtime_namespace": self.runtime_namespace})
                 else:
-                    result = {"status": "error", "message": "Unknown operation"}
+                    result = {"status": "error",
+                              "message": "Unknown operation"}
             else:
-                result = {"status": "success", "message": "Standard processing"}
+                result = {"status": "success",
+                          "message": "Standard processing"}
         except Exception as e:
             result = {"status": "error", "message": str(e)}
         return result
-
     def execute_atom(self, request_context: Dict[str, Any]) -> Dict[str, Any]:
         ns: RuntimeNamespace = request_context.get("runtime_namespace")
         if ns:
@@ -605,17 +519,16 @@ class __Atom__(Generic[T, V, C], PyObjectLike):
             atom_ns = ns.get_child("some_atom")
             if atom_ns:
                 # Add code parameter
-                atom = __Atom__(code="return 42", request_data=self.request_data, session=self.session, runtime_namespace=ns)
+                atom = __Atom__(code="return 42", request_data=self.request_data,
+                                session=self.session, runtime_namespace=ns)
                 atom_ns.set_attribute("atom", atom)
         return {"status": "error", "message": "Atom not found"}
-
     def query_memory(self, request_context: Dict[str, Any]) -> Dict[str, Any]:
         ns: RuntimeNamespace = request_context.get("runtime_namespace")
         if ns:
             # Placeholder: Implement measure_memory_state in RuntimeNamespace
             return {"status": "success", "result": "memory_state_placeholder"}
         return {"status": "error", "message": "Memory not found"}
-
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
         local_env = self._local_env.copy()
         try:
@@ -633,40 +546,31 @@ class __Atom__(Generic[T, V, C], PyObjectLike):
             return None
         except Exception as e:
             raise RuntimeError(f"Error executing __Atom__ code: {e}")
-
     def __repr__(self) -> str:
         return f"__Atom__(code='{self._code}', value={self._value})"
-
     def __str__(self) -> str:
         return self.__repr__()
-
     @property
     def ob_refcnt(self) -> int:
         return self._refcount
-
     @ob_refcnt.setter
     def ob_refcnt(self, value: int) -> None:
         self._refcount = value
-
     @property
     def ob_ttl(self) -> Optional[int]:
         return self._ttl
-
     @ob_ttl.setter
     def ob_ttl(self, value: Optional[int]) -> None:
         self._ttl = value
-
     def is_expired(self) -> bool:
         if self._ttl is None:
             return False
         return time.time() - self._created_at > self._ttl
-
     def encode(self) -> bytes:
         """
         Encode the __Atom__ instance into a JSON-serialized byte string using a custom encoder.
         """
         return json.dumps({"id": self.id, "attributes": self.__dict__}, cls=CustomEncoder).encode()
-
     @classmethod
     def decode(cls, data: bytes) -> __Atom__:
         """
@@ -674,7 +578,6 @@ class __Atom__(Generic[T, V, C], PyObjectLike):
         """
         decoded_data = json.loads(data.decode())
         return cls(**decoded_data["attributes"])
-
     def introspect(self) -> str:
         """
         Reflect on its own code structure via AST.
@@ -692,46 +595,33 @@ class {self.__class__.__name__}(__Atom__):
         super().__init__(*args, **kwargs)
 """
             return ast.dump(ast.parse(fallback_source))
-
     def __strrpr__(self) -> str:
         return f"{self.value} : {self.type}"
-
     def __eq__(self, other: Any) -> bool:
         return isinstance(other, __Atom__) and self.hash == other.hash
-
     def __hash__(self) -> int:
         return int(self.hash, 16)
-
     def __getitem__(self, key):
         return self.value[key]
-
     def __setitem__(self, key, value):
         self.value[key] = value
-
     def __delitem__(self, key):
         del self.value[key]
-
     def __len__(self):
         return len(self.value)
-
     def __iter__(self):
         return iter(self.value)
-
     def __contains__(self, item):
         return item in self.value
-
     def __bytes__(self) -> bytes:
         return bytes(self.value)
-
     @property
     def memory_view(self) -> memoryview:
         if isinstance(self.value, (bytes, bytearray)):
             return memoryview(self.value)
         raise TypeError("Unsupported type for memoryview")
-
     def __buffer__(self, flags: int) -> memoryview:
         return memoryview(self.value)
-
     async def send_message(self, message: Any, ttl: int = 3) -> None:
         """
         Send a message to subscribers with a time-to-live (TTL).
@@ -739,89 +629,18 @@ class {self.__class__.__name__}(__Atom__):
         if ttl <= 0:
             logging.warning(f"Message TTL expired for Atom {self.id}")
             return
-        logging.info(f"__Atom__ {self.id} processing received message: {message} with TTL {ttl}")
+        logging.info(
+            f"__Atom__ {self.id} processing received message: {message} with TTL {ttl}")
         await self.send_message(message, ttl - 1)
-
     def subscribe(self, atom: __Atom__) -> None:
         """
         Subscribe another __Atom__ to this one.
         """
         self.children.append(atom)
         logging.info(f"__Atom__ {self.id} subscribed to {atom.id}")
-
     def unsubscribe(self, atom: __Atom__) -> None:
         """
         Unsubscribe another __Atom__ from this one.
         """
         self.children.remove(atom)
         logging.info(f"__Atom__ {self.id} unsubscribed from {atom.id}")
-
-def frozen(cls):
-    """
-    Decorator to make a class immutable after initialization.
-    """
-    original_init = cls.__init__
-    original_setattr = cls.__setattr__
-    
-    @wraps(original_init)
-    def __init__(self, *args, **kwargs):
-        self._initialized = False
-        original_init(self, *args, **kwargs)
-        self._initialized = True
-    
-    def __setattr__(self, name, value):
-        if getattr(self, '_initialized', False) and name != '_initialized':
-            raise AttributeError(f"Cannot modify frozen attribute '{name}'")
-        original_setattr(self, name, value)
-        
-    cls.__init__ = __init__
-    cls.__setattr__ = __setattr__
-    return cls
-
-@frozen
-class Module(BaseModel):
-    file_path: pathlib.Path
-    module_name: str
-    
-    @validate(lambda x: x if x.endswith('.py') else None)
-    def validate_file_path(self, value):
-        return value
-    
-    @validate(lambda x: x if x.isidentifier() else None)
-    def validate_module_name(self, value):
-        return value
-
-
-def __Decorator__(cls):
-    """
-    Decorator to enhance a class with __Atom__ behavior.
-    """
-    class EnhancedAtom(__Atom__, cls):
-        def __init__(self, *args, **kwargs):
-            # Create code string from class name and kwargs
-            code_str = f"class {cls.__name__}:\n"
-            for k, v in kwargs.items():
-                code_str += f"    {k} = {repr(v)}\n"
-            kwargs['code'] = code_str
-            super().__init__(*args, **kwargs)
-
-    return EnhancedAtom
-    
-def main():
-    """Access enhanced __Atom__ features"""
-    @__Decorator__
-    class MyCustomClass:
-        def __init__(self, value: int):
-            self.value = value
-            
-    custom_atom = MyCustomClass(code="value = 69", value=69)
-    print(custom_atom.introspect())
-    print(custom_atom.encode())
-    custom_atom.subscribe(custom_atom)
-    custom_atom.send_message("Ayylmao")
-    custom_atom.unsubscribe(custom_atom)
-    # print(custom_atom.memory_view)
-    # print(custom_atom.decode(custom_atom.encode()))
-
-if __name__ == "__main__":
-    main()

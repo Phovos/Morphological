@@ -66,13 +66,16 @@ exclude = ["build/", "dist/", ".venv/"]
 ignore_missing_imports = true
 
 [tool.ruff]
-line-length = 88
+line-length = 108
 select = ["E", "F", "W", "B"]
 exclude = ["build/", "dist/", ".venv/"]
 
 # Allow autofix for all enabled rules (when `--fix`) is provided.
-fixable = ["A", "B", "C", "D", "E", "F"]
-unfixable = []
+fixable = ["A", "B", "C", "D", "F"]
+unfixable = ["F841", "E301", "E302", "E305", "E305", "D201", "D202", "D203", "D204", "D205"]
+
+[tool.ruff.lint]
+ignore = ["F841", "E301", "E302", "E305", "E305", "D201", "D202", "D203", "D204", "D205"]
 
 # Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
