@@ -17,6 +17,8 @@ from types import SimpleNamespace
 # ------------------------------------------------------------------------------
 # BaseModel (no-copy immutable dataclasses for data models)
 # ------------------------------------------------------------------------------
+
+
 def mapper(mapping_description, input_data):
     """Transform input data according to a mapping description."""
     def transform(xform, value):
@@ -26,10 +28,12 @@ def mapper(mapping_description, input_data):
             return {k: transform(v, value) for k, v in xform.items()}
         else:
             raise ValueError(f"Invalid transformation: {xform}")
+
     def get_value(key):
         if isinstance(key, str) and key.startswith(":"):
             return input_data.get(key[1:])
         return input_data.get(key)
+
     def process_mapping(mapping_desc):
         result = {}
         for key, xform in mapping_desc.items():
@@ -58,52 +62,70 @@ def mapper(mapping_description, input_data):
                 result[key] = xform
         return result
     return process_mapping(mapping_description)
+
+
 def jsonload_file(file_path: pathlib.Path, mapping_description: dict):
     """Load a JSON file and transform it according to a mapping description."""
     with file_path.open('r') as file:
         data = json.load(file)
     return mapper(mapping_description, data)
+
+
 class PyObject(ABC):
     @abstractmethod
     def __getattribute__(self, name: str) -> Any:
         return object.__getattribute__(self, name)
+
     @abstractmethod
     def __setattr__(self, name: str, value: Any) -> None:
         object.__setattr__(self, name, value)
+
     @abstractmethod
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
         raise NotImplementedError
+
     @abstractmethod
     def __repr__(self) -> str:
         raise NotImplementedError
+
     @abstractmethod
     def __str__(self) -> str:
         raise NotImplementedError
+
     @property
     @abstractmethod
     def ob_refcnt(self) -> int:
         raise NotImplementedError
+
     @ob_refcnt.setter
     @abstractmethod
     def ob_refcnt(self, value: int) -> None:
         raise NotImplementedError
+
     @property
     @abstractmethod
     def ob_ttl(self) -> Optional[int]:
         raise NotImplementedError
+
     @ob_ttl.setter
     @abstractmethod
     def ob_ttl(self, value: Optional[int]) -> None:
         raise NotImplementedError
+
+
 # Type variables for generic usage
 T = TypeVar("T")
 V = TypeVar("V")
 C = TypeVar("C")
+
+
 class BaseModel:
     __slots__ = ('__dict__', '__weakref__')
+
     def __init__(self, **data):
         for name, value in data.items():
             setattr(self, name, value)
+
     def __setattr__(self, name, value):
         if hasattr(self.__class__, '__annotations__') and name in self.__class__.__annotations__:
             expected_type = self.__class__.__annotations__[name]
@@ -114,13 +136,16 @@ class BaseModel:
             if validator:
                 value = validator(self, value)  # Store the validated value
         super().__setattr__(name, value)
+
     @classmethod
     def create(cls, **kwargs):
         return cls(**kwargs)
+
     def dict(self):
         if hasattr(self.__class__, '__annotations__'):
             return {name: getattr(self, name, None) for name in self.__class__.__annotations__}
         return self.__dict__.copy()
+
     def __repr__(self):
         if hasattr(self.__class__, '__annotations__'):
             attrs = ', '.join(
@@ -131,6 +156,7 @@ class BaseModel:
             attrs = ', '.join(f"{name}={value!r}" for name,
                               value in self.__dict__.items())
         return f"{self.__class__.__name__}({attrs})"
+
     def __str__(self):
         if hasattr(self.__class__, '__annotations__'):
             attrs = ', '.join(
@@ -141,18 +167,23 @@ class BaseModel:
             attrs = ', '.join(f"{name}={value}" for name,
                               value in self.__dict__.items())
         return f"{self.__class__.__name__}({attrs})"
+
     def clone(self):
         return self.__class__(**self.dict())
+
 
 class FileModel(BaseModel):
     file_name: str
     file_content: str
+
     def save(self, directory: pathlib.Path):
         """Save the file content to the specified directory."""
         target_path = directory / self.file_name
         with target_path.open('w') as file:
             file.write(self.file_content)
         return target_path
+
+
 def create_model_from_file(file_path: pathlib.Path):
     """Create a FileModel instance from a file path."""
     try:
@@ -167,6 +198,8 @@ def create_model_from_file(file_path: pathlib.Path):
     except Exception as e:
         logging.error(f"Failed to create model from {file_path}: {e}")
         return None, None
+
+
 def load_files_as_models(root_dir: pathlib.Path, file_extensions: List[str]) -> Dict[str, BaseModel]:
     """Load all files with specified extensions as models."""
     models = {}
@@ -178,7 +211,11 @@ def load_files_as_models(root_dir: pathlib.Path, file_extensions: List[str]) -> 
                     models[model_name] = instance
                     sys.modules[model_name] = instance
     return models
+
+
 AccessLevel = Enum('AccessLevel', 'READ WRITE EXECUTE ADMIN USER')
+
+
 @dataclass
 class AccessPolicy:
     """Defines access control policies for runtime operations."""
@@ -190,12 +227,16 @@ class AccessPolicy:
         """Check if access is allowed for the given namespace and operation."""
         return any(pattern in namespace for pattern in self.namespace_patterns) and \
             operation in self.allowed_operations
+
+
 class SecurityContext:
     """Manages security context and audit logging for runtime operations."""
+
     def __init__(self, user_id: str, access_policy: AccessPolicy):
         self.user_id = user_id
         self.access_policy = access_policy
         self._audit_log = []
+
     def log_access(self, namespace: str, operation: str, success: bool):
         """Log an access attempt."""
         self._audit_log.append({
@@ -205,15 +246,20 @@ class SecurityContext:
             "success": success,
             "timestamp": datetime.now().timestamp()
         })
+
     @property
     def audit_log(self):
         """Return a copy of the audit log."""
         return self._audit_log.copy()
+
+
 class SecurityValidator(ast.NodeVisitor):
     """Validates AST nodes against security policies."""
+
     def __init__(self, security_context: SecurityContext):
         self.security_context = security_context
         self.violations = []
+
     def visit_Name(self, node):
         if not self.security_context.access_policy.can_access(node.id, "read"):
             violation = f"Access denied to name: {node.id}"
@@ -222,6 +268,7 @@ class SecurityValidator(ast.NodeVisitor):
             raise PermissionError(violation)
         self.security_context.log_access(node.id, "read", True)
         self.generic_visit(node)
+
     def visit_Call(self, node):
         if isinstance(node.func, ast.Name):
             if not self.security_context.access_policy.can_access(node.func.id, "execute"):
@@ -233,25 +280,34 @@ class SecurityValidator(ast.NodeVisitor):
             self.security_context.log_access(node.func.id, "execute", True)
         self.generic_visit(node)
 
+
 class FrameModel(Generic[T, V, C], ABC):
     def init(self, start_delimiter: str = "<<CONTENT>>", end_delimiter: str = "<<END_CONTENT>>") -> None:
         self.start_delimiter = start_delimiter
         self.end_delimiter = end_delimiter
+
     @abstractmethod
     def to_bytes(self) -> bytes:
         pass
+
     @abstractmethod
     def parse_content(self, raw_content: str) -> str:
         pass
+
     def validate_content(self, content: str) -> bool:
         return content.startswith(self.start_delimiter) and content.endswith(self.end_delimiter)
+
+
 @dataclass
-class CustomDelimiterFrame(Generic(FrameModel)):
+class CustomDelimiterFrame(FrameModel):
     content: str
+
     def __post_init__(self):
         self.init()
+
     def to_bytes(self) -> bytes:
         return self.content.encode()
+
     def parse_content(self, raw_content: str) -> str:
         start_index = raw_content.find(self.start_delimiter)
         end_index = raw_content.rfind(self.end_delimiter)
@@ -259,6 +315,8 @@ class CustomDelimiterFrame(Generic(FrameModel)):
             raise ValueError(
                 "Invalid content format: Missing or mismatched delimiters.")
         return raw_content[start_index + len(self.start_delimiter):end_index]
+
+
 def register_models(models: Dict[str, BaseModel], target_globals=None):
     """Register models in the specified globals dictionary or the caller's globals."""
     if target_globals is None:
@@ -268,6 +326,8 @@ def register_models(models: Dict[str, BaseModel], target_globals=None):
     for model_name, instance in models.items():
         target_globals[model_name] = instance
         logging.info(f"Registered {model_name} in the global namespace")
+
+
 def runtime(root_dir: pathlib.Path, extensions=None):
     """Initialize the runtime with models from the specified directory."""
     if extensions is None:
@@ -275,8 +335,11 @@ def runtime(root_dir: pathlib.Path, extensions=None):
     file_models = load_files_as_models(root_dir, extensions)
     register_models(file_models)
     return file_models
+
+
 class RuntimeNamespace:
     """Manages hierarchical runtime namespaces with security controls."""
+
     def __init__(self, name: str = "root", parent: Optional['RuntimeNamespace'] = None):
         self._name = name
         self._parent = parent
@@ -285,9 +348,11 @@ class RuntimeNamespace:
         self._security_context = None
         self.available_modules = {}
         self.frame_model: Optional[FrameModel] = None
+
     @property
     def full_path(self) -> str:
         return f"{self._parent.full_path}.{self._name}" if self._parent else self._name
+
     def add_child(self, name: str) -> 'RuntimeNamespace':
         """Add a child namespace."""
         if not isinstance(name, str) or not name.isidentifier():
@@ -295,6 +360,7 @@ class RuntimeNamespace:
         child = RuntimeNamespace(name, self)
         self._children[name] = child
         return child
+
     def get_child(self, path: str) -> Optional['RuntimeNamespace']:
         """Get a child namespace by path."""
         if not path:
@@ -307,9 +373,11 @@ class RuntimeNamespace:
         if len(parts) == 1:
             return child
         return child.get_child(parts[1])
+
     def set_security_context(self, context: SecurityContext):
         """Set the security context for this namespace."""
         self._security_context = context
+
     def get_attribute(self, name: str, default=None):
         """Get an attribute with security validation."""
         if self._security_context:
@@ -321,6 +389,7 @@ class RuntimeNamespace:
             if not can_access:
                 raise PermissionError(f"Access denied to attribute: {name}")
         return getattr(self._content, name, default)
+
     def set_attribute(self, name: str, value: Any):
         """Set an attribute with security validation."""
         if self._security_context:
@@ -333,8 +402,10 @@ class RuntimeNamespace:
                 raise PermissionError(
                     f"Access denied to modify attribute: {name}")
         setattr(self._content, name, value)
+
     def set_frame_model(self, frame_model: Generic(FrameModel)) -> None:
         self.frame_model = frame_model
+
     def embed_content(self, raw_content: str) -> None:
         if not self.frame_model:
             raise ValueError("No FrameModel configured for this namespace.")
@@ -343,10 +414,13 @@ class RuntimeNamespace:
                 "Content validation failed. Invalid delimiters or format.")
         self._content.embedded_data = self.frame_model.parse_content(
             raw_content)
+
     def retrieve_content(self) -> str:
         if hasattr(self._content, "embedded_data"):
             return self.frame_model.start_delimiter + self._content.embedded_data + self.frame_model.end_delimiter
         raise ValueError("No content embedded in this namespace.")
+
+
 # ------------------------------------------------------------------------------
 # The __Atom__ Class: Code as Data and Data as Code
 # ------------------------------------------------------------------------------
@@ -371,6 +445,8 @@ drawing inspiration from lambda calculus, LISP, and modern programming technique
 Ultimately, this model enables the creation of a "runtime of runtimes," where source code is
 rewritten dynamically, limited only by hardware and operating system constraints.
 """
+
+
 @dataclass
 class GrammarRule:
     """
@@ -378,13 +454,17 @@ class GrammarRule:
     """
     lhs: str
     rhs: List[Union[str, 'GrammarRule']]
+
     def __repr__(self) -> str:
         rhs_str = " ".join(str(elem) for elem in self.rhs)
         return f"{self.lhs} -> {rhs_str}"
+
+
 class CustomEncoder(json.JSONEncoder):
     """
     Custom JSON encoder to handle non-serializable types.
     """
+
     def default(self, obj: Any) -> Any:
         if isinstance(obj, set):
             return list(obj)  # Convert sets to lists
@@ -394,6 +474,8 @@ class CustomEncoder(json.JSONEncoder):
             # Represent functions as strings
             return f"<function {obj.__name__}>"
         return super().default(obj)
+
+
 @dataclass
 class __Atom__(Generic[T, V, C], PyObject):
     """
@@ -403,6 +485,7 @@ class __Atom__(Generic[T, V, C], PyObject):
             return object.__getattribute__(self, name)
         return super().__getattribute__(name)
     """
+
     def __init__(self, code: str, value: Optional[Any] = None, ttl: Optional[int] = None,
                  request_data: Optional[Dict[str, Any]] = None):
         # Initialize basic attributes first using direct object.__setattr__
@@ -419,6 +502,7 @@ class __Atom__(Generic[T, V, C], PyObject):
         object.__setattr__(self, 'session', (request_data or {}).get("session", {}))
         object.__setattr__(self, 'runtime_namespace', None)
         """
+
     def _initialize_base_attributes(self, code, value, ttl, request_data):
         # Direct attribute setting to bypass __getattribute__ during initialization
         object.__setattr__(self, '_code', code)
@@ -447,6 +531,7 @@ class __Atom__(Generic[T, V, C], PyObject):
     children: List[__Atom__] = field(default_factory=list)
     hash: str = field(init=False)
     tag: str = field(default="")
+
     def __post_init__(self):
         # Generate a unique ID and hash based on the value
         self.id = f"__Atom__-{id(self)}"
@@ -461,6 +546,7 @@ class __Atom__(Generic[T, V, C], PyObject):
             "→": lambda a, b: (not a) or b,
             "↔": lambda a, b: (a and b) or (not a and not b),
         }
+
     def process_attributes(self, mapping_description: Dict[str, Any], input_data: Dict[str, Any]) -> None:
         """
         Use the `mapper` function to process input data and map it to attributes.
@@ -469,6 +555,7 @@ class __Atom__(Generic[T, V, C], PyObject):
         for key, value in mapped_data.items():
             if hasattr(self, key):
                 setattr(self, key, value)
+
     def __getattribute__(self, name: str) -> Any:
         # For internal attributes, bypass dynamic lookup
         if name in ('_code', '_value', '_local_env', '_refcount', '_ttl', '_created_at'):
@@ -483,11 +570,13 @@ class __Atom__(Generic[T, V, C], PyObject):
             return local_env[name]
         except Exception as e:
             raise AttributeError(f"Attribute '{name}' not found: {e}")
+
     def __setattr__(self, name: str, value: Any) -> None:
         if name in ('_code', '_value', '_local_env', '_refcount', '_ttl', '_created_at', 'request_data', 'session', 'runtime_namespace'):
             super().__setattr__(name, value)
         else:
             self._local_env[name] = value
+
     def handle_request(self, *args: Any, **kwargs: Any) -> Dict[str, Any]:
         # Stub implementation; implement is_authenticated, log_request, etc.
         if not getattr(self, 'is_authenticated', lambda: True)():
@@ -512,6 +601,7 @@ class __Atom__(Generic[T, V, C], PyObject):
         except Exception as e:
             result = {"status": "error", "message": str(e)}
         return result
+
     def execute_atom(self, request_context: Dict[str, Any]) -> Dict[str, Any]:
         ns: RuntimeNamespace = request_context.get("runtime_namespace")
         if ns:
@@ -523,12 +613,14 @@ class __Atom__(Generic[T, V, C], PyObject):
                                 session=self.session, runtime_namespace=ns)
                 atom_ns.set_attribute("atom", atom)
         return {"status": "error", "message": "Atom not found"}
+
     def query_memory(self, request_context: Dict[str, Any]) -> Dict[str, Any]:
         ns: RuntimeNamespace = request_context.get("runtime_namespace")
         if ns:
             # Placeholder: Implement measure_memory_state in RuntimeNamespace
             return {"status": "success", "result": "memory_state_placeholder"}
         return {"status": "error", "message": "Memory not found"}
+
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
         local_env = self._local_env.copy()
         try:
@@ -546,31 +638,40 @@ class __Atom__(Generic[T, V, C], PyObject):
             return None
         except Exception as e:
             raise RuntimeError(f"Error executing __Atom__ code: {e}")
+
     def __repr__(self) -> str:
         return f"__Atom__(code='{self._code}', value={self._value})"
+
     def __str__(self) -> str:
         return self.__repr__()
+
     @property
     def ob_refcnt(self) -> int:
         return self._refcount
+
     @ob_refcnt.setter
     def ob_refcnt(self, value: int) -> None:
         self._refcount = value
+
     @property
     def ob_ttl(self) -> Optional[int]:
         return self._ttl
+
     @ob_ttl.setter
     def ob_ttl(self, value: Optional[int]) -> None:
         self._ttl = value
+
     def is_expired(self) -> bool:
         if self._ttl is None:
             return False
         return time.time() - self._created_at > self._ttl
+
     def encode(self) -> bytes:
         """
         Encode the __Atom__ instance into a JSON-serialized byte string using a custom encoder.
         """
         return json.dumps({"id": self.id, "attributes": self.__dict__}, cls=CustomEncoder).encode()
+
     @classmethod
     def decode(cls, data: bytes) -> __Atom__:
         """
@@ -578,6 +679,7 @@ class __Atom__(Generic[T, V, C], PyObject):
         """
         decoded_data = json.loads(data.decode())
         return cls(**decoded_data["attributes"])
+
     def introspect(self) -> str:
         """
         Reflect on its own code structure via AST.
@@ -595,33 +697,46 @@ class {self.__class__.__name__}(__Atom__):
         super().__init__(*args, **kwargs)
 """
             return ast.dump(ast.parse(fallback_source))
+
     def __strrpr__(self) -> str:
         return f"{self.value} : {self.type}"
+
     def __eq__(self, other: Any) -> bool:
         return isinstance(other, __Atom__) and self.hash == other.hash
+
     def __hash__(self) -> int:
         return int(self.hash, 16)
+
     def __getitem__(self, key):
         return self.value[key]
+
     def __setitem__(self, key, value):
         self.value[key] = value
+
     def __delitem__(self, key):
         del self.value[key]
+
     def __len__(self):
         return len(self.value)
+
     def __iter__(self):
         return iter(self.value)
+
     def __contains__(self, item):
         return item in self.value
+
     def __bytes__(self) -> bytes:
         return bytes(self.value)
+
     @property
     def memory_view(self) -> memoryview:
         if isinstance(self.value, (bytes, bytearray)):
             return memoryview(self.value)
         raise TypeError("Unsupported type for memoryview")
+
     def __buffer__(self, flags: int) -> memoryview:
         return memoryview(self.value)
+
     async def send_message(self, message: Any, ttl: int = 3) -> None:
         """
         Send a message to subscribers with a time-to-live (TTL).
@@ -632,12 +747,14 @@ class {self.__class__.__name__}(__Atom__):
         logging.info(
             f"__Atom__ {self.id} processing received message: {message} with TTL {ttl}")
         await self.send_message(message, ttl - 1)
+
     def subscribe(self, atom: __Atom__) -> None:
         """
         Subscribe another __Atom__ to this one.
         """
         self.children.append(atom)
         logging.info(f"__Atom__ {self.id} subscribed to {atom.id}")
+
     def unsubscribe(self, atom: __Atom__) -> None:
         """
         Unsubscribe another __Atom__ from this one.
