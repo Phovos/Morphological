@@ -14,8 +14,6 @@ from datetime import datetime
 from enum import Enum
 from functools import wraps
 from types import SimpleNamespace
-
-# Import the sandbox generator script
 # Assuming sandbox_generator.py is located at ./platform/sandbox_generator.py
 try:
     import platform.sandbox_generator as sg
@@ -24,11 +22,6 @@ except ImportError:
     print("Please ensure sandbox_generator.py is in a 'platform' directory")
     print("relative to your main.py and that 'platform' is a valid Python package (e.g., has an __init__.py).")
     sys.exit(1)
-
-
-# ------------------------------------------------------------------------------
-# BaseModel (no-copy immutable dataclasses for data models)
-# ------------------------------------------------------------------------------
 
 
 def mapper(mapping_description, input_data):
@@ -111,11 +104,8 @@ class PyObject(ABC):
     # are fundamental object methods. Making them abstract here means
     # any concrete subclass *must* implement them, which might be
     # overly restrictive depending on the intent. Python provides
-    # default implementations for these. If the goal is just to
-    # define an interface, perhaps focus on specific methods/properties
-    # relevant to your domain rather than these built-ins.
-    # However, syntactically, this is valid for an ABC.
-
+    # default implementations for these. This is morphological or
+    # intentional in nature.
     @abstractmethod
     def __getattribute__(self, name: str) -> Any:
         return object.__getattribute__(self, name)
@@ -164,15 +154,6 @@ C = TypeVar("C")
 
 
 class BaseModel:
-    # __slots__ with __dict__ included doesn't provide the typical memory
-    # optimization benefit of slots, but it does allow dynamic attribute
-    # assignment while potentially preventing the creation of __weakref__
-    # unless explicitly listed (which it is here). If the goal was strict
-    # attribute control *without* dynamic attributes, __dict__ should be omitted.
-    # If the goal was memory optimization, __dict__ should be omitted and
-    # all expected attributes listed in __slots__. As is, it's a bit unusual.
-    __slots__ = ('__dict__', '__weakref__')
-
     def __init__(self, **data):
         # Use setattr to trigger the custom __setattr__ logic
         for name, value in data.items():
@@ -184,7 +165,6 @@ class BaseModel:
             expected_type = self.__class__.__annotations__[name]
             # Basic type checking
             # Note: isinstance check might be too strict for Union, Optional, etc.
-            # Consider using a library like Pydantic for more robust validation.
             # For simple types, this is okay.
             if not isinstance(value, expected_type):
                 # Handle Optional types specifically
@@ -286,7 +266,6 @@ def create_model_from_file(file_path: pathlib.Path):
             file_name=file_path.name, file_content=content)
 
         # --- POTENTIAL ISSUE ---
-        # Adding instances to sys.modules is highly unusual and can cause problems.
         # sys.modules is intended for storing *module* objects, not instances.
         # If other code tries to 'import ModelNameModel', it won't get this instance.
         # Consider removing this line and managing instances in a dedicated registry
@@ -406,12 +385,9 @@ class SecurityValidator(ast.NodeVisitor):
 
 
 class FrameModel(Generic[T, V, C], ABC):
-    # Consider making delimiters class attributes or instance attributes set in __init__
-    # rather than requiring a separate init() call after instantiation.
+    # Removed init method, moved delimiter setting to class attributes
     start_delimiter: str = "<<CONTENT>>"
     end_delimiter: str = "<<END_CONTENT>>"
-
-    # Removed init method, moved delimiter setting to class attributes
 
     @abstractmethod
     def to_bytes(self) -> bytes:
@@ -468,11 +444,6 @@ class CustomDelimiterFrame(FrameModel):
 
 def register_models(models: Dict[str, BaseModel], target_globals=None):
     """Register models in the specified globals dictionary or the caller's globals."""
-    # --- POTENTIAL ISSUE ---
-    # Adding instances directly to globals can clutter the namespace and make
-    # dependencies less explicit. Consider managing models within a dedicated
-    # registry object or the RuntimeNamespace structure instead.
-    # --- END POTENTIAL ISSUE ---
     if target_globals is None:
         # Get the globals of the frame that called this function
         frame = inspect.currentframe()
