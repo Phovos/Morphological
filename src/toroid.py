@@ -1,4 +1,10 @@
+from __future__ import annotations
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# LICENSE © 2025: CC BY 4.0: PHOVOS:https://github.com/Phovos/Morphological
+# ------------------------------------------------------------------------------
+# Standard Library Imports - 3.13 std libs **ONLY**
+# ------------------------------------------------------------------------------
 """
 Toroidal Morphological Phase Transitions with Landau Theory
 Standard library implementation of T/V/C ontology on toroidal fields
