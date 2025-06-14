@@ -1,0 +1,22 @@
+[[language.markdown.code_actions]]
+trigger = "extract"
+command = ["python3", "/path/to/md_agent.py", "extract", "$file", "$line"]
+
+[[language.markdown.code_actions]]
+trigger = "inline"
+command = ["python3", "/path/to/md_agent.py", "inline", "$file", "$selection"]
+
+[[language.markdown.code_actions]]
+trigger = "analyze"
+command = ["python3", "/path/to/md_agent.py", "analyze", "$file"]
+
+[[language.markdown.code_actions]]
+trigger = "quantum_state"
+command = ["python3", "/path/to/md_agent.py", "morphic_transform", "$file", "quantum"]
+
+# Custom keybindings
+[keys.normal]
+space.m.e = ":code-action extract"
+space.m.i = ":code-action inline"
+space.m.a = ":code-action analyze"
+space.m.q = ":code-action quantum_state"
