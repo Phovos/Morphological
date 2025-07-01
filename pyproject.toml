@@ -1,29 +1,25 @@
-[build-system]
-requires = ["uv-build==0.6.0"]
-build-backend = "uv.build"
-
 [project]
-name = "Morphological-Source-Code"
+name = "morphological-source-code"
 description = "A namespace and filesystem interface for Obsidian knowledge bases and co-user/co-agent collaboration."
 authors = [{ name = "Phovos", email = "Phovos@outlook.com" }]
+version = "0.69.1"
+readme = "README.md"
 requires-python = ">=3.13"
-version = "0.69"
-readme = { file = "README.md", content-type = "text/markdown" }
-license = { text = "MIT" }
-keywords = ["namespace", "filesystem", "obsidian", "knowledge-base", "NLP"]
 dependencies = []
-
-[tool.cognosis.api]
-readme = { file = "src/api/README.md", content-type = "text/markdown" }
+[build-system]
+requires = ["uv_build>=0.7.17,<0.8.0"]
+build-backend = "uv_build"
 
 [scripts]
 main = "main:main"
 
-[tool.uv]
-venv.path = ".venv"
-
 [tool.env]
 path = "{working_dir}/.devcontainer/.env"
+
+[tool.uv.build-backend]
+namespace = true
+source-exclude = ["*.bin"]
+source-include = ["tests/**"]
 
 [project.optional-dependencies]
 dev = [
@@ -83,3 +79,8 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 [lint.per-file-ignores]
 # Allow unused imports in __init__.py files.
 "__init__.py" = ["F401"]
+
+[dependency-groups]
+dev = [
+    "uv>=0.7.17",
+]
