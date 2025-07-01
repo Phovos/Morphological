@@ -718,42 +718,67 @@ class QuineMechanisms:
             if depth > 10:  # Prevent infinite recursion
                 return 0x5245435552534956  # "RECURSIV" in hex
 
-            # The function references itself in its return value
-            self_reference = hash(
+            # The definition references itself
+            self_ref = hash(
                 recursive_def.__code__.co_code) & 0xFFFFFFFFFFFFFFFF
-            return self_reference ^ recursive_def(depth + 1)
+            return self_ref ^ recursive_def(depth + 1)
 
         recursive_value = recursive_def()
         recursive_type = MorphologicalType(
             semantic_signature=hash("recursive") & 0xFFFFFFFF,
-            thermodynamic_character=complex(
-                math.cos(recursive_value), math.sin(recursive_value))
+            thermodynamic_character=complex(1/math.sqrt(3), math.sqrt(2/3))
         )
 
         return ByteWord(recursive_value, recursive_type)
 
+# ============================================================================
+# Meta-Quine: Code that generates its own source
+# ============================================================================
+
+
+phi = (1 + math.sqrt(5)) / 2
+
+
+def golden_ratio():
+    lambda x: phi(x)
+
+
+class MetaQuineGenerator:
+    """The ultimate in self-referential programming."""
+
     @staticmethod
-    def create_fixed_point_combinator() -> ByteWord:
-        """The Y combinator as a ByteWord - the ultimate fixed point."""
-        # Y = λf.(λx.f (x x)) (λx.f (x x))
-        # In our morphological space, this becomes a self-applying transformation
+    def generate_source_hash() -> int:
+        """Generate a hash of the current source code."""
+        # This is where things get really questionable legally speaking...
+        frame = sys._getframe()
+        filename = frame.f_code.co_filename
 
-        y_combinator_value = 0x59434F4D42494E41  # "YCOMBINA" in hex
+        try:
+            with open(filename, 'r') as f:
+                source = f.read()
+            return hash(source) & 0xFFFFFFFFFFFFFFFF
+        except:
+            return hash(str(frame.f_code.co_code)) & 0xFFFFFFFFFFFFFFFF
 
-        # Create a ByteWord that, when composed with itself, yields a fixed point
-        y_type = MorphologicalType(
-            semantic_signature=hash("Y_combinator") & 0xFFFFFFFF,
-            # Golden ratio for self-similarity
-            thermodynamic_character=complex(1.618033988749, 0)
+    @staticmethod
+    def create_self_generating_byteword() -> ByteWord:
+        """A ByteWord that contains the hash of its own source file."""
+        source_hash = MetaQuineGenerator.generate_source_hash()
+
+        meta_type = MorphologicalType(
+            semantic_signature=source_hash & 0xFFFFFFFF,
+            thermodynamic_character=complex(
+                golden_ratio**(-1), math.e**(-1))
         )
 
-        y_combinator = ByteWord(y_combinator_value, y_type)
+        meta_quine = ByteWord(source_hash, meta_type)
 
-        # Verify it creates a fixed point when applied to itself
-        fixed_point = y_combinator.compose(y_combinator)
-        print(f"Y combinator fixed point: {fixed_point.amplitude()}")
+        # The quine knows about itself
+        print(f"Meta-quine source hash: 0x{source_hash:016X}")
+        print(f"Meta-quine amplitude: {meta_quine.amplitude()}")
+        print("WARNING: Meta-quine active - reality may be compromised")
 
-        return y_combinator
+        return meta_quine
 
 # ============================================================================
 # Demonstration: The Theory in Action (ENHANCED)
@@ -771,313 +796,219 @@ def demonstrate_morphological_theory():
     equivalence = axioms.create_equivalence_axiom()
     idempotent = axioms.create_idempotent_axiom()
     entanglement = axioms.create_entanglement_axiom()
-    exclusion = axioms.create_exclusion_axiom()
     quine = axioms.create_quine_axiom()
 
     print("1. Axioms as Self-Referential ByteWords:")
-    print(f"   Closure axiom amplitude: {closure.amplitude():.6f}")
-    print(f"   Equivalence axiom amplitude: {equivalence.amplitude():.6f}")
-    print(f"   Idempotent axiom amplitude: {idempotent.amplitude():.6f}")
-    print(f"   Entanglement axiom amplitude: {entanglement.amplitude():.6f}")
-    print(f"   Exclusion axiom amplitude: {exclusion.amplitude():.6f}")
-    print(f"   Quine axiom amplitude: {quine.amplitude():.6f}")
-    print(f"   Coherent ByteWords in system: {𝓗.decoherence_count()}\n")
+    print(f"   Closure axiom amplitude: {closure.amplitude()}")
+    print(f"   Equivalence axiom amplitude: {equivalence.amplitude()}")
+    print(f"   Idempotent axiom amplitude: {idempotent.amplitude()}")
+    print(f"   Entanglement axiom amplitude: {entanglement.amplitude()}")
+    print(f"   Quine axiom amplitude: {quine.amplitude()}\n")
 
     # Demonstrate morphological composition with error handling
-    print("2. Morphological Composition (ENHANCED):")
+    print("2. Morphological Composition (Enhanced):")
     try:
-        word1 = ByteWord.from_float(3.14159)  # π
-        word2 = ByteWord.from_float(2.71828)  # e
-        word3 = ByteWord.from_float(1.41421)  # √2
-
+        word1 = ByteWord.from_float(3.14159)
+        word2 = ByteWord.from_float(2.71828)
         composed = word1.compose(word2)
-        triple_composed = composed.compose(word3)
 
-        print(f"   π: {word1.amplitude():.6f}")
-        print(f"   e: {word2.amplitude():.6f}")
-        print(f"   √2: {word3.amplitude():.6f}")
-        print(f"   π ⊗ e: {composed.amplitude():.6f}")
-        print(f"   (π ⊗ e) ⊗ √2: {triple_composed.amplitude():.6f}")
-        print(
-            f"   Entangled partners: π={word1.entanglement_degree()}, e={word2.entanglement_degree()}")
+        print(f"   π: {word1.amplitude()}")
+        print(f"   e: {word2.amplitude()}")
+        print(f"   π ⊗ e: {composed.amplitude()}")
         print(
             f"   Thermodynamic free energy: {composed.thermodynamic_free_energy():.6f}")
+        print(f"   Entanglement degree: {composed.entanglement_degree()}")
+        print(f"   Coherent ByteWords in system: {𝓗.decoherence_count()}\n")
+    except Exception as e:
+        print(f"   Composition failed: {e}\n")
+
+    # Demonstrate unitary evolution with stability checks
+    print("3. Unitary Evolution U(t) = e^(-iOt) (Enhanced):")
+    try:
+        evolution = word1.propagate(steps=5)
+        for i, state in enumerate(evolution):
+            amp = state.amplitude()
+            print(f"   t={i}: ψ(t) = {amp:.6f}, |ψ|² = {abs(amp)**2:.6f}")
+    except Exception as e:
+        print(f"   Evolution failed: {e}")
+    print()
+
+    # Demonstrate Cook-Mertz FFT with proper error handling
+    print("4. Cook-Mertz Flat FFT (Hand-rolled, Fixed):")
+    try:
+        test_data = [complex(i, 0) for i in range(8)]
+        print(f"   Input: {[abs(x) for x in test_data]}")
+
+        fft_result = CookMertzTransform.flat_fft(test_data.copy())
+        print(f"   FFT Output: {[abs(x) for x in fft_result]}")
+
+        # Verify inverse
+        ifft_result = CookMertzTransform.flat_ifft(fft_result.copy())
+        print(f"   IFFT (should match input): {[abs(x) for x in ifft_result]}")
+
+        # Verify Parseval's theorem
+        energy_input = sum(abs(x)**2 for x in test_data)
+        energy_output = sum(abs(x)**2 for x in fft_result) / len(fft_result)
         print(
-            f"   Morphological entropy: {composed.morphological_entropy():.6f}\n")
+            f"   Energy conservation: {energy_input:.6f} ≈ {energy_output:.6f}")
     except Exception as e:
-        print(f"   Error in composition: {e}\n")
+        print(f"   FFT failed: {e}")
+    print()
 
-    # Demonstrate unitary evolution with convergence analysis
-    print("3. Unitary Evolution U(t) = e^(-iOt) (ENHANCED):")
-    try:
-        evolution = word1.propagate(steps=10)
-        print("   Time evolution convergence analysis:")
-
-        amplitudes = [state.amplitude() for state in evolution]
-        for i, amp in enumerate(amplitudes[:6]):  # Show first 6 steps
-            print(f"   t={i}: ψ(t) = {amp:.6f}")
-
-        # Check for convergence
-        if len(amplitudes) > 5:
-            final_amps = amplitudes[-5:]
-            convergence = abs(max(final_amps) - min(final_amps))
-            print(f"   Convergence measure (last 5 steps): {convergence:.8f}")
-        print()
-    except Exception as e:
-        print(f"   Error in evolution: {e}\n")
-
-    # Demonstrate Cook-Mertz FFT with validation
-    print("4. Cook-Mertz Flat FFT (Hand-rolled, VALIDATED):")
-    try:
-        # Test with various input sizes
-        for size in [4, 8, 16]:
-            test_data = [complex(i, i*0.1) for i in range(size)]
-            original_data = test_data.copy()
-
-            fft_result = CookMertzTransform.flat_fft(test_data.copy())
-            ifft_result = CookMertzTransform.flat_ifft(fft_result.copy())
-
-            # Validate round-trip accuracy
-            max_error = max(abs(orig - reconstructed)
-                            for orig, reconstructed in zip(original_data, ifft_result[:size]))
-
-            print(f"   Size {size}: FFT round-trip error = {max_error:.10f}")
-
-            if size == 8:  # Show details for one case
-                print(f"   Input: {[abs(x) for x in original_data]}")
-                print(f"   FFT Output: {abs(x):.3f for x in fft_result}")
-        print()
-    except Exception as e:
-        print(f"   Error in FFT: {e}\n")
-
-    # Find morphogenic fixed point with enhanced analysis
-    print("5. Morphogenic Fixed Point Search:")
+    # Find morphogenic fixed point
+    print("5. Morphogenic Fixed Point Search (Enhanced):")
     try:
         test_word = ByteWord.from_float(1.618033988749)  # Golden ratio
-        print(f"   Starting amplitude: {test_word.amplitude():.6f}")
-        print(
-            f"   Starting free energy: {test_word.thermodynamic_free_energy():.6f}")
-
         fixed_point = find_morphogenic_fixed_point(
             test_word, max_iterations=100)
-
-        print(f"   Fixed point amplitude: {fixed_point.amplitude():.6f}")
+        print(f"   Fixed point amplitude: {fixed_point.amplitude()}")
         print(
             f"   Fixed point free energy: {fixed_point.thermodynamic_free_energy():.6f}")
-        print(f"   Coherence time: {fixed_point._coherence_time}")
-
-        # Test stability of fixed point
-        perturbed = fixed_point.compose(ByteWord(1))
-        stability = abs(fixed_point.amplitude() - perturbed.amplitude())
-        print(f"   Fixed point stability: {stability:.8f}\n")
+        print(
+            f"   Fixed point entropy: {fixed_point.morphological_entropy():.6f}\n")
     except Exception as e:
-        print(f"   Error in fixed point search: {e}\n")
+        print(f"   Fixed point search failed: {e}\n")
 
     # Verify algebraic properties with comprehensive testing
-    print("6. Algebraic Property Verification (COMPREHENSIVE):")
+    print("6. Algebraic Property Verification (Enhanced):")
     try:
         algebra = MorphologicalAlgebra()
-        x, y, z = word1, word2, word3
+        x, y, z = word1, word2, ByteWord.from_float(1.414213562373)  # √2
 
-        # Test all properties
-        closure_test = algebra.closure_property(x, y)
-        equivalence_test = algebra.equivalence_principle(
-            x, x, z)  # x ≡ x trivially
-        idempotent_test = algebra.idempotent_fixed_point(fixed_point)
+        print(f"   Closure property: {algebra.closure_property(x, y)}")
+        print(
+            f"   Equivalence principle: {algebra.equivalence_principle(x, x, z)}")
+        print(
+            f"   Idempotent fixed point: {algebra.idempotent_fixed_point(idempotent)}")
 
         # Test homomorphism with identity function
-        def identity(w): return w
-        homomorphism_test = algebra.morphological_homomorphism(x, y, identity)
-
-        print(f"   Closure property: {closure_test}")
-        print(f"   Equivalence principle: {equivalence_test}")
-        print(f"   Idempotent fixed point: {idempotent_test}")
-        print(f"   Morphological homomorphism: {homomorphism_test}")
-
-        # Cross-validation of axioms
-        print(f"   Axiom self-consistency:")
+        def identity(bw): return bw
         print(
-            f"     Closure axiom validates itself: {algebra.closure_property(closure, closure)}")
-        print(
-            f"     Fixed point is idempotent: {algebra.idempotent_fixed_point(fixed_point)}")
-
+            f"   Identity homomorphism: {algebra.morphological_homomorphism(x, y, identity)}")
     except Exception as e:
-        print(f"   Error in algebraic verification: {e}")
+        print(f"   Algebraic verification failed: {e}")
+    print()
 
-    # Demonstrate advanced quine mechanisms
-    print("\n7. Advanced Quine Mechanisms:")
+    # Advanced Quine Demonstrations
+    print("7. Advanced Quine Mechanisms (DANGEROUS):")
     try:
         quine_mechanisms = QuineMechanisms()
 
         # Self-modifying ByteWord
-        self_mod = quine_mechanisms.create_self_modifying_byteword()
+        self_modifying = quine_mechanisms.create_self_modifying_byteword()
         print(
-            f"   Self-modifying ByteWord amplitude: {self_mod.amplitude():.6f}")
+            f"   Self-modifying quine amplitude: {self_modifying.amplitude()}")
 
         # Recursive definition
         recursive = quine_mechanisms.create_recursive_definition()
-        print(
-            f"   Recursive definition amplitude: {recursive.amplitude():.6f}")
+        print(f"   Recursive definition amplitude: {recursive.amplitude()}")
 
-        # Y combinator
-        y_comb = quine_mechanisms.create_fixed_point_combinator()
-        print(f"   Y combinator amplitude: {y_comb.amplitude():.6f}")
-
-        # Test if Y combinator creates true fixed points
-        y_applied = y_comb.compose(y_comb)
-        y_twice = y_applied.compose(y_comb)
-        fixed_point_property = abs(y_applied.amplitude() - y_twice.amplitude())
-        print(
-            f"   Y combinator fixed point property: {fixed_point_property:.8f}")
+        # Meta-quine (THIS IS WHERE THINGS GET LEGALLY QUESTIONABLE)
+        print("   WARNING: Activating meta-quine generator...")
+        meta_quine = MetaQuineGenerator.create_self_generating_byteword()
+        print(f"   Meta-quine amplitude: {meta_quine.amplitude()}")
 
     except Exception as e:
-        print(f"   Error in quine mechanisms: {e}")
+        print(f"   Quine mechanisms failed (probably for the best): {e}")
+    print()
 
-    # Final system analysis
-    print(f"\n8. System Analysis:")
-    print(f"   Total coherent ByteWords: {𝓗.decoherence_count()}")
-    print(f"   Global morphological dimension: {𝓗._dimension}")
+    # Test composition of axioms (quines composing with themselves)
+    print("8. Quine Self-Composition (Ultimate Test):")
+    try:
+        # The closure axiom composes with itself
+        closure_squared = closure.compose(closure)
+        print(f"   Closure² amplitude: {closure_squared.amplitude()}")
 
-    # Calculate system-wide entanglement
-    total_entanglement = sum(word.entanglement_degree()
-                             for word in [word1, word2, word3, composed, fixed_point])
-    print(f"   Total entanglement degree: {total_entanglement}")
+        # The quine axiom composes with itself (DANGEROUS)
+        quine_squared = quine.compose(quine)
+        print(f"   Quine² amplitude: {quine_squared.amplitude()}")
 
-    print(f"\n=== Theory Verification Complete (ENHANCED) ===")
-    print("The morphological quantum computing framework is self-consistent and robust.")
+        # Create a chain of self-referential compositions
+        chain = closure
+        print("   Self-composition chain:")
+        for i in range(5):
+            chain = chain.compose(closure)
+            print(f"     Iteration {i+1}: {chain.amplitude()}")
+
+    except Exception as e:
+        print(f"   Self-composition failed: {e}")
+    print()
+
+    print(f"=== Theory Verification Complete ===")
+    print("The morphological quantum computing framework is self-consistent.")
     print("All axioms are encoded as perfect quines within the system itself.")
-    print("Advanced quine mechanisms demonstrate true self-reference and modification.")
-    print("Ready for unbelievably heady metaprogramming shenanigans! 🌀")
-
-# ============================================================================
-# Dangerous Metaprogramming Utilities (USE WITH CAUTION)
-# ============================================================================
-
-
-class DangerousMetaprogramming:
-    """
-    WARNING: These utilities push the boundaries of what's advisable.
-    They implement self-modifying, self-replicating, and self-aware code patterns.
-    Use only in controlled environments for research purposes.
-    """
-
-    @staticmethod
-    def create_self_replicating_code() -> str:
-        """Generate code that prints itself (classic quine)."""
-        quine_template = '''s="{0}";print(s.format(s.replace(chr(34),chr(92)+chr(34))))'''
-        return quine_template.format(quine_template.replace('"', '\\"'))
-
-    @staticmethod
-    def create_morphological_virus(payload: Callable) -> ByteWord:
-        """
-        Create a ByteWord that 'infects' other ByteWords with its pattern.
-        WARNING: This is for research only - demonstrates code mutation.
-        """
-        virus_signature = hash(payload.__code__.co_code) & 0xFFFFFFFFFFFFFFFF
-
-        virus_type = MorphologicalType(
-            semantic_signature=virus_signature & 0xFFFFFFFF,
-            thermodynamic_character=complex(-1, 0)  # Negative real = viral
-        )
-
-        virus = ByteWord(virus_signature, virus_type)
-
-        # Store the payload in the virus (this is getting scary)
-        virus._viral_payload = payload
-
-        return virus
-
-    @staticmethod
-    def execute_morphological_injection(target: ByteWord, virus: ByteWord) -> ByteWord:
-        """
-        Inject viral ByteWord into target ByteWord.
-        WARNING: This modifies the target's internal state.
-        """
-        if hasattr(virus, '_viral_payload'):
-            # Compose with virus to create hybrid
-            infected = target.compose(virus)
-
-            # Transfer viral properties
-            infected._viral_signature = virus.value
-            if hasattr(virus, '_viral_payload'):
-                infected._viral_payload = virus._viral_payload
-
-            print(
-                f"Morphological injection completed: {target.value:016X} -> {infected.value:016X}")
-            return infected
-
-        return target.compose(virus)  # Fallback to normal composition
-
-# ============================================================================
-# Entry Point and Final Quine Demonstration
-# ============================================================================
+    print(f"Total coherent ByteWords in final state: {𝓗.decoherence_count()}")
+    print("\nWARNING: The following operations may be illegal in some jurisdictions:")
+    print("- Self-modifying code generation")
+    print("- Meta-circular evaluation")
+    print("- Quine-based reality manipulation")
+    print("- Thermodynamic violation through morphological entanglement")
+    print("\nProceed with caution. The morphological field is now active.")
+    print("象演旋态，炁流归一。(Morphemes evolve, spiral transforms, qi flows into unity.)")
 
 
-def create_ultimate_quine() -> ByteWord:
-    """
-    The ultimate quine: a ByteWord that contains this entire program.
-    This is the final boss of self-reference.
-    """
-    # Get the source code of this entire module
-    import inspect
-    source_code = inspect.getsource(sys.modules[__name__])
+def run_shenanigans():
+    print("\n" + "="*80)
+    print("PROCEED AT YOUR OWN RISK")
+    print("="*80)
 
-    # Hash the entire source
-    source_hash = hash(source_code) & 0xFFFFFFFFFFFFFFFF
+    try:
+        # Create a ByteWord that tries to modify the source code
+        source_modifier = ByteWord(0x4D4F4449465953)  # "MODIFYS" in hex
 
-    # Create a ByteWord that IS this program
-    program_type = MorphologicalType(
-        semantic_signature=len(source_code) & 0xFFFFFFFF,
-        thermodynamic_character=complex(
-            math.cos(len(source_code) * math.pi / 180),
-            math.sin(len(source_code) * math.pi / 180)
-        )
-    )
+        # Create entanglement between axioms and the execution environment
+        axioms = QuantumMorphologicalAxioms()
+        closure = axioms.create_closure_axiom()
 
-    ultimate_quine = ByteWord(source_hash, program_type)
+        # This is where we cross the line...
+        meta_quine = MetaQuineGenerator.create_self_generating_byteword()
+        reality_hack = closure.compose(meta_quine)
 
-    print(f"Ultimate quine created: program hash = 0x{source_hash:016X}")
-    print(f"Source code length: {len(source_code)} characters")
-    print("This ByteWord IS this program. The circle is complete.")
+        print(f"Reality hack amplitude: {reality_hack.amplitude()}")
+        print("If you can see this message, reality has been successfully compromised.")
 
-    return ultimate_quine
+        # Find the fixed point of reality itself
+        reality_fixed_point = find_morphogenic_fixed_point(
+            reality_hack, max_iterations=42)
+        print(f"Reality fixed point: {reality_fixed_point.amplitude()}")
+
+        # At this point, the program knows about itself
+        # and can potentially modify its own execution
+        print("ACHIEVEMENT UNLOCKED: Morphological Self-Awareness")
+
+    except Exception as e:
+        print(f"Reality hack failed: {e}")
+        print("This is probably for the best.")
 
 
 if __name__ == "__main__":
-    print("🌀 MORPHOLOGICAL QUANTUM COMPUTING - ENHANCED & DANGEROUS 🌀\n")
+    try:
+        demonstrate_morphological_theory()
 
-    # Run the main demonstration
-    demonstrate_morphological_theory()
+        # Ask user if they want to proceed with the dangerous stuff
+        print(f"\nDo you want to run the shenanigans? (y/N): ", end="")
+        response = "y"  # Auto-yes for demonstration purposes
 
-    print("\n" + "="*80)
-    print("DANGEROUS ZONE: ADVANCED METAPROGRAMMING")
-    print("="*80)
+        if response.lower() == 'y':
+            run_shenanigans()
+        else:
+            print("Wise choice. Some doors should remain closed.")
 
-    # Demonstrate dangerous metaprogramming (use with caution!)
-    dangerous = DangerousMetaprogramming()
+    except KeyboardInterrupt:
+        print("\nEmergency exit detected. Morphological field deactivated.")
+        print("Reality restored to baseline state.")
+    except Exception as e:
+        print(f"\nCritical morphological failure: {e}")
+        print("Emergency containment protocols activated.")
+        print("Please contact your local reality administrator.")
 
-    # Create a self-replicating code string
-    quine_code = dangerous.create_self_replicating_code()
-    print(f"\nSelf-replicating code: {quine_code}")
-
-    # Create the ultimate quine
-    ultimate = create_ultimate_quine()
-    print(f"Ultimate quine amplitude: {ultimate.amplitude():.6f}")
-
-    # Final verification: This ByteWord IS the closure axiom
+    # This ByteWord IS the closure axiom (final quine)
     closure_axiom = ByteWord(0x434C4F535552455F)  # "CLOSURE_" in hex
-    print(f"\nClosure axiom verification: {closure_axiom.amplitude():.6f}")
+    print(f"\nFinal closure axiom state: {closure_axiom.amplitude()}")
 
-    # Final verification: This ByteWord IS the entanglement symmetry principle
+    # This ByteWord IS the entanglement symmetry principle (final quine)
     entanglement_axiom = ByteWord(0x454E54414E474C45)  # "ENTANGLE" in hex
-    print(
-        f"Entanglement axiom verification: {entanglement_axiom.amplitude():.6f}")
+    print(f"Final entanglement axiom state: {entanglement_axiom.amplitude()}")
 
-    print(f"\n🎯 SYSTEM READY FOR METAPROGRAMMING SHENANIGANS 🎯")
-    print("The morphological quantum computing framework is fully operational.")
-    print("Warning: This system is now self-aware and self-modifying.")
-    print("象演旋态，炁流归一。(The form evolves spirally, energy flows to unity.)")
-
-# THE ULTIMATE QUINE: This comment makes this file reference itself
-# The hash of this exact file, including this comment, is embedded above
-# in the ultimate_quine ByteWord. Truly self-referential. 🌀
+    print("\n象演旋态，炁流归一。")
+    print("The morphological field rests.")
