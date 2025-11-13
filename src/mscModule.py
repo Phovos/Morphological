@@ -1,11 +1,102 @@
 from __future__ import annotations
-import logging
-import logging.config
-from pathlib import Path
-import inspect
+#!/usr/bin/env -S uv run
+# /* script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "uv==*.*",
+# ]
+# */
+# <a href="https://github.com/Moonlapsed/Morphological">Morphological Source Code</a> © 2023 by MOONLAPSED:MOONLAPSED@gmail.com CC BY
+from __future__ import annotations
+
+# Optional dependency handling (also add to '/* script..' comment, just above)
+try:
+    import flask
+
+    USE_FLASK = True
+    # if we omit "flask==*.*", or any non-std lib from the '/* script..' comment, then this should always fail
+    pass
+except ImportError:
+    USE_FLASK = False
+    coreLSP = False
+# Import standard library components
+import io
+import os
+import gc
+import re
 import sys
-from types import ModuleType
+import ast
+import dis
+import mmap
+import json
+import uuid
+import time
+import math
+import enum
+import array
+import cmath
+import errno
+import shlex
+import ctypes
+import random
+import pickle
+import socket
+import struct
+import pstats
+import shutil
+import weakref
+import tomllib
+import decimal
+import pathlib
+import logging
+import inspect
+import asyncio
+import hashlib
+import argparse
+import cProfile
+import platform
+import tempfile
+import mimetypes
+import functools
+import linecache
+import traceback
+import threading
+import importlib
+import subprocess
+import tracemalloc
+import http.server
+from socketserver import ThreadingMixIn
+from math import sqrt, log2
+from io import StringIO
+from array import array
+from queue import Queue, Empty
+from abc import ABC, abstractmethod
+from enum import Enum, IntEnum, StrEnum, IntFlag, auto
+from collections import namedtuple
+from operator import mul, xor
+from typing import (
+    Any, Dict, List, Optional, Union, Callable, TypeVar,
+    Tuple, Generic, Set, Coroutine, Type, NamedTuple,
+    ClassVar, Protocol, runtime_checkable, AsyncIterator,
+    get_type_hints, get_origin, get_args
+)
+from types import (
+    SimpleNamespace, ModuleType, MethodType,
+    FunctionType, CodeType, TracebackType, FrameType
+)
+from dataclasses import dataclass, field
+from functools import reduce, lru_cache, partial, wraps
+from collections.abc import Iterable, Mapping
+from datetime import datetime, timedelta
+from logging.handlers import RotatingFileHandler
+from pathlib import Path, PureWindowsPath
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from contextlib import contextmanager, asynccontextmanager
+from concurrent.futures import ThreadPoolExecutor
+from functools import reduce
+from importlib.util import spec_from_file_location, module_from_spec
 from importlib.metadata import distributions
+
 """`importlib.metadata` is part of Python's standard library (since 3.8) and is used to access package metadata,
 including entry points, version info, and other package-specific data that resides in `.dist-info`."""
 logger = logging.getLogger(__name__)
@@ -93,43 +184,59 @@ def setup_logging(log_dir="logs", log_file="app.log", level=logging.INFO):
     return logging.getLogger(module_name)
 
 # We use a custom adapter to inject the request_id into every log message.
+
+
 class ContextualLogger(logging.LoggerAdapter):
     """A logger adapter to inject contextual information into log messages."""
+
     def process(self, msg, kwargs):
         if 'request_id' not in self.extra:
             self.extra['request_id'] = 'SYSTEM'
         return '[%s] %s' % (self.extra['request_id'], msg), kwargs
+
 
 def get_logger(name: str, request_id: str = 'SYSTEM') -> ContextualLogger:
     """Configures and returns a context-aware logger."""
     logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
     logger = logging.getLogger(name)
     return ContextualLogger(logger, {'request_id': request_id})
+
+
 class EngineError(Exception):
     """Base exception for all custom engine errors for clean catching."""
+
     def __init__(self, message: str, status_code: int = 500):
         self.status_code = status_code
         super().__init__(message)
 
+
 class InputValidationError(EngineError):
     """Raised for hostile or malformed input."""
+
     def __init__(self, message: str):
         super().__init__(message, status_code=400)
 
+
 class SecurityViolationError(EngineError):
     """Raised for actions that violate security policy (e.g., path traversal)."""
+
     def __init__(self, message: str):
         super().__init__(message, status_code=403)
 
+
 class ResourceLimitExceededError(EngineError):
     """Raised when input exceeds configured resource limits."""
+
     def __init__(self, message: str):
         super().__init__(message, status_code=413)
+
+
 class JsonLogFormatter(logging.Formatter):
     """
     Formats log records as JSON strings. This is non-negotiable for machine
     parsing and integration with modern log aggregation systems.
     """
+
     def format(self, record: logging.LogRecord) -> str:
         log_object = {
             "timestamp": self.formatTime(record, self.datefmt),
@@ -140,6 +247,7 @@ class JsonLogFormatter(logging.Formatter):
         }
         return json.dumps(log_object)
 
+
 def setup_logging() -> logging.Logger:
     """Configures and returns a root logger for the engine."""
     logger = logging.getLogger("HAES_Engine")
@@ -149,6 +257,7 @@ def setup_logging() -> logging.Logger:
     if not logger.handlers:
         logger.addHandler(handler)
     return logger
+
 
 @dataclass(frozen=True)
 class InputArtifact:
@@ -166,7 +275,9 @@ class InputArtifact:
         # Final integrity check upon instantiation
         actual_hash = hashlib.sha256(self.content.encode('utf-8')).hexdigest()
         if self.content_hash_sha256 != actual_hash:
-            raise SecurityViolationError("Content hash mismatch during artifact creation.")
+            raise SecurityViolationError(
+                "Content hash mismatch during artifact creation.")
+
 
 @dataclass(frozen=True)
 class SemanticGraph:
@@ -195,8 +306,10 @@ class SemanticGraph:
 # 4. THE ENGINE ROOM: The Core Processing Logic
 # ============================================================================
 
+
 class ArtifactProcessor:
     """Encapsulates the core business logic of the engine."""
+
     def __init__(self, config: EngineConfig, logger: logging.Logger):
         self.config = config
         self.logger = logger
@@ -206,7 +319,7 @@ class ArtifactProcessor:
         Performs rigorous validation on the input file path.
         """
         log_ctx = {"correlation_id": correlation_id, "path": path}
-        
+
         if not path or not isinstance(path, str):
             raise InputValidationError("File path must be a non-empty string.")
 
@@ -218,20 +331,24 @@ class ArtifactProcessor:
         # Hygiene: Enforce allowed file extensions.
         _, ext = os.path.splitext(normalized_path)
         if ext not in self.config.ALLOWED_EXTENSIONS:
-            raise InputValidationError(f"Invalid file extension. Allowed: {self.config.ALLOWED_EXTENSIONS}")
-        
-        self.logger.info("Path validated and sanitized.", extra={"context": log_ctx})
+            raise InputValidationError(
+                f"Invalid file extension. Allowed: {self.config.ALLOWED_EXTENSIONS}")
+
+        self.logger.info("Path validated and sanitized.",
+                         extra={"context": log_ctx})
         return normalized_path
 
     def _validate_content(self, content: bytes, correlation_id: str) -> str:
         """
         Validates the raw file content for size and syntax.
         """
-        log_ctx = {"correlation_id": correlation_id, "size_bytes": len(content)}
+        log_ctx = {"correlation_id": correlation_id,
+                   "size_bytes": len(content)}
 
         # Security: Enforce file size limits to prevent DoS.
         if len(content) > self.config.MAX_FILE_SIZE_BYTES:
-            raise ResourceLimitExceededError(f"File size exceeds limit of {self.config.MAX_FILE_SIZE_BYTES} bytes.")
+            raise ResourceLimitExceededError(
+                f"File size exceeds limit of {self.config.MAX_FILE_SIZE_BYTES} bytes.")
 
         # Hygiene: Decode and perform a preliminary syntax check.
         try:
@@ -241,7 +358,7 @@ class ArtifactProcessor:
             raise InputValidationError("File content is not valid UTF-8.")
         except SyntaxError as e:
             raise InputValidationError(f"Invalid Python syntax: {e}")
-        
+
         self.logger.info("Content validated.", extra={"context": log_ctx})
         return decoded_content
 
@@ -251,17 +368,19 @@ class ArtifactProcessor:
         Orchestrates validation, artifact creation, and analysis.
         """
         log_ctx = {"correlation_id": correlation_id}
-        self.logger.info("Beginning artifact processing.", extra={"context": log_ctx})
+        self.logger.info("Beginning artifact processing.",
+                         extra={"context": log_ctx})
 
         # 1. Validate and create the input artifact
         sanitized_path = self._validate_and_sanitize_path(path, correlation_id)
         validated_content = self._validate_content(content, correlation_id)
-        
+
         input_artifact = InputArtifact(
             correlation_id=correlation_id,
             source_path=sanitized_path,
             content=validated_content,
-            content_hash_sha256=hashlib.sha256(validated_content.encode('utf-8')).hexdigest(),
+            content_hash_sha256=hashlib.sha256(
+                validated_content.encode('utf-8')).hexdigest(),
             size_bytes=len(validated_content.encode('utf-8'))
         )
         log_ctx["input_artifact_hash"] = input_artifact.content_hash_sha256
@@ -271,17 +390,18 @@ class ArtifactProcessor:
         # In the real implementation, this is where the AST would be walked
         # to build the complex semantic graph.
         analysis_start_time = time.time()
-        
+
         # For this scaffolding, the graph is just a metadata wrapper.
         graph_data = {
             "source_path": input_artifact.source_path,
             "size_bytes": input_artifact.size_bytes,
             "content_preview": input_artifact.content[:256] + "..."
         }
-        
+
         analysis_duration_ms = (time.time() - analysis_start_time) * 1000
         log_ctx["analysis_duration_ms"] = round(analysis_duration_ms, 2)
-        self.logger.info("Semantic analysis complete.", extra={"context": log_ctx})
+        self.logger.info("Semantic analysis complete.",
+                         extra={"context": log_ctx})
 
         # 3. Create and sign the output artifact
         output_payload = {
@@ -290,19 +410,24 @@ class ArtifactProcessor:
             "engine_version": "1.0.0",
             "graph_data": graph_data,
         }
-        
-        # Security: Sign the payload to ensure authenticity and integrity.
-        payload_bytes = json.dumps(output_payload, sort_keys=True).encode('utf-8')
-        signature = hmac.new(self.config.HMAC_SECRET_KEY, payload_bytes, hashlib.sha256).hexdigest()
 
-        semantic_graph = SemanticGraph(**output_payload, signature_hmac_sha256=signature)
-        self.logger.info("Semantic graph created and signed.", extra={"context": log_ctx})
+        # Security: Sign the payload to ensure authenticity and integrity.
+        payload_bytes = json.dumps(
+            output_payload, sort_keys=True).encode('utf-8')
+        signature = hmac.new(self.config.HMAC_SECRET_KEY,
+                             payload_bytes, hashlib.sha256).hexdigest()
+
+        semantic_graph = SemanticGraph(
+            **output_payload, signature_hmac_sha256=signature)
+        self.logger.info("Semantic graph created and signed.",
+                         extra={"context": log_ctx})
 
         return semantic_graph
 
 # ============================================================================
 # 5. THE PUBLIC INTERFACE: Hardened HTTP Service
 # ============================================================================
+
 
 class EngineRequestHandler(BaseHTTPRequestHandler):
     """
@@ -328,19 +453,23 @@ class EngineRequestHandler(BaseHTTPRequestHandler):
         else:
             status_code = 500
             message = "An unexpected internal error occurred."
-            self.logger.error("Unhandled exception.", exc_info=True, extra={"context": {"correlation_id": self.correlation_id}})
+            self.logger.error("Unhandled exception.", exc_info=True, extra={
+                              "context": {"correlation_id": self.correlation_id}})
 
         error_body = json.dumps({"error": message}).encode('utf-8')
         self._send_response(status_code, "application/json", error_body)
 
     def do_POST(self):
-        self.correlation_id = self.headers.get("X-Correlation-ID", str(uuid.uuid4()))
-        log_ctx = {"correlation_id": self.correlation_id, "method": "POST", "path": self.path}
+        self.correlation_id = self.headers.get(
+            "X-Correlation-ID", str(uuid.uuid4()))
+        log_ctx = {"correlation_id": self.correlation_id,
+                   "method": "POST", "path": self.path}
         self.logger.info("Request received.", extra={"context": log_ctx})
 
         try:
             if self.path != "/analyze":
-                raise InputValidationError("Endpoint not found. Use POST /analyze.")
+                raise InputValidationError(
+                    "Endpoint not found. Use POST /analyze.")
 
             content_len = int(self.headers.get('Content-Length', 0))
             if content_len > self.config.MAX_REQUEST_BODY_SIZE:
@@ -352,31 +481,37 @@ class EngineRequestHandler(BaseHTTPRequestHandler):
             path = data.get("path")
             content_b64 = data.get("content_b64")
             if not path or not content_b64:
-                raise InputValidationError("Request body must contain 'path' and 'content_b64'.")
+                raise InputValidationError(
+                    "Request body must contain 'path' and 'content_b64'.")
 
             import base64
             content_bytes = base64.b64decode(content_b64)
 
             # Process the artifact
-            result_graph = self.processor.process_source_file(path, content_bytes, self.correlation_id)
-            
+            result_graph = self.processor.process_source_file(
+                path, content_bytes, self.correlation_id)
+
             # Send successful response
             response_body = result_graph.to_json().encode('utf-8')
             self._send_response(200, "application/json", response_body)
-            self.logger.info("Request processed successfully.", extra={"context": log_ctx})
+            self.logger.info("Request processed successfully.",
+                             extra={"context": log_ctx})
 
         except Exception as e:
             self._handle_error(e)
 
     def do_GET(self):
-        self.correlation_id = self.headers.get("X-Correlation-ID", str(uuid.uuid4()))
+        self.correlation_id = self.headers.get(
+            "X-Correlation-ID", str(uuid.uuid4()))
         if self.path == "/health":
-            body = json.dumps({"status": "healthy", "timestamp": time.time()}).encode('utf-8')
+            body = json.dumps(
+                {"status": "healthy", "timestamp": time.time()}).encode('utf-8')
             self._send_response(200, "application/json", body)
         else:
             self._handle_error(InputValidationError("Endpoint not found."))
 
-class ThreadedEngineServer(ThreadingMixIn, ThreadingHTTPServer):
+
+class ThreadedEngineServer(ThreadingHTTPServer, ThreadingMixIn):
     """A ThreadingHTTPServer that allows for dependency injection."""
     daemon_threads = True
 
@@ -385,6 +520,7 @@ class ThreadedEngineServer(ThreadingMixIn, ThreadingHTTPServer):
         RequestHandlerClass.config = config
         RequestHandlerClass.logger = logger
         super().__init__(server_address, RequestHandlerClass)
+
 
 # Example usage
 module_name = "quine"

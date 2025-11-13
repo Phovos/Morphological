@@ -6,7 +6,7 @@ Unified Morphological Analysis Engine
 Combines AtomicLogic architecture with static analysis, RPC, and LSP capabilities.
 Single-file, stdlib-only, polymorphic-first design.
 
-© 2025 MOONLAPSED | BSD-3 & CC BY
+© 2025 MOONLAPSED | BSD-3 & CC ND
 
 Morphological Analysis Engine
 ├── Logging Layer (JSON, contextual, rotating)
