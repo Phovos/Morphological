@@ -1,35 +1,62 @@
 {
-    "name": "Py 3.13 with Jupyter kernel + JLab, R, B, M, and Docker + VScode/dev-env/git CICD",
-    "image": "mcr.microsoft.com/vscode/devcontainers/base:ubuntu",
-    "customizations": {
-        "vscode": {
-            "settings": {
-                "terminal.integrated.defaultProfile.linux": "bash",
-                "editor.formatOnSave": true,
-                "python.defaultInterpreterPath": ".venv/bin/python",
-                "python.linting.enabled": true,
-                "python.linting.ruffEnabled": true,
-                "editor.defaultFormatter": "ms-python.black-formatter"
-            },
-            "extensions": [
-                "ms-python.python",
-                "charliermarsh.ruff",
-                "ms-python.black-formatter",
-                "matangover.mypy",
-                "ms-python.debugpy"
-            ]
-        }
+  "name": "Py 3.14.0 with Jupyter, ruff and uv.",
+  "image": "mcr.microsoft.com/vscode/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/git-lfs:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers-extra/features/vscode-cli:1": {},
+    "ghcr.io/devcontainers-extra/features/vscode-server:1": {},
+    "ghcr.io/devcontainers-extra/features/pre-commit:2": {},
+    "ghcr.io/stuartleeks/dev-container-features/shell-history:0": {},
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.14.0"
     },
-    "postCreateCommand": "bash .devcontainer/provisioning.sh && bash .devcontainer/setup.sh && cp .devcontainer/.bashrc ~/.bashrc && source ~/.bashrc && pip install -e . || true",
-    "forwardPorts": [8000, 8888, 8341],
-    "runArgs": ["--network=host"],
-    "onCreateCommand": "if [ \"$CODESPACES\" = \"true\" ]; then echo 'In Codespaces: Running minimal setup'; else bash .devcontainer/provisioning.sh; fi || true",
-    "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/${localWorkspaceFolderBasename},type=bind",
-    "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
-    "remoteUser": "vscode",
-    "features": {
-        "ghcr.io/devcontainers/features/python:1": {
-            "version": "3.13"
+    "ghcr.io/va-h/devcontainers-features/uv:1": {},
+    "ghcr.io/devcontainers-extra/features/mypy:2": {},
+    "ghcr.io/devcontainers-extra/features/ruff:1": {},
+    "ghcr.io/warrenbuckley/codespace-features/sqlite:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "editor.formatOnSave": true,
+        "python.pythonPath": "~/.pyenv/versions/3.14.0/bin/python",
+        "python.linting.enabled": true,
+        "python.linting.ruffEnabled": true,
+        "editor.defaultFormatter": "ms-python.vscode-pylance",
+        "[python]": {
+          "editor.defaultFormatter": "charliermarsh.ruff",
+          "editor.codeActionsOnSave": {
+            "source.fixAll": "explicit"
+          }
         }
+      },
+      "extensions": [
+        "ms-python.python",
+        "ms-python.debugpy",
+        "ms-python.vscode-pylance",
+        "charliermarsh.ruff",
+        "matangover.mypy",
+        "perras.UV",
+        "ms-toolsai.jupyter",
+        "eamodio.gitlens"
+      ]
     }
+  },
+  "onCreateCommand": "if [ \"$CODESPACES\" = \"true\" ]; then echo 'In Codespaces: Running minimal setup'; else bash .devcontainer/provisioning.sh; fi || true",
+  "postCreateCommand": "export UV_LINK_MODE=copy && uv venv .venv --clear --python 3.14.0 && uv pip install --no-cache -U jupyterlab ipykernel",
+  "postStartCommand": "nohup bash -c 'source .venv/bin/activate && jupyter lab --ip=0.0.0.0 --port=8888 --allow-root --no-browser --ServerApp.token=\"\" --ServerApp.password=\"\" > .jupyter.log 2>&1 &'",
+  "forwardPorts": [8888],
+  "portsAttributes": {
+    "8888": {
+      "label": "JupyterLab",
+      "onAutoForward": "notify"
+    }
+  },
+  "runArgs": ["--network=host"],
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/${localWorkspaceFolderBasename},type=bind",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "remoteUser": "vscode"
 }
