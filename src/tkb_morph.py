@@ -1,14 +1,20 @@
+from __future__ import annotations
+
+#!/usr/bin/env -S uv run
+# /* script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "uv==*.*",
+# ]
+# */
+# https://github.com/Moonlapsed/Morphological © 2023 by MOONLAPSED:MOONLAPSED@gmail.com BSD-3 & CC ND
 import math
 from typing import List, Optional, Tuple
 from dataclasses import dataclass
-from random import randint, seed as rand_seed
-from typing import Tuple
 from tkinter import ttk
 import tkinter as tk
-import time
 """
-Holographic ByteWord Ontology Library (Revised)
-
+Holographic ByteWord Ontology Library
 Implements compound morphological data structures using 8-bit ByteWord units
 that can reference each other within a constrained holographic memory space.
 Focuses on dynamic transformations and system analysis.
@@ -19,7 +25,7 @@ Structure of an 8-bit ByteWord:
 - C: 1 bit (control/activity)    - LSB (bit 0)
 """
 
-from typing import Dict, List, Optional, Callable, Set, Tuple, Sequence
+from typing import Dict, Callable, Sequence
 from enum import Enum
 import random
 

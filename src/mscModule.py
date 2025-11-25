@@ -6,7 +6,7 @@ from __future__ import annotations
 #     "uv==*.*",
 # ]
 # */
-# <a href="https://github.com/Moonlapsed/Morphological">Morphological Source Code</a> © 2023 by MOONLAPSED:MOONLAPSED@gmail.com CC BY
+# <a href="https://github.com/Moonlapsed/Morphological">Morphological Source Code</a> © 2023 by MOONLAPSED:MOONLAPSED@gmail.com CC ND
 from __future__ import annotations
 
 # Optional dependency handling (also add to '/* script..' comment, just above)
