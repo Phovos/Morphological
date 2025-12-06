@@ -439,14 +439,22 @@ class BaseModel:
             result[f.name] = _uncoerce(value)
         return result
 
-    def to_json(self, **kwargs) -> str:
-        """Serialize to JSON"""
-        return json.dumps(self.to_dict(), **kwargs)
+    def to_json(self, *, indent: int | None = None, sort_keys: bool = False) -> str:
+        """Return JSON string. Fully deterministic if sort_keys=True."""
+        return json.dumps(
+            self.to_dict(),
+            indent=indent,
+            sort_keys=sort_keys,
+            separators=(",", ":") if indent is None else None,
+            ensure_ascii=False,
+        )
 
     @classmethod
-    def from_json(cls: Type[T], json_str: str) -> T:
-        """Deserialize from JSON"""
-        return cls.from_dict(json.loads(json_str))
+    def from_json(cls, data: str | bytes) -> "BaseModel":
+        """Parse JSON string/bytes → instance. Fully reversible."""
+        if isinstance(data, (bytes, bytearray)):
+            data = data.decode("utf-8")
+        return cls.from_dict(json.loads(data))
 
     def fingerprint(self) -> str:
         """Content-based fingerprint for caching"""
