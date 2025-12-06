@@ -7,12 +7,14 @@ from __future__ import annotations
 #     "uv==*.*",
 # ]
 # */
-# https://github.com/Moonlapsed/Morphological © 2023 by MOONLAPSED:MOONLAPSED@gmail.com BSD-3 & CC ND
+# > © 2024-2025 Phovos https://github.com/Phovos/Morphologic BSD-3 & CC ND
+# > © 2023-2025 Moonlapsed https://github.com/MOONLAPSED/Cognosis
 import math
 from typing import List, Optional, Tuple
 from dataclasses import dataclass
 from tkinter import ttk
 import tkinter as tk
+
 """
 Holographic ByteWord Ontology Library
 Implements compound morphological data structures using 8-bit ByteWord units
@@ -34,7 +36,8 @@ import random
 
 class AddressingMode(Enum):
     """Defines how the T nibble (high nibble) is interpreted for pointers."""
-    DIRECT = 0      # T directly points to a target address (0-15). C ignored for deref.
+
+    DIRECT = 0  # T directly points to a target address (0-15). C ignored for deref.
     # INDIRECT = 1  # T points to an address containing another address (Not fully implemented below for brevity)
     # T points to a target address (0-15) *only if* C=1 (active).
     RECURSIVE = 2
@@ -133,9 +136,11 @@ class ByteWord:
     def __repr__(self) -> str:
         """Detailed string representation."""
         binary = format(self._value, '08b')
-        return (f"ByteWord(0x{self._value:02X}, "
-                f"0b{binary[:4]}_{binary[4:]}, "
-                f"T={self.high_nibble}, V={self.morphism_selector}, C={self.control_bit})")
+        return (
+            f"ByteWord(0x{self._value:02X}, "
+            f"0b{binary[:4]}_{binary[4:]}, "
+            f"T={self.high_nibble}, V={self.morphism_selector}, C={self.control_bit})"
+        )
 
     def __eq__(self, other) -> bool:
         """Compare two ByteWords based on their value."""
@@ -171,6 +176,7 @@ class HolographicMemory:
     Represents a limited (16-address) memory space for ByteWords,
     supporting different addressing modes for pointer dereferencing.
     """
+
     MEMORY_SIZE = 16  # Due to 4-bit addressing (T nibble)
 
     def __init__(self, addressing_mode: AddressingMode = AddressingMode.RECURSIVE):
@@ -186,8 +192,7 @@ class HolographicMemory:
     def _check_address(self, address: int) -> None:
         """Helper to validate address range."""
         if not 0 <= address < self.MEMORY_SIZE:
-            raise ValueError(
-                f"Address must be between 0 and {self.MEMORY_SIZE - 1}")
+            raise ValueError(f"Address must be between 0 and {self.MEMORY_SIZE - 1}")
 
     def store(self, address: int, byte_word: ByteWord) -> None:
         """Store a ByteWord at the specified address."""
@@ -236,20 +241,23 @@ class HolographicMemory:
                 return None  # Inactive, doesn't point anywhere
 
         # elif self._addressing_mode == AddressingMode.INDIRECT:
-            # Placeholder: T points to addr X, retrieve BW at X, use its T/low nibble?
-            # intermediate = self.retrieve(pointer_val)
-            # if intermediate:
-            #     final_addr = intermediate.get_pointer_nibble() # Or low_nibble? Needs definition.
-            #     return self.retrieve(final_addr)
-            # else:
-            #     return None
+        # Placeholder: T points to addr X, retrieve BW at X, use its T/low nibble?
+        # intermediate = self.retrieve(pointer_val)
+        # if intermediate:
+        #     final_addr = intermediate.get_pointer_nibble() # Or low_nibble? Needs definition.
+        #     return self.retrieve(final_addr)
+        # else:
+        #     return None
         else:
             raise NotImplementedError(
-                f"Addressing mode {self._addressing_mode} not fully implemented")
+                f"Addressing mode {self._addressing_mode} not fully implemented"
+            )
 
     # --- Structure Creation Examples (Illustrative, may have limitations) ---
 
-    def create_linked_list(self, values: Sequence[int], start_addr: int = 0) -> Optional[int]:
+    def create_linked_list(
+        self, values: Sequence[int], start_addr: int = 0
+    ) -> Optional[int]:
         """
         Creates a linked list in memory using the T nibble as the 'next' pointer.
         Overwrites existing memory contents. Stores raw values in ByteWords.
@@ -265,8 +273,9 @@ class HolographicMemory:
             return None
         if len(values) > self.MEMORY_SIZE - start_addr:
             print(
-                f"Warning: Not enough space for {len(values)} list items starting at {start_addr}.")
-            values = values[:self.MEMORY_SIZE - start_addr]
+                f"Warning: Not enough space for {len(values)} list items starting at {start_addr}."
+            )
+            values = values[: self.MEMORY_SIZE - start_addr]
 
         head_addr = start_addr
         prev_addr = -1
@@ -309,7 +318,9 @@ class HolographicMemory:
             if current_addr in visited:
                 # Cycle detected or self-pointing end node
                 bw = self.retrieve(current_addr)
-                if bw and bw.get_pointer_nibble() == current_addr:  # Check if it's the self-pointing end
+                if (
+                    bw and bw.get_pointer_nibble() == current_addr
+                ):  # Check if it's the self-pointing end
                     result.append(bw)
                 break  # Avoid infinite loops
 
@@ -328,7 +339,9 @@ class HolographicMemory:
 
         return result
 
-    def create_binary_tree(self, values: Sequence[int], start_addr: int = 0) -> Optional[int]:
+    def create_binary_tree(
+        self, values: Sequence[int], start_addr: int = 0
+    ) -> Optional[int]:
         """
         Creates a simple binary tree structure (complete tree layout).
         Compromise: Uses T for left child addr, VVC (low nibble) for right child addr.
@@ -347,7 +360,8 @@ class HolographicMemory:
         num_nodes = len(values)
         if num_nodes > self.MEMORY_SIZE - start_addr:
             print(
-                f"Warning: Not enough space for {num_nodes} tree nodes starting at {start_addr}.")
+                f"Warning: Not enough space for {num_nodes} tree nodes starting at {start_addr}."
+            )
             num_nodes = self.MEMORY_SIZE - start_addr
             values = values[:num_nodes]
 
@@ -364,7 +378,9 @@ class HolographicMemory:
             # Point left to self if no child
             left_addr = start_addr + left_idx if left_idx < num_nodes else current_addr
             # Point right to self if no child
-            right_addr = start_addr + right_idx if right_idx < num_nodes else current_addr
+            right_addr = (
+                start_addr + right_idx if right_idx < num_nodes else current_addr
+            )
 
             # Store pointers, sacrificing V and C
             bw.high_nibble = left_addr & 0x0F
@@ -382,6 +398,7 @@ class HolographicMemory:
             bw = self._memory.get(addr)
             lines.append(f"  [{addr:02d}]: {bw if bw else 'Empty'}")
         return "\n".join(lines)
+
 
 # --- Dynamic System Class ---
 
@@ -401,24 +418,22 @@ class DynamicByteWordSystem:
         """Defines and registers the 8 standard transformations."""
         # V=0: Identity (No change)
         self.transformations[0] = MorphicTransformation(
-            "Identity", lambda bw: ByteWord(bw.value)  # Return new instance
+            "Identity",
+            lambda bw: ByteWord(bw.value),  # Return new instance
         )
         # V=1: Flip Nibbles (Swap T and VVC)
         self.transformations[1] = MorphicTransformation(
-            "FlipNibbles",
-            lambda bw: ByteWord(((bw.low_nibble << 4) | bw.high_nibble))
+            "FlipNibbles", lambda bw: ByteWord(((bw.low_nibble << 4) | bw.high_nibble))
         )
         # V=2: Increment State (T nibble + 1)
         self.transformations[2] = MorphicTransformation(
             "IncrementState",
-            lambda bw: ByteWord(
-                ((bw.high_nibble + 1) & 0x0F << 4) | bw.low_nibble)
+            lambda bw: ByteWord(((bw.high_nibble + 1) & 0x0F << 4) | bw.low_nibble),
         )
         # V=3: Decrement State (T nibble - 1)
         self.transformations[3] = MorphicTransformation(
             "DecrementState",
-            lambda bw: ByteWord(
-                ((bw.high_nibble - 1) & 0x0F << 4) | bw.low_nibble)
+            lambda bw: ByteWord(((bw.high_nibble - 1) & 0x0F << 4) | bw.low_nibble),
         )
         # V=4: Complement (Invert all bits)
         self.transformations[4] = MorphicTransformation(
@@ -427,13 +442,12 @@ class DynamicByteWordSystem:
         # V=5: Rotate Left (all 8 bits)
         self.transformations[5] = MorphicTransformation(
             "RotateLeft",
-            lambda bw: ByteWord(((bw.value << 1) | (bw.value >> 7)) & 0xFF)
+            lambda bw: ByteWord(((bw.value << 1) | (bw.value >> 7)) & 0xFF),
         )
         # V=6: Rotate Right (all 8 bits)
         self.transformations[6] = MorphicTransformation(
             "RotateRight",
-            lambda bw: ByteWord(
-                ((bw.value >> 1) | ((bw.value & 1) << 7)) & 0xFF)
+            lambda bw: ByteWord(((bw.value >> 1) | ((bw.value & 1) << 7)) & 0xFF),
         )
         # V=7: Toggle Activity (Flip C bit)
         self.transformations[7] = MorphicTransformation(
@@ -446,11 +460,12 @@ class DynamicByteWordSystem:
 
     def create_byte_word(self, state: int, morphism: int, active: bool) -> ByteWord:
         """Helper to create a ByteWord with specific T, V, C."""
-        val = ((state & 0x0F) << 4) | (
-            (morphism & 0x07) << 1) | (1 if active else 0)
+        val = ((state & 0x0F) << 4) | ((morphism & 0x07) << 1) | (1 if active else 0)
         return ByteWord(val)
 
-    def initialize_memory_random(self, num_byte_words: Optional[int] = None, pointer_probability: float = 0.5) -> None:
+    def initialize_memory_random(
+        self, num_byte_words: Optional[int] = None, pointer_probability: float = 0.5
+    ) -> None:
         """
         Initializes memory with random ByteWords.
 
@@ -463,7 +478,8 @@ class DynamicByteWordSystem:
             num_byte_words = self.memory.MEMORY_SIZE
         if not 0 < num_byte_words <= self.memory.MEMORY_SIZE:
             raise ValueError(
-                f"num_byte_words must be between 1 and {self.memory.MEMORY_SIZE}")
+                f"num_byte_words must be between 1 and {self.memory.MEMORY_SIZE}"
+            )
 
         self.memory._memory.clear()  # Start fresh
         valid_addresses = list(range(num_byte_words))
@@ -500,8 +516,7 @@ class DynamicByteWordSystem:
 
         # Apply transformation
         transformation = self.get_transformation(original_bw.morphism_selector)
-        transformed_bw = transformation(
-            original_bw) if transformation else original_bw
+        transformed_bw = transformation(original_bw) if transformation else original_bw
 
         # Store transformed version back into memory
         self.memory.store(current_addr, transformed_bw)
@@ -525,7 +540,9 @@ class DynamicByteWordSystem:
 
         return (next_addr, transformed_bw)
 
-    def run_simulation(self, start_addr: int, max_steps: int) -> Tuple[List[int], List[Dict[int, ByteWord]]]:
+    def run_simulation(
+        self, start_addr: int, max_steps: int
+    ) -> Tuple[List[int], List[Dict[int, ByteWord]]]:
         """
         Runs the simulation for a number of steps, tracking address trajectory
         and full memory snapshots.
@@ -554,7 +571,9 @@ class DynamicByteWordSystem:
 
     # --- Dynamics Analysis (Revised Approach) ---
 
-    def detect_cycle(self, start_addr: int, max_steps: int = 256) -> Optional[Tuple[List[int], int]]:
+    def detect_cycle(
+        self, start_addr: int, max_steps: int = 256
+    ) -> Optional[Tuple[List[int], int]]:
         """
         Detects a cycle in the address trajectory starting from start_addr.
         Simulates the system step by step.
@@ -632,6 +651,7 @@ class DynamicByteWordSystem:
 
         return fixed_points
 
+
 # --- Example Usage ---
 
 
@@ -642,8 +662,7 @@ def main():
     print(system.memory)
 
     start_address = 0
-    print(
-        f"\n--- Running Simulation from Address {start_address} for 15 steps ---")
+    print(f"\n--- Running Simulation from Address {start_address} for 15 steps ---")
     addresses, states = system.run_simulation(start_address, 15)
 
     print("Address Trajectory:", addresses)
@@ -683,8 +702,8 @@ if __name__ == "__main__":
 
 class MorphicRole(Enum):
     COMPUTE = 0  # C - operator/function aspect
-    VALUE = 1    # V - state/value aspect
-    TYPE = 2     # T - type/structural aspect
+    VALUE = 1  # V - state/value aspect
+    TYPE = 2  # T - type/structural aspect
 
 
 @dataclass
@@ -708,7 +727,7 @@ class BitMorphology:
         return (
             bool((self.raw >> 6) & 0x1),
             bool((self.raw >> 5) & 0x1),
-            bool((self.raw >> 4) & 0x1)
+            bool((self.raw >> 4) & 0x1),
         )
 
     @property
@@ -717,7 +736,7 @@ class BitMorphology:
             bool((self.raw >> 3) & 0x1),
             bool((self.raw >> 2) & 0x1),
             bool((self.raw >> 1) & 0x1),
-            bool(self.raw & 0x1)
+            bool(self.raw & 0x1),
         )
 
     def morph(self, other: 'BitMorphology') -> 'BitMorphology':
@@ -743,15 +762,15 @@ class BitMorphology:
     def create_from_components(
         compute: bool,
         values: Tuple[bool, bool, bool],
-        types: Tuple[bool, bool, bool, bool]
+        types: Tuple[bool, bool, bool, bool],
     ) -> 'BitMorphology':
-        raw = (int(compute) << 7)
-        raw |= (int(values[0]) << 6)
-        raw |= (int(values[1]) << 5)
-        raw |= (int(values[2]) << 4)
-        raw |= (int(types[0]) << 3)
-        raw |= (int(types[1]) << 2)
-        raw |= (int(types[2]) << 1)
+        raw = int(compute) << 7
+        raw |= int(values[0]) << 6
+        raw |= int(values[1]) << 5
+        raw |= int(values[2]) << 4
+        raw |= int(types[0]) << 3
+        raw |= int(types[1]) << 2
+        raw |= int(types[2]) << 1
         raw |= int(types[3])
         return BitMorphology(raw)
 
@@ -765,10 +784,10 @@ class BitMorphology:
 class MorphicField:
     def __init__(self, size: Tuple[int, int]):
         self.width, self.height = size
-        self.lattice = [[0 for _ in range(self.width)]
-                        for _ in range(self.height)]
-        self.morphologies = [[BitMorphology(0) for _ in range(
-            self.width)] for _ in range(self.height)]
+        self.lattice = [[0 for _ in range(self.width)] for _ in range(self.height)]
+        self.morphologies = [
+            [BitMorphology(0) for _ in range(self.width)] for _ in range(self.height)
+        ]
 
     def initialize_random(self, seed: Optional[int] = None) -> None:
         rng = random.Random(seed)
@@ -794,21 +813,19 @@ class MorphicField:
                 for x in range(self.width):
                     dx = x - midpoint[0]
                     dy = y - midpoint[1]
-                    dist = math.sqrt(dx*dx + dy*dy)
-                    compute = (int(dist) % 2 == 0)
+                    dist = math.sqrt(dx * dx + dy * dy)
+                    compute = int(dist) % 2 == 0
                     values = (dist % 3 < 1, dist % 5 < 2, dist % 7 < 3)
-                    types = (dist % 2 < 1, dist %
-                             3 < 1, dist % 5 < 2, dist % 7 < 3)
-                    morph = BitMorphology.create_from_components(
-                        compute, values, types)
+                    types = (dist % 2 < 1, dist % 3 < 1, dist % 5 < 2, dist % 7 < 3)
+                    morph = BitMorphology.create_from_components(compute, values, types)
                     self.lattice[y][x] = morph.raw
                     self.morphologies[y][x] = morph
 
     def step(self) -> None:
-        new_lattice = [[0 for _ in range(self.width)]
-                       for _ in range(self.height)]
-        new_morphologies = [[BitMorphology(0) for _ in range(
-            self.width)] for _ in range(self.height)]
+        new_lattice = [[0 for _ in range(self.width)] for _ in range(self.height)]
+        new_morphologies = [
+            [BitMorphology(0) for _ in range(self.width)] for _ in range(self.height)
+        ]
 
         for y in range(self.height):
             for x in range(self.width):
@@ -832,7 +849,9 @@ class MorphicField:
                 neighbors.append(self.morphologies[ny][nx])
         return neighbors
 
-    def _apply_rulial_dynamics(self, center: BitMorphology, neighbors: List[BitMorphology]) -> BitMorphology:
+    def _apply_rulial_dynamics(
+        self, center: BitMorphology, neighbors: List[BitMorphology]
+    ) -> BitMorphology:
         max_resonance = -1
         most_resonant = None
         for neighbor in neighbors:
@@ -880,12 +899,13 @@ class MorphicApp:
         # Control buttons
         control_frame = ttk.Frame(root)
         control_frame.pack(pady=5)
-        ttk.Button(control_frame, text="Step",
-                   command=self.step).pack(side=tk.LEFT)
-        ttk.Button(control_frame, text="Reset Random",
-                   command=self.reset_random).pack(side=tk.LEFT)
-        ttk.Button(control_frame, text="Quine Kernel",
-                   command=self.reset_quine).pack(side=tk.LEFT)
+        ttk.Button(control_frame, text="Step", command=self.step).pack(side=tk.LEFT)
+        ttk.Button(control_frame, text="Reset Random", command=self.reset_random).pack(
+            side=tk.LEFT
+        )
+        ttk.Button(control_frame, text="Quine Kernel", command=self.reset_quine).pack(
+            side=tk.LEFT
+        )
 
         self.image = tk.PhotoImage(width=self.width, height=self.height)
         self.canvas.create_image((0, 0), image=self.image, anchor="nw")
@@ -934,9 +954,14 @@ class ByteWordCanvas(tk.Canvas):
             x = (CELL_SIZE + PADDING) * (i % 4)
             y = (CELL_SIZE + PADDING) * (i // 4)
             rect = self.create_rectangle(
-                x, y, x + CELL_SIZE, y + CELL_SIZE, fill="white")
+                x, y, x + CELL_SIZE, y + CELL_SIZE, fill="white"
+            )
             text = self.create_text(
-                x + CELL_SIZE//2, y + CELL_SIZE//2, text=f"[{i:02d}]", font=("Courier", 12))
+                x + CELL_SIZE // 2,
+                y + CELL_SIZE // 2,
+                text=f"[{i:02d}]",
+                font=("Courier", 12),
+            )
             self.rects[i] = rect
             self.texts[i] = text
 
@@ -951,7 +976,7 @@ class ByteWordCanvas(tk.Canvas):
                 T = bw.high_nibble
                 label = f"[{i:02d}]\nT:{T:04b}\nV:{V:03b} C:{C}"
                 if C == 1:
-                    color = f"#{255:02x}{(V*30) % 256:02x}{(T*15) % 256:02x}"
+                    color = f"#{255:02x}{(V * 30) % 256:02x}{(T * 15) % 256:02x}"
                 else:
                     color = "dimgray"
             self.itemconfig(self.rects[i], fill=color)
@@ -967,14 +992,14 @@ class ByteWordApp(tk.Tk):
         self.mem = HolographicMemory(addressing_mode=AddressingMode.RECURSIVE)
         self.populate_memory()
 
-        self.canvas = ByteWordCanvas(
-            self, memory=self.mem, width=500, height=500)
+        self.canvas = ByteWordCanvas(self, memory=self.mem, width=500, height=500)
         self.canvas.pack()
 
         self.after(UPDATE_INTERVAL, self.tick)
 
     def populate_memory(self):
         import random
+
         for i in range(16):
             val = random.randint(0, 255)
             bw = ByteWord(val)

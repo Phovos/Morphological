@@ -1,88 +1,50 @@
 [project]
-name = "morphological-source-code"
-description = "A namespace and filesystem interface for Obsidian knowledge bases and co-user/co-agent collaboration."
-authors = [{ name = "Phovos", email = "Phovos@outlook.com" }]
-version = "0.69.1"
-readme = "README.md"
-requires-python = ">=3.13"
-dependencies = [
-    "numpy>=2.3.5",
-]
-[build-system]
-requires = ["uv_build>=0.7.17,<0.8.0"]
-build-backend = "uv_build"
+name = "Morphological-Source-Code"
+description = "Morphological Source Code"
+authors = [{ name = "Phovos", email = "phovos@outlook.com" }]
+requires-python = ">=3.14"
+version = "0.4.24"
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
 
 [scripts]
 main = "main:main"
 
-[tool.env]
-path = "{working_dir}/.devcontainer/.env"
-
-[tool.uv.build-backend]
-namespace = true
-source-exclude = ["*.bin"]
-source-include = ["tests/**"]
-
 [project.optional-dependencies]
 dev = [
-    "black",
-    "mypy",
-    "nox",
+    "uv",
     "pre-commit",
-    "jupyterlab",
-    "pytest",
-    "pytest-cov",
-    "pytest-benchmark",
-
 ]
 
-[tool.flake8]
-max-line-length = 88
-extend-ignore = ["E203"]
-
-[tool.black]
-line-length = 88
-target-version = ["py313"]
-exclude = '''
-/(
-    \.git
-  | \.mypy_cache
-  | \.scratch
-  | \.nox
-  | \.venv
-  | build
-  | dist
-)/
-'''
-
-[tool.mypy]
-python_version = "3.13"
-strict = true
-show_error_codes = true
-disallow_untyped_defs = true
-exclude = ["build/", "dist/", ".venv/"]
-ignore_missing_imports = true
+[project.scripts]
+setup = "pip install -e .[dev]"
+lint = "ruff ."
 
 [tool.ruff]
-line-length = 108
-select = ["E", "F", "W", "B"]
-exclude = ["build/", "dist/", ".venv/"]
-
-# Allow autofix for all enabled rules (when `--fix`) is provided.
-fixable = ["A", "B", "C", "D", "F"]
-unfixable = ["F841", "E301", "E302", "E305", "E305", "D201", "D202", "D203", "D204", "D205"]
+line-length = 88
+exclude = ["build/", "dist/", ".venv/", "imports/",]
 
 [tool.ruff.lint]
-ignore = ["F841", "E301", "E302", "E305", "E305", "D201", "D202", "D203", "D204", "D205"]
-
-# Allow unused variables when underscore-prefixed.
-dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
-
-[lint.per-file-ignores]
-# Allow unused imports in __init__.py files.
-"__init__.py" = ["F401"]
-
-[dependency-groups]
-dev = [
-    "uv>=0.7.17",
+select = ["E", "F", "W", "B"]
+extend-ignore = [
+    "E501",  # line too long
+    "W291",  # trailing whitespace
+    "W293",  # blank line contains whitespace
+    "W391",  # blank line at end of file
+    "D206",  # docstring whitespace errors
+    "D300",  # triple double quotes on one line
 ]
+
+[tool.ruff.format]
+quote-style = "preserve"
+skip-magic-trailing-comma = true
+line-ending = "auto"
+
+[tool.uv.workspace]
+members = ["packages/*"]
+exclude = ["packages/seeds"]
+
+[tool.uv]
+cache-keys = [{ file = "**/*.toml" }]
