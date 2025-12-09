@@ -16,7 +16,8 @@ Design goals:
  - Clear lifecycle, refcounting, cleanup semantics
  - Minimal external dependence (stdlib only)
 """
-
+# > © 2024-2025 Phovos https://github.com/Phovos/Morphologic BSD-3 & CC ND
+# > © 2023-2025 Moonlapsed https://github.com/MOONLAPSED/Cognosis
 from __future__ import annotations
 
 import ast
