@@ -1,3 +1,14 @@
+---
+title: "README.md"
+Licenses: CC ND & BSD-3
+copywrite: |
+
+  © 2025 Phovos https://github.com/Phovos/Morphological-Source-Code
+copywrite2: |
+
+  © 2023-2025 Moonlapsed https://github.com/MOONLAPSED/Cognosis
+tag: [Morphological Source Code, Quinic Statistical Dynamics, Public Statements: on MSC & QSD, version: 2.25]
+---
 ## Requirements
 
 ![Win11](/public/Win11%20High%20Contrast%20(Black).png)
