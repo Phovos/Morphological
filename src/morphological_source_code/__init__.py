@@ -1857,7 +1857,7 @@ class Frame(Generic[T, V, C]):
             self._state = QuantumState.COLLAPSED
 
 
-class Field(Frame[T, V, C], ABC):
+class Field(Frame[T, V, C], abc.ABC):
     """
     A Field represents a region of spacetime in our quantum memory model.
     It extends Frame with composition and transformation capabilities.
@@ -1874,7 +1874,7 @@ class Field(Frame[T, V, C], ABC):
         self._state = QuantumState.ENTANGLED
         other._state = QuantumState.ENTANGLED
 
-    @abstractmethod
+    @abc.abstractmethod
     def transform(self, operator: Callable[[V], V]) -> None:
         """Applies a transformation operator to the value space."""
         pass
@@ -2253,10 +2253,10 @@ class MorphologicalBasis(Generic[T, V, C]):
 # ==============================================================================
 
 
-class Morphism(Generic[T_co, T_anti]):
+class Morphism(Generic[T_co, T_anti], abc.ABC):
     """Abstract morphism between type structures"""
 
-    @abstractmethod
+    @abc.abstractmethod
     def apply(self, source: T_anti) -> T_co:
         pass
 
