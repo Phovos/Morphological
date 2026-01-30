@@ -1,5 +1,105 @@
-# > © 2024-2025 Phovos https://github.com/Phovos/Morphologic BSD-3 & CC ND
-# > © 2023-2025 Moonlapsed https://github.com/MOONLAPSED/Cognosis
+#!/usr/bin/env -S uv run
+# -*- coding: utf-8 -*-
+# /* script
+# requires-python = ">=3.14"
+# dependencies = [
+#     "uv==*.*",
+# ]
+# pylsp: disable
+# pyright: ignore-all
+# ruff: noqa: E401,F401,I001,F811,TC003,TC004,E402,E702,UP029,PLR0402,PLC0415,F406,E301,E302,E305
+# fmt: off
+import ast, os, sys, pathlib, logging, threading, datetime, inspect, uuid, base64, json, asyncio, functools, time, random, queue, hashlib, math, cmath, enum, re, types, dataclasses, typing, contextlib, collections, abc, io, string, itertools, operator, copy, weakref, gc, marshal, struct, array, mmap, ssl, socket, concurrent, multiprocessing, subprocess, tempfile, shutil, glob, fnmatch, csv, pickle, sqlite3, urllib, http, ftplib, smtplib, email, mimetypes, hmac, secrets, ipaddress, socketserver, http.server, xml, html, webbrowser, turtle, tkinter, ctypes, ctypes.wintypes, site  # noqa: E401, F401, F811, E702 # fmt: skip
+from dataclasses import dataclass, field; from enum import Enum, auto, IntEnum; from types import SimpleNamespace, ModuleType  # noqa: E702, F401 # fmt: skip
+
+Path = pathlib.Path; Queue = queue.Queue  # noqa: E702 # fmt: skip
+from typing import (
+    Any,
+    Dict,
+    Optional,
+    Set,
+    Type,
+    Union,
+    Callable,
+    List,
+    Tuple,
+    Generic,
+    TypeVar,
+    Protocol,
+    runtime_checkable,
+    cast,
+    get_origin,
+    get_args,
+)
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from socketserver import ThreadingMixIn  # fmt: skip noqa: F401
+
+# ------------------------------
+# CPy3.14 std libs **ONLY**    | > © 2024-2025 Phovos https://github.com/Phovos/Morphologic | CC ND && BSD-3 | SEE LICENSE
+# Platform(s): (5600xRyzen)    | > © 2023-2025 Moonlapsed https://github.com/MOONLAPSED/Cognosis
+# Win11 (production)           | > if we don't have "flask==*.*", or any non-std lib from the '/* script.. depenencies = [..'
+# Ubuntu-22.04 (dev, staging)  | > comment, above, in the local .venv or $PATH; then this idempotent import-fmt-block fails.
+# ------------------------------
+_log = logging.getLogger(__name__)
+handler = logging.StreamHandler(sys.stderr)
+handler.setFormatter(
+    logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
+)
+_log.addHandler(handler)
+_log.setLevel(logging.INFO)
+try:
+    import flask
+    import pylsp
+except ImportError:
+    USE_FLASK = False
+    coreLSP = False
+_SELF = Path(__file__).resolve()
+_COMMENT_RE = re.compile(r'# /\* script\n(.*?)\n# \*/', re.S)
+_TOML_RE = re.compile(r'dependencies\s*=\s*\[(.*?)\]', re.S)
+_PKG_RE = re.compile(r'"([^"]+)"')
+
+
+def _read_deps() -> list[str]:
+    """Return the list of *optional* third-party packages mentioned in the comment."""
+    raw = _SELF.read_text(encoding='utf-8')
+    block = _COMMENT_RE.search(raw)[1]  # type: ignore[index]
+    deps_section = _TOML_RE.search(block)[1]  # type: ignore[index]
+    return _PKG_RE.findall(deps_section)  # fmt: on
+
+
+# (no-affiliation):====================================== ('SmallTalk':©Xerox)=|
+# ========================================================('Squeak':©SqueakJS)=|
+# ====================================================('Pharo':©Pharo Project)=|
+#   ███████╗███╗   ███╗ █████╗ ██╗     ██╗  ████████╗ █████╗ ██╗     ██╗  ██╗  |
+#   ██╔════╝████╗ ████║██╔══██╗██║     ██║  ╚══██╔══╝██╔══██╗██║     ██║ ██╔╝  |
+#   ███████╗██╔████╔██║███████║██║     ██║     ██║   ███████║██║     █████╔╝   |
+#   ╚════██║██║╚██╔╝██║██╔══██║██║     ██║     ██║   ██╔══██║██║     ██╔═██╗   |
+#   ███████║██║ ╚═╝ ██║██║  ██║███████╗███████╗██║   ██║  ██║███████╗██║  ██╗  |
+#   ╚══════╝╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝  |
+#                        MORPHIC-BOUNDARY CROSSED:                             |
+#  Below this line: LIVING OBJECTS, VISUAL WORKSPACE, SELF-MODIFYING GUI;      |
+# ==============('TOU(s) and LICENSE(s) are distributed alongside this 'file')=|
+#  Assuming you have read and understood the TOU(s) and LICENSE(s), included:  |
+#                                                                              |
+#  Your IDE, LSP, debugger, REPL, Server and runtime are all the same thing!   |
+#                                                                              |
+#  The code above can introspect and modify everything below.                  |
+#  The code below can render and manipulate everything above.                  |
+#                                                                              |
+#  This is not a "file", not logic; it is Morphological Source Code©(pend)™;   |
+#  You are engaged in the programming of a morphism, and with respect to       |
+#  groups; your 'sets' are emergent, topological, and quantized CATEGORIES.    |
+#  Categories and groups then, it may be said,  allow for sets; sets are not   |
+#  fundemental, CATEGORIES and groups, are; "null-glue" yields "set-builder"   |
+#  snytax with intensive, unobservable character but deterministic detritus;   |
+#  set-theoretic so-called observables resultant of a first-class morphisms    |
+#  in category-theoretic, inner-product (operator)-based Frobenius Algebra.    |
+#                                                                              |
+#  **DISCLAIMER**                                                              |
+#  All runtimes, 'Quines' (derivatives), and distributions are subject to      |
+#  "Morphological Source Code"©™ (patent, tm pend) 'TOU' &'LICENSE' (CCBY ND)  |
+#                                                                              |
+# ===============================================================(pre-release)=|
 """
 Quinic Statistical Dynamics (QSD) centers around three fundamental pillars:
 
@@ -77,123 +177,158 @@ try:
         from ctypes import windll, wintypes
         from ctypes.wintypes import HANDLE, DWORD, LPWSTR, LPVOID, BOOL
         from pathlib import PureWindowsPath
+
         global localSite
         localSite = pathlib.PureWindowsPath(site.getusersitepackages())
 except:
     sys.exit('Windows platform-only.')
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Security
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 AccessLevel = Enum('AccessLevel', 'READ WRITE EXECUTE ADMIN USER')
+
+
 @dataclass
 class AccessPolicy:
     """Defines access control policies for runtime operations."""
+
     level: AccessLevel
     namespace_patterns: list[str] = field(default_factory=list)
     allowed_operations: list[str] = field(default_factory=list)
+
     def can_access(self, namespace: str, operation: str) -> bool:
-        return any(pattern in namespace for pattern in self.namespace_patterns) and \
-               operation in self.allowed_operations
+        return (
+            any(pattern in namespace for pattern in self.namespace_patterns)
+            and operation in self.allowed_operations
+        )
+
 
 class SecurityContext:
     """Manages security context and audit logging for runtime operations."""
+
     def __init__(self, user_id: str, access_policy: AccessPolicy):
         self.user_id = user_id
         self.access_policy = access_policy
         self._audit_log = []
+
     def log_access(self, namespace: str, operation: str, success: bool):
-        self._audit_log.append({
-            "user_id": self.user_id,
-            "namespace": namespace,
-            "operation": operation,
-            "success": success,
-            "timestamp": datetime.now().timestamp()
-        })
+        self._audit_log.append(
+            {
+                "user_id": self.user_id,
+                "namespace": namespace,
+                "operation": operation,
+                "success": success,
+                "timestamp": datetime.now().timestamp(),
+            }
+        )
+
 
 class SecurityValidator(ast.NodeVisitor):
     """Validates AST nodes against security policies."""
+
     def __init__(self, security_context: SecurityContext):
         self.security_context = security_context
+
     def visit_Name(self, node):
         if not self.security_context.access_policy.can_access(node.id, "read"):
             raise PermissionError(f"Access denied to name: {node.id}")
         self.generic_visit(node)
+
     def visit_Call(self, node):
         if isinstance(node.func, ast.Name):
-            if not self.security_context.access_policy.can_access(node.func.id, "execute"):
+            if not self.security_context.access_policy.can_access(
+                node.func.id, "execute"
+            ):
                 raise PermissionError(f"Access denied to function: {node.func.id}")
         self.generic_visit(node)
 
-#------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 # Runtime State Management
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def register_models(models: Dict[str, BaseModel]):
     for model_name, instance in models.items():
         globals()[model_name] = instance
         logging.info(f"Registered {model_name} in the global namespace")
 
+
 def runtime(root_dir: pathlib.Path):
     file_models = load_files_as_models(root_dir, ['.md', '.txt'])
     register_models(file_models)
 
+
 class MemoryTraceLevel(Enum):
     """Granularity levels for memory tracing."""
+
     BASIC = auto()
-    DETAILED = auto()   # Include stack traces
-    FULL = auto()       # Include object references
+    DETAILED = auto()  # Include stack traces
+    FULL = auto()  # Include object references
+
 
 class _ColorFormatter(logging.Formatter):
     """Colour console output for Windows terminal."""
+
     _COLOURS = {
-        logging.DEBUG: "\033[34m",    # blue
-        logging.INFO: "\033[32m",     # green
+        logging.DEBUG: "\033[34m",  # blue
+        logging.INFO: "\033[32m",  # green
         logging.WARNING: "\033[33m",  # yellow
-        logging.ERROR: "\033[31m",    # red
-        logging.CRITICAL: "\033[41m", # red background
+        logging.ERROR: "\033[31m",  # red
+        logging.CRITICAL: "\033[41m",  # red background
     }
     _RESET = "\033[0m"
+
     def format(self, record: logging.LogRecord) -> str:
-        ts = datetime.datetime.fromtimestamp(record.created).strftime("%Y-%m-%d %H:%M:%S")
+        ts = datetime.datetime.fromtimestamp(record.created).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
         colour = self._COLOURS.get(record.levelno, "")
         level = f"{record.levelname:<8}"
         where = f"({record.filename}:{record.lineno})"
         msg = record.getMessage()
         return f"{colour}{ts} - {level} - {msg} {where}{self._RESET}"
 
+
 class _CorrelationAdapter(logging.LoggerAdapter):
     """Adds a correlation id to every message."""
+
     def process(self, msg: str, kwargs: Any) -> tuple[str, Any]:
         cid = self.extra.get("cid", "SYSTEM")
         return f"[{cid}] {msg}", kwargs
 
+
 class CustomFormatter(logging.Formatter):
     """Custom formatter for colored console output."""
-    
+
     COLORS = {
         'grey': "\x1b[38;20m",
         'yellow': "\x1b[33;20m",
         'red': "\x1b[31;20m",
         'bold_red': "\x1b[31;1m",
         'green': "\x1b[32;20m",
-        'reset': "\x1b[0m"
+        'reset': "\x1b[0m",
     }
-    FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s (%(filename)s:%(lineno)d)"
+    FORMAT = (
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s (%(filename)s:%(lineno)d)"
+    )
     FORMATS = {
         logging.DEBUG: COLORS['grey'] + FORMAT + COLORS['reset'],
         logging.INFO: COLORS['green'] + FORMAT + COLORS['reset'],
         logging.WARNING: COLORS['yellow'] + FORMAT + COLORS['reset'],
         logging.ERROR: COLORS['red'] + FORMAT + COLORS['reset'],
-        logging.CRITICAL: COLORS['bold_red'] + FORMAT + COLORS['reset']
+        logging.CRITICAL: COLORS['bold_red'] + FORMAT + COLORS['reset'],
     }
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.log_queue = Queue()
         self.log_thread = threading.Thread(target=self._log_thread_func, daemon=True)
         self.log_thread.start()
+
     def format(self, record):
         log_fmt = self.FORMATS.get(record.levelno, self.FORMAT)
         formatter = logging.Formatter(log_fmt)
         return formatter.format(record)
+
     def _log_thread_func(self):
         while True:
             try:
@@ -203,22 +338,30 @@ class CustomFormatter(logging.Formatter):
                 super().handle(record)
             except Exception:
                 import traceback
+
                 print("Error in log thread:", file=sys.stderr)
                 traceback.print_exc()
+
     def emit(self, record):
         self.log_queue.put(record)
+
     def close(self):
         self.log_queue.put(None)
         self.log_thread.join()
 
+
 class AdminLogger(logging.LoggerAdapter):
     """Logger adapter for administrative logging."""
+
     def __init__(self, logger, extra=None):
         super().__init__(logger, extra or {})
+
     def process(self, msg, kwargs):
         return f"{self.extra.get('name', 'Admin')}: {msg}", kwargs
 
+
 logger = AdminLogger(logging.getLogger(__name__))
+
 
 def setup_logger(
     name: str = __name__,
@@ -253,8 +396,10 @@ def setup_logger(
         logger.addHandler(fh)
     return logger
 
+
 class RuntimeNamespace:
     """Manages hierarchical runtime namespaces with security controls."""
+
     def __init__(self, name: str = "root", parent: Optional['RuntimeNamespace'] = None):
         self._name = name
         self._parent = parent
@@ -262,15 +407,18 @@ class RuntimeNamespace:
         self._content = SimpleNamespace()
         self._security_context: Optional[SecurityContext] = None
         self.available_modules: Dict[str, Any] = {}
+
     @property
     def full_path(self) -> str:
         if self._parent:
             return f"{self._parent.full_path}.{self._name}"
         return self._name
+
     def add_child(self, name: str) -> 'RuntimeNamespace':
         child = RuntimeNamespace(name, self)
         self._children[name] = child
         return child
+
     def get_child(self, path: str) -> Optional['RuntimeNamespace']:
         parts = path.split(".", 1)
         if len(parts) == 1:
@@ -278,39 +426,57 @@ class RuntimeNamespace:
         child = self._children.get(parts[0])
         return child.get_child(parts[1]) if child and len(parts) > 1 else None
 
+
 def get_logger(name: str = __name__, cid: str = "SYSTEM") -> _CorrelationAdapter:
     """Return a correlation-id-aware logger."""
     return _CorrelationAdapter(logging.getLogger(name), {"cid": cid})
+
 
 def log(level=logging.INFO):
     """
     Decorator that logs function calls, works with both sync and async functions.
     """
+
     def decorator(func):
         if asyncio.iscoroutinefunction(func):
+
             @functools.wraps(func)
             async def async_wrapper(*args, **kwargs):
-                logger.log(level, f"Executing {func.__name__} with args: {args}, kwargs: {kwargs}")
+                logger.log(
+                    level,
+                    f"Executing {func.__name__} with args: {args}, kwargs: {kwargs}",
+                )
                 try:
                     result = await func(*args, **kwargs)
-                    logger.log(level, f"Completed {func.__name__} with result: {result}")
+                    logger.log(
+                        level, f"Completed {func.__name__} with result: {result}"
+                    )
                     return result
                 except Exception as e:
                     logger.exception(f"Error in {func.__name__}: {e}")
                     raise
+
             return async_wrapper
         else:
+
             @functools.wraps(func)
             def sync_wrapper(*args, **kwargs):
-                logger.log(level, f"Executing {func.__name__} with args: {args}, kwargs: {kwargs}")
+                logger.log(
+                    level,
+                    f"Executing {func.__name__} with args: {args}, kwargs: {kwargs}",
+                )
                 try:
                     result = func(*args, **kwargs)
-                    logger.log(level, f"Completed {func.__name__} with result: {result}")
+                    logger.log(
+                        level, f"Completed {func.__name__} with result: {result}"
+                    )
                     return result
                 except Exception as e:
                     logger.exception(f"Error in {func.__name__}: {e}")
                     raise
+
             return sync_wrapper
+
     return decorator
 
 
@@ -320,6 +486,7 @@ def measure_time(func):
     Uses time.perf_counter() for high-resolution timing.
     """
     if asyncio.iscoroutinefunction(func):
+
         @functools.wraps(func)
         async def async_wrapper(*args, **kwargs):
             start = time.perf_counter()
@@ -329,8 +496,10 @@ def measure_time(func):
                 end = time.perf_counter()
                 logger.info(f"{func.__name__} executed in {end - start:.4f} seconds")
             return result
+
         return async_wrapper
     else:
+
         @functools.wraps(func)
         def sync_wrapper(*args, **kwargs):
             start = time.perf_counter()
@@ -340,22 +509,29 @@ def measure_time(func):
                 end = time.perf_counter()
                 logger.info(f"{func.__name__} executed in {end - start:.4f} seconds")
             return result
+
         return sync_wrapper
+
 
 # MSC Framework Constants and Definitions
 MSC_REGISTRY: Dict[str, Set[str]] = {'classes': set(), 'functions': set()}
 
+
 class MorphodynamicCollapse(Exception):
     """Raised when a morph object destabilizes under thermal pressure."""
+
     pass
+
 
 @dataclass
 class MorphSpec:
     """Blueprint for morphological classes."""
+
     entropy: float
     trigger_threshold: float
     memory: dict
     signature: str
+
 
 def hash_state(value: Any) -> int:
     """Hash a state value in a deterministic way"""
@@ -366,8 +542,10 @@ def hash_state(value: Any) -> int:
     else:
         return hash(str(value)) % 2**32
 
+
 def morphology(source_model: Type) -> Callable[[Type], Type]:
     """Decorator: register & validate a class against a MorphSpec."""
+
     def decorator(target: Type) -> Type:
         target.__msc_source__ = source_model
         # Ensure target has all annotated fields from source_model
@@ -376,7 +554,9 @@ def morphology(source_model: Type) -> Callable[[Type], Type]:
                 raise TypeError(f"{target.__name__} missing field '{field_name}'")
         MSC_REGISTRY['classes'].add(target.__name__)
         return target
+
     return decorator
+
 
 # Functional Programming Patterns - Transducers
 def mapper(mapping_description: Mapping[str, Any], input_data: Dict[str, Any]):
@@ -386,13 +566,15 @@ def mapper(mapping_description: Mapping[str, Any], input_data: Dict[str, Any]):
         elif isinstance(xform, Mapping):
             return {k: transform(v, value) for k, v in xform.items()}
         else:
-            raise ValueError(f"Invalid transformation type: {type(xform)}. Expected callable or Mapping.")
-    
+            raise ValueError(
+                f"Invalid transformation type: {type(xform)}. Expected callable or Mapping."
+            )
+
     def get_value(key):
         if isinstance(key, str) and key.startswith(":"):
             return input_data.get(key[1:])
         return input_data.get(key)
-    
+
     def process_mapping(mapping_description):
         result = {}
         for key, xform in mapping_description.items():
@@ -420,26 +602,36 @@ def mapper(mapping_description: Mapping[str, Any], input_data: Dict[str, Any]):
             else:
                 result[key] = xform
         return result
+
     return process_mapping(mapping_description)
+
 
 class Missing:
     """Marker class to indicate a missing value."""
+
     pass
+
 
 class Reduced:
     """Sentinel class to signal early termination during reduction."""
+
     def __init__(self, val: Any):
         self.val = val
+
 
 def ensure_reduced(x: Any) -> Union[Any, Reduced]:
     """Ensure the value is wrapped in a Reduced sentinel."""
     return x if isinstance(x, Reduced) else Reduced(x)
 
+
 def unreduced(x: Any) -> Any:
     """Unwrap a Reduced value or return the value itself."""
     return x.val if isinstance(x, Reduced) else x
 
-def reduce(function: Callable[[Any, T], Any], iterable: Iterable[T], initializer: Any = Missing) -> Any:
+
+def reduce(
+    function: Callable[[Any, T], Any], iterable: Iterable[T], initializer: Any = Missing
+) -> Any:
     """A custom reduce implementation that supports early termination with Reduced."""
     if initializer is Missing:
         if callable(function):
@@ -448,16 +640,18 @@ def reduce(function: Callable[[Any, T], Any], iterable: Iterable[T], initializer
             raise TypeError("No initializer provided and function is not callable.")
     else:
         accum_value = initializer
-    
+
     for x in iterable:
         accum_value = function(accum_value, x)
         if isinstance(accum_value, Reduced):
             return accum_value.val
     return accum_value
 
-class Transducer(ABC):
+
+class Transducer(abc.ABC):
     """Base class for defining transducers."""
-    @abstractmethod
+
+    @abc.abstractmethod
     def step(self, step_fn: Callable[[Any, T], Any]) -> Callable[[Any, T], Any]:
         pass
 
@@ -465,28 +659,36 @@ class Transducer(ABC):
         """The transducer's __call__ method allows it to be used as a decorator."""
         return self.step(step)
 
+
 class Map(Transducer):
     """Transducer for mapping elements with a function."""
+
     def __init__(self, f: Callable[[T], V]):
         self.f = f
 
     def step(self, step_fn: Callable[[Any, T], Any]) -> Callable[[Any, T], Any]:
         def new_step(r: Any, x: T):
             return step_fn(r, self.f(x))
+
         return new_step
+
 
 class Filter(Transducer):
     """Transducer for filtering elements based on a predicate."""
+
     def __init__(self, pred: Callable[[T], bool]):
         self.pred = pred
 
     def step(self, step_fn: Callable[[Any, T], Any]) -> Callable[[Any, T], Any]:
         def new_step(r: Any, x: T):
             return step_fn(r, x) if self.pred(x) else r
+
         return new_step
+
 
 class Cat(Transducer):
     """Transducer for flattening nested collections."""
+
     def step(self, step_fn: Callable[[Any, T], Any]) -> Callable[[Any, T], Any]:
         def new_step(r: Any, x: Any):
             if not hasattr(x, '__iter__'):
@@ -497,32 +699,42 @@ class Cat(Transducer):
                 if isinstance(result, Reduced):
                     return result
             return result
+
         return new_step
+
 
 def compose(*fns: Callable[[Any], Any]) -> Callable[[Any], Any]:
     """Compose functions such that the rightmost function is applied first."""
     return functools.reduce(lambda f, g: lambda x: f(g(x)), fns)
 
-def transduce(xform: Transducer, f: Callable[[Any, T], Any], start: Any, coll: Iterable[T]) -> Any:
+
+def transduce(
+    xform: Transducer, f: Callable[[Any, T], Any], start: Any, coll: Iterable[T]
+) -> Any:
     """Apply a transducer to a collection with an initial value."""
     if not isinstance(coll, Iterable):
         raise TypeError("Expected an iterable collection.")
     reducer = xform(f)
     return reduce(reducer, coll, start)
 
+
 def mapcat(f: Callable[[T], Iterable[V]]) -> Transducer:
     """Map then flatten results into one collection."""
     return compose(Map(f), Cat())
 
+
 def into(target: Union[list, set], xducer: Transducer, coll: Iterable[T]) -> Any:
     """Apply transducer and collect results into a target container."""
+
     def append(r: Any, x: Any):
         if hasattr(r, 'append'):
             r.append(x)
         elif hasattr(r, 'add'):
             r.add(x)
         return r
+
     return transduce(xducer, append, target, coll)
+
 
 @dataclass
 class MorphicComplex:
@@ -534,25 +746,34 @@ class MorphicComplex:
 
     def __add__(self, other: 'MorphicComplex') -> 'MorphicComplex':
         if not isinstance(other, MorphicComplex):
-            raise TypeError(f"Unsupported operand type(s) for +: 'MorphicComplex' and '{type(other)}'")
+            raise TypeError(
+                f"Unsupported operand type(s) for +: 'MorphicComplex' and '{type(other)}'"
+            )
         return MorphicComplex(self.real + other.real, self.imag + other.imag)
 
     def __mul__(self, other: 'MorphicComplex') -> 'MorphicComplex':
         if not isinstance(other, MorphicComplex):
-            raise TypeError(f"Unsupported operand type(s) for *: 'MorphicComplex' and '{type(other)}'")
+            raise TypeError(
+                f"Unsupported operand type(s) for *: 'MorphicComplex' and '{type(other)}'"
+            )
         return MorphicComplex(
             self.real * other.real - self.imag * other.imag,
-            self.real * other.imag + self.imag * other.real
+            self.real * other.imag + self.imag * other.real,
         )
 
     def __eq__(self, other: 'MorphicComplex') -> bool:
-        return isinstance(other, MorphicComplex) and self.real == other.real and self.imag == other.imag
+        return (
+            isinstance(other, MorphicComplex)
+            and self.real == other.real
+            and self.imag == other.imag
+        )
 
     def __repr__(self) -> str:
         if self.imag == 0:
             return f"{self.real}"
         sign = "+" if self.imag >= 0 else ""
         return f"{self.real}{sign}{self.imag}j"
+
 
 def format_complex_matrix(matrix: List[List[complex]], precision: int = 3) -> str:
     """Helper function to format complex matrices for printing."""
@@ -567,9 +788,12 @@ def format_complex_matrix(matrix: List[List[complex]], precision: int = 3) -> st
             if abs(imag) < 1e-10:
                 formatted_row.append(f"{real:6.3f}")
             else:
-                formatted_row.append(f"{real:6.3f}{'+' if imag >= 0 else ''}{imag:6.3f}j")
+                formatted_row.append(
+                    f"{real:6.3f}{'+' if imag >= 0 else ''}{imag:6.3f}j"
+                )
         result.append("[" + ", ".join(formatted_row) + "]")
     return "[\n " + "\n ".join(result) + "\n]"
+
 
 def _matches_type(value: Any, tp: Any) -> bool:
     """True if `value` conforms to the (possibly generic) type `tp`."""
@@ -586,9 +810,12 @@ def _matches_type(value: Any, tp: Any) -> bool:
             return all(_matches_type(v, args[0]) for v in value)
         if origin is dict and len(args) >= 2:
             kt, vt = args[0], args[1]
-            return all(_matches_type(k, kt) and _matches_type(v, vt) for k, v in value.items())
+            return all(
+                _matches_type(k, kt) and _matches_type(v, vt) for k, v in value.items()
+            )
         return True
     return isinstance(value, tp)
+
 
 def _coerce(raw: Any, tp: Any) -> Any:
     """Turn raw JSON into the correct nested structure."""
@@ -646,12 +873,17 @@ def _coerce(raw: Any, tp: Any) -> Any:
         if isinstance(raw, tp):
             return raw
         if tp is bool and isinstance(raw, (int, str)):
-            return bool(raw) if isinstance(raw, int) else raw.lower() in ('true', '1', 'yes', 'on')
+            return (
+                bool(raw)
+                if isinstance(raw, int)
+                else raw.lower() in ('true', '1', 'yes', 'on')
+            )
         if tp in (int, float) and isinstance(raw, (int, float, str)):
             return tp(raw)
         if tp is str:
             return str(raw)
     return raw  # No conversion needed or possible
+
 
 def _uncoerce(value: Any) -> Any:
     """Inverse of _coerce for serialization."""
@@ -673,26 +905,33 @@ def _uncoerce(value: Any) -> Any:
         return str(value)
     return value
 
+
 class SerializationFormat(Enum):
     """Supported serialization formats for IPC."""
+
     JSON = "json"
-    PICKLE = "pickle" 
+    PICKLE = "pickle"
     REPR = "repr"
     PYTHONC = "pythonc"  # C-Python, Python(i)C; don't name mangle
 
+
 class MessageType(Enum):
     """Standard message types for RPC/networking."""
+
     REQUEST = "request"
     RESPONSE = "response"
     ERROR = "error"
     EVENT = "event"
     HEARTBEAT = "heartbeat"
 
-class GlobalWindingMode(Enum):
+
+class WindingMode(Enum):
     BINARY = "binary"
     TERNARY = "ternary"
 
-GLOBAL_WINDING_MODE = GlobalWindingMode.TERNARY
+
+GLOBAL_WINDING_MODE = WindingMode.TERNARY
+
 
 def elevate(data: Any, cls: Type) -> object:
     """Raise a dict or object to a registered morphological class."""
@@ -702,11 +941,13 @@ def elevate(data: Any, cls: Type) -> object:
     kwargs = {k: getattr(data, k, data.get(k)) for k in source.__annotations__}
     return cls(**kwargs)
 
+
 @dataclass(frozen=True)
 class WindingPair:
     w1: int
     w2: int
     mode: WindingMode = WindingMode.TERNARY
+
     def __post_init__(self):
         if self.mode == WindingMode.BINARY:
             if self.w1 not in (0, 1) or self.w2 not in (0, 1):
@@ -714,6 +955,7 @@ class WindingPair:
         else:
             if self.w1 not in (-1, 0, 1) or self.w2 not in (-1, 0, 1):
                 raise ValueError("Ternary winding must be -1,0,1")
+
     def tx(self, a: int, b: int) -> int:
         if a == b:
             return 0
@@ -722,6 +964,7 @@ class WindingPair:
         if b == 0:
             return a
         return 0
+
     def xor(self, other: "WindingPair") -> "WindingPair":
         if self.mode != other.mode:
             raise ValueError("Mode mismatch")
@@ -730,6 +973,7 @@ class WindingPair:
         return WindingPair(
             self.tx(self.w1, other.w1), self.tx(self.w2, other.w2), mode=self.mode
         )
+
     def apply_val(self, mask: "WindingPair") -> "WindingPair":
         if self.mode != mask.mode:
             raise ValueError("Mode mismatch")
@@ -740,18 +984,22 @@ class WindingPair:
             self.w2 if mask.w2 == -1 else self.tx(self.w2, mask.w2),
             mode=self.mode,
         )
+
     def to_state_index(self) -> int:
         if self.mode == WindingMode.BINARY:
             return (self.w1 << 1) | self.w2
         idx_map = {-1: 0, 0: 1, 1: 2}
         return (idx_map[self.w1] * 3) + idx_map[self.w2]
+
     def __repr__(self):
         tag = "B" if self.mode == WindingMode.BINARY else "T"
         return f"WindingPair({self.w1},{self.w2})[{tag}]"
 
+
 @dataclass(frozen=True)
 class Datagram:
     """Universal message format for multi-layer IPC communication."""
+
     msg_id: str
     msg_type: MessageType
     timestamp: float
@@ -759,14 +1007,22 @@ class Datagram:
     recipient: Optional[str]
     payload: Dict[str, Any]
     checksum: Optional[str] = None
+
     def __post_init__(self):
         # Calculate checksum if not provided
         if self.checksum is None:
-            payload_str = json.dumps(self.payload, sort_keys=True, separators=(',', ':'))
-            checksum = hashlib.md5(f"{self.msg_id}{self.msg_type.value}{payload_str}".encode()).hexdigest()
+            payload_str = json.dumps(
+                self.payload, sort_keys=True, separators=(',', ':')
+            )
+            checksum = hashlib.md5(
+                f"{self.msg_id}{self.msg_type.value}{payload_str}".encode()
+            ).hexdigest()
             object.__setattr__(self, 'checksum', checksum)
+
     @classmethod
-    def create_request(cls, sender: str, recipient: str, method: str, params: Dict[str, Any]) -> 'Datagram':
+    def create_request(
+        cls, sender: str, recipient: str, method: str, params: Dict[str, Any]
+    ) -> 'Datagram':
         """Create an RPC request datagram."""
         return cls(
             msg_id=str(uuid.uuid4()),
@@ -774,10 +1030,13 @@ class Datagram:
             timestamp=datetime.now().timestamp(),
             sender=sender,
             recipient=recipient,
-            payload={"method": method, "params": params}
+            payload={"method": method, "params": params},
         )
+
     @classmethod
-    def create_response(cls, request_msg: 'Datagram', sender: str, result: Any) -> 'Datagram':
+    def create_response(
+        cls, request_msg: 'Datagram', sender: str, result: Any
+    ) -> 'Datagram':
         """Create an RPC response datagram."""
         return cls(
             msg_id=request_msg.msg_id,  # Same ID as request
@@ -785,8 +1044,9 @@ class Datagram:
             timestamp=datetime.now().timestamp(),
             sender=sender,
             recipient=request_msg.sender,
-            payload={"result": _uncoerce(result)}
+            payload={"result": _uncoerce(result)},
         )
+
     def to_bytes(self, format: SerializationFormat = SerializationFormat.JSON) -> bytes:
         """Serialize datagram to bytes for network transmission."""
         data = _uncoerce(self)
@@ -798,8 +1058,11 @@ class Datagram:
             return repr(data).encode('utf-8')
         else:
             raise ValueError(f"Unsupported format: {format}")
+
     @classmethod
-    def from_bytes(cls, data: bytes, format: SerializationFormat = SerializationFormat.JSON) -> 'Datagram':
+    def from_bytes(
+        cls, data: bytes, format: SerializationFormat = SerializationFormat.JSON
+    ) -> 'Datagram':
         """Deserialize datagram from bytes."""
         if format == SerializationFormat.JSON:
             parsed = json.loads(data.decode('utf-8'))
@@ -813,27 +1076,36 @@ class Datagram:
         parsed['msg_type'] = MessageType(parsed['msg_type'])
         return cls(**parsed)
 
-#  十十十十十 DOMAIN LAYER: BaseModel + Validation Framework 十十十十十 
+
+#  十十十十十 DOMAIN LAYER: BaseModel + Validation Framework 十十十十十
 Validator = Callable[[Any], None]
 ValidatorSet = Union[Validator, Tuple[Validator, ...]]
+
+
 # === Decorator for method-based validation ===
 def validate(validator: Validator):
     def decorator(fn: Callable[[Any, Any], None]):
         def wrapper(self, value):
             validator(value)
             return fn(self, value)
+
         return wrapper
+
     return decorator
+
 
 @dataclass(frozen=True)
 class BaseModel:
     """
     Provides Pydantic-style semantics with stdlib-only implementation.
     """
+
     __slots__ = ('__weakref__',)
+
     def _validate_model(self):
         """Override for model-level validation logic."""
         pass
+
     def __post_init__(self):
         """Validate all fields after initialization."""
         annotations = self.__annotations__
@@ -849,7 +1121,11 @@ class BaseModel:
             if field_obj:
                 validators = field_obj.metadata.get("validate")
                 if validators:
-                    for validator in (validators if isinstance(validators, (list, tuple)) else (validators,)):
+                    for validator in (
+                        validators
+                        if isinstance(validators, (list, tuple))
+                        else (validators,)
+                    ):
                         validator(value)
             # === Decorator-based validation ===
             validator_method = getattr(self.__class__, f'validate_{field_name}', None)
@@ -860,15 +1136,18 @@ class BaseModel:
         if hasattr(self, '_validate_model'):
             self._validate_model()
         self._validate_model()
+
     # === Shared Validators ===
     @staticmethod
     def must_be_str(x: Any) -> None:
         if not isinstance(x, str):
             raise ValueError(f"Expected a string, got {type(x).__name__}")
+
     @staticmethod
     def non_negative(x: Any) -> None:
         if not isinstance(x, int) or x < 0:
             raise ValueError(f"Expected a non-negative int, got {x!r}")
+
     # === Validation Helpers ===
     def is_valid(self) -> bool:
         """Check if model passes all validations without raising."""
@@ -878,6 +1157,7 @@ class BaseModel:
             return True
         except (TypeError, ValueError):
             return False
+
     def validate(self) -> List[str]:
         """Return list of validation errors (empty if valid)."""
         errors = []
@@ -886,7 +1166,9 @@ class BaseModel:
             value = getattr(self, field_name)
             # Type validation
             if not _matches_type(value, expected_type):
-                errors.append(f"{field_name}: expected {expected_type}, got {type(value).__name__}")
+                errors.append(
+                    f"{field_name}: expected {expected_type}, got {type(value).__name__}"
+                )
             # Custom validation
             try:
                 validator_method = getattr(self, f'validate_{field_name}', None)
@@ -898,7 +1180,7 @@ class BaseModel:
                         validator_method(value)
             except (TypeError, ValueError) as e:
                 errors.append(f"{field_name}: {str(e)}")
-        
+
         # Model-level validation
         try:
             if hasattr(self, '_validate_model'):
@@ -906,13 +1188,16 @@ class BaseModel:
         except (TypeError, ValueError) as e:
             errors.append(f"model: {str(e)}")
         return errors
+
     def _validate_type(self, value: Any, expected_type: Any) -> bool:
         if expected_type is Any:
             return True
         # Handle Optional[T] (Union[T, None])
         origin = get_origin(expected_type)
         if origin is Union:
-            return any(self._validate_type(value, arg) for arg in get_args(expected_type))
+            return any(
+                self._validate_type(value, arg) for arg in get_args(expected_type)
+            )
         # Handle List[T], Dict[K, V], etc.
         if origin and not isinstance(value, origin):
             return False
@@ -921,10 +1206,13 @@ class BaseModel:
             return all(self._validate_type(v, elem_type) for v in value)
         if origin is dict:
             key_type, val_type = get_args(expected_type)
-            return all(self._validate_type(k, key_type) for k in value) and all(self._validate_type(v, val_type) for v in value.values())
+            return all(self._validate_type(k, key_type) for k in value) and all(
+                self._validate_type(v, val_type) for v in value.values()
+            )
         if hasattr(expected_type, '__origin__'):
             return isinstance(value, expected_type.__origin__)
         return isinstance(value, expected_type)
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'BaseModel':
         if not isinstance(data, dict):
@@ -935,15 +1223,27 @@ class BaseModel:
         for field_name, field_type in annotations.items():
             if field_name in filtered_data:
                 value = filtered_data[field_name]
-                if (inspect.isclass(field_type) and issubclass(field_type, BaseModel) and isinstance(value, dict)):
+                if (
+                    inspect.isclass(field_type)
+                    and issubclass(field_type, BaseModel)
+                    and isinstance(value, dict)
+                ):
                     filtered_data[field_name] = field_type.from_dict(value)
-                elif get_origin(field_type) is list and get_args(field_type) and issubclass(get_args(field_type)[0], BaseModel):
+                elif (
+                    get_origin(field_type) is list
+                    and get_args(field_type)
+                    and issubclass(get_args(field_type)[0], BaseModel)
+                ):
                     model_class = get_args(field_type)[0]
-                    filtered_data[field_name] = [model_class.from_dict(item) if isinstance(item, dict) else item for item in value]
+                    filtered_data[field_name] = [
+                        model_class.from_dict(item) if isinstance(item, dict) else item
+                        for item in value
+                    ]
         try:
             return cls(**filtered_data)
         except TypeError as e:
             raise ValueError(f"Failed to create {cls.__name__}: {e}")
+
     def to_dict(self, exclude_none: bool = False) -> Dict[str, Any]:
         result = {}
         for f in fields(self):
@@ -955,37 +1255,54 @@ class BaseModel:
             elif isinstance(value, list) and value and isinstance(value[0], BaseModel):
                 result[f.name] = [v.to_dict(exclude_none=exclude_none) for v in value]
             elif isinstance(value, dict):
-                result[f.name] = {k: v.to_dict(exclude_none=exclude_none) if isinstance(v, BaseModel) else v for k, v in value.items()}
+                result[f.name] = {
+                    k: v.to_dict(exclude_none=exclude_none)
+                    if isinstance(v, BaseModel)
+                    else v
+                    for k, v in value.items()
+                }
             else:
                 result[f.name] = value
         return result
+
     def clone(self, **overrides) -> 'BaseModel':
         data = self.to_dict()
         data.update(overrides)
         return self.__class__.from_dict(data)
+
     # === Hash and Equality (for caching/deduplication) ===
     def __hash__(self) -> int:
         """Hash based on field values (works because frozen=True)."""
         values = tuple(getattr(self, f.name) for f in fields(self))
         return hash((self.__class__.__name__, values))
+
     def __repr__(self):
         return f"{self.__class__.__name__}({', '.join(f'{f.name}={getattr(self, f.name)!r}' for f in fields(self))})"
+
     def __str__(self):
         return self.__repr__()
+
     # === Immutable Operations ===
     def replace(self, **changes) -> T:
         """Immutable clone with changes (dataclass-style name)."""
         data = self.to_dict()
         data.update(changes)
         return self.__class__.from_dict(data)
+
     # === Network/IPC Serialization ===
     def to_json(self, exclude_none: bool = False, indent: Optional[int] = None) -> str:
         """Serialize to JSON string."""
-        return json.dumps(self.to_dict(exclude_none=exclude_none), indent=indent, separators=(',', ':') if indent is None else None)
+        return json.dumps(
+            self.to_dict(exclude_none=exclude_none),
+            indent=indent,
+            separators=(',', ':') if indent is None else None,
+        )
+
     @classmethod
     def from_json(cls: Type[T], json_str: str) -> T:
         """Deserialize from JSON string."""
         return cls.from_dict(json.loads(json_str))
+
     def to_bytes(self, format: SerializationFormat = SerializationFormat.JSON) -> bytes:
         """Serialize to bytes for network transmission."""
         if format == SerializationFormat.JSON:
@@ -996,8 +1313,13 @@ class BaseModel:
             return repr(self.to_dict()).encode('utf-8')
         else:
             raise ValueError(f"Unsupported format: {format}")
+
     @classmethod
-    def from_bytes(cls: Type[T], data: bytes, format: SerializationFormat = SerializationFormat.JSON) -> T:
+    def from_bytes(
+        cls: Type[T],
+        data: bytes,
+        format: SerializationFormat = SerializationFormat.JSON,
+    ) -> T:
         """Deserialize from bytes."""
         if format == SerializationFormat.JSON:
             return cls.from_json(data.decode('utf-8'))
@@ -1007,9 +1329,14 @@ class BaseModel:
             return cls.from_dict(eval(data.decode('utf-8')))  # Note: eval is dangerous
         else:
             raise ValueError(f"Unsupported format: {format}")
+
     # === Datagram Integration ===
-    def to_datagram(self, sender: str, recipient: Optional[str] = None, 
-                   msg_type: MessageType = MessageType.EVENT) -> Datagram:
+    def to_datagram(
+        self,
+        sender: str,
+        recipient: Optional[str] = None,
+        msg_type: MessageType = MessageType.EVENT,
+    ) -> Datagram:
         """Convert model to datagram for IPC."""
         return Datagram(
             msg_id=str(uuid.uuid4()),
@@ -1017,49 +1344,61 @@ class BaseModel:
             timestamp=datetime.now().timestamp(),
             sender=sender,
             recipient=recipient,
-            payload={"model": self.__class__.__name__, "data": self.to_dict()}
+            payload={"model": self.__class__.__name__, "data": self.to_dict()},
         )
+
     @classmethod
     def from_datagram(cls: Type[T], datagram: Datagram) -> T:
         """Extract model from datagram payload."""
         if "data" not in datagram.payload:
             raise ValueError("Datagram payload missing 'data' field")
         return cls.from_dict(datagram.payload["data"])
+
     # === RPC Helpers ===
     def as_rpc_params(self) -> Dict[str, Any]:
         """Convert model to RPC parameter dictionary."""
         return self.to_dict(exclude_none=True)
+
     @classmethod
     def from_rpc_params(cls: Type[T], params: Dict[str, Any]) -> T:
         """Create model from RPC parameters."""
         return cls.from_dict(params)
 
+
 @dataclass(frozen=True)
 class FileModel(BaseModel):
     """Represents a file with validation."""
+
     file_path: pathlib.Path
     file_name: str = field(init=False, metadata={"validate": BaseModel.must_be_str})
     content_type: Optional[str] = None
-    size_bytes: Optional[int] = field(default=None, metadata={"validate": BaseModel.non_negative})
+    size_bytes: Optional[int] = field(
+        default=None, metadata={"validate": BaseModel.non_negative}
+    )
     ALLOWED_MIME_TYPES = {
         ".txt": "text/plain",
         ".md": "text/markdown",
         ".py": "text/x-python",
     }
+
     def __post_init__(self):
         # Set derived field
         object.__setattr__(self, "file_name", self.file_path.name)
         super().__post_init__()
+
     @validate(lambda path: path.exists() and path.is_file())
     def validate_file_path(self, path: pathlib.Path) -> None:
         """Ensure file exists and is readable."""
         pass
+
     @validate(BaseModel.must_be_str)
     def validate_file_name(self, value: str) -> None:
         pass
+
     @validate(BaseModel.non_negative)
     def validate_file_size(self, value: int) -> None:
         pass
+
     def _validate_model(self) -> None:
         ext = self.file_path.suffix.lower()
         if ext not in self.ALLOWED_MIME_TYPES:
@@ -1067,18 +1406,24 @@ class FileModel(BaseModel):
         expected_mime = self.ALLOWED_MIME_TYPES[ext]
         actual_mime, _ = mimetypes.guess_type(self.file_path.name)
         if actual_mime != expected_mime:
-            raise ValueError(f"File MIME type mismatch: expected {expected_mime}, got {actual_mime}")
+            raise ValueError(
+                f"File MIME type mismatch: expected {expected_mime}, got {actual_mime}"
+            )
         if self.content_type and self.content_type != actual_mime:
-            raise ValueError(f"Declared content_type '{self.content_type}' does not match detected '{actual_mime}'")
+            raise ValueError(
+                f"Declared content_type '{self.content_type}' does not match detected '{actual_mime}'"
+            )
         # Auto-set content_type if missing
         if self.content_type is None:
             object.__setattr__(self, "content_type", actual_mime)
+
     def read_content(self, encoding: str = "utf-8") -> str:
         """Read file content safely."""
         try:
             return self.file_path.read_text(encoding=encoding)
         except Exception as e:
             raise IOError(f"Cannot read file {self.file_path}: {e}")
+
     def get_stats(self) -> Dict[str, Any]:
         """Get file statistics."""
         stat = self.file_path.stat()
@@ -1086,16 +1431,19 @@ class FileModel(BaseModel):
             "size_bytes": stat.st_size,
             "modified_time": stat.st_mtime,
             "created_time": stat.st_ctime,
-            "is_readable": os.access(self.file_path, os.R_OK)
+            "is_readable": os.access(self.file_path, os.R_OK),
         }
+
 
 @dataclass(frozen=True)
 class Module(FileModel):
     """A Python source file plus an import-safe module name."""
+
     @validate(lambda v: v.suffix == ".py")
     def validate_file_path(self, v: pathlib.Path) -> None: ...
     @validate(lambda v: v.isidentifier())
     def validate_module_name(self, v: str) -> None: ...
+
 
 def _install_model_module(name: str, fm: FileModel) -> None:
     """Create a real module that exposes the FileModule instance."""
@@ -1107,7 +1455,10 @@ def _install_model_module(name: str, fm: FileModel) -> None:
     setattr(mod, fm.file_path.stem, fm)
     sys.modules[name] = mod
 
-def create_model_from_file(file_path: pathlib.Path) -> tuple[str, FileModel] | tuple[None, None]:
+
+def create_model_from_file(
+    file_path: pathlib.Path,
+) -> tuple[str, FileModel] | tuple[None, None]:
     """Return (model_name, FileModule) for a single file."""
     try:
         content = file_path.read_text(encoding="utf-8", errors="ignore")
@@ -1117,6 +1468,7 @@ def create_model_from_file(file_path: pathlib.Path) -> tuple[str, FileModel] | t
     except Exception as e:
         logging.error("Failed to load %s: %s", file_path, e)
         return None, None
+
 
 def load_files_as_models(root: pathlib.Path, exts: list[str]) -> dict[str, FileModel]:
     """Walk root and register FileModule instances as importable modules."""
@@ -1129,55 +1481,65 @@ def load_files_as_models(root: pathlib.Path, exts: list[str]) -> dict[str, FileM
                 _install_model_module(name, fm)
     return models
 
+
 @dataclass(frozen=True)
 class MemoryStats(BaseModel):
     """Memory statistics with validation."""
+
     size_bytes: int
     object_count: int
     peak_memory: int
     traceback_info: Optional[str] = None
     timestamp: float = field(default_factory=time.time)
-    
+
     @validate(lambda x: x >= 0)
     def validate_size_bytes(self, value: int) -> None:
         """Size must be non-negative."""
         pass
+
     @validate(lambda x: x >= 0)
     def validate_object_count(self, value: int) -> None:
         """Count must be non-negative."""
         pass
+
     def _validate_model(self):
         """Ensure peak >= current size."""
         if self.peak_memory < self.size_bytes:
             raise ValueError("Peak memory cannot be less than current size")
 
+
 @dataclass(frozen=True)
 class RPCRequest(BaseModel):
     """Typed RPC request model."""
+
     method: str
     params: Union[Dict[str, Any], List[Any], None] = None
     request_id: Optional[str] = None
     client_info: Optional[Dict[str, Any]] = None
-    
+
     @validate(lambda x: len(x.strip()) > 0)
     def validate_method(self, value: str) -> None:
         """Method name cannot be empty."""
         pass
 
+
 @dataclass(frozen=True)
 class RPCResponse(BaseModel):
     """Typed RPC response model."""
+
     result: Optional[Any] = None
     error: Optional[Dict[str, Any]] = None
     request_id: Optional[str] = None
     execution_time_ms: Optional[float] = None
-    
+
     def _validate_model(self):
         """Ensure exactly one of result or error is present."""
         if self.result is not None and self.error is not None:
             raise ValueError("Response cannot have both result and error")
         if self.result is None and self.error is None:
             raise ValueError("Response must have either result or error")
+
+
 # ==============================================================================
 # Type Variables (covariant/contravariant for morphological directionality)
 # ==============================================================================
@@ -1218,6 +1580,7 @@ C_anti = TypeVar(
 # PAULI_Z = np.array([[1, 0], [0, -1]], dtype=np.complex128)
 # Instead, we are doing tesnsors from top-down, taking as a given Einsteins Summation
 
+
 class WordAlignment(IntEnum):
     UNALIGNED = 1
     WORD = 2
@@ -1226,11 +1589,13 @@ class WordAlignment(IntEnum):
     CACHE_LINE = 64
     PAGE = 4096
 
+
 class WordSize(enum.IntEnum):
     BYTE = 1  # 8-bit
     SHORT = 2  # 16-bit
     INT = 4  # 32-bit
     LONG = 8  # 64-bit
+
 
 class QuantumState(enum.Enum):
     # Wigner's Friend's enum (in the Indivisible Stochastic-sense)
@@ -1239,6 +1604,7 @@ class QuantumState(enum.Enum):
     COLLAPSED = 4  # Fully materialized; a 'mere' Object, in the SmallTalk first class functions sense.
     DECOHERENT = 8  # Garbage collected; Dead or dying, only reversable insofar as re-running and yielding potentially alternative results (non-comutative 'arena', of sorts, with thermodynamcis being the only ledger of account)
     EIGENSTATE = 16
+
 
 class OperatorType(Enum):
     """
@@ -1251,6 +1617,7 @@ class OperatorType(Enum):
     respect to the cross-product of two cartesian coordinates in super position;
     a 'Born Rule'-type ontological scaffolding.
     """
+
     COMPOSITION = auto()  # Function composition (f >> g)
     TENSOR = auto()  # Tensor product (⊗)
     DIRECT_SUM = auto()  # Direct sum (⊕)
@@ -1258,17 +1625,20 @@ class OperatorType(Enum):
     ADJOINT = auto()  # Hermitian adjoint (†)
     MEASUREMENT = auto()  # Quantum measurement (⟨M|ψ⟩)
 
+
 class EntanglementType(enum.Enum):
     CODE_LINEAGE = "code_lineage"
     TEMPORAL_SYNC = "temporal_sync"
     SEMANTIC_BRIDGE = "semantic_bridge"
     PROBABILITY_FIELD = "probability_field"
 
+
 class Morphology(enum.Enum):
     MORPHIC = 0  # Stable, low-energy state
     DYNAMIC = 1  # High-energy, potentially transformative state
     MARKOVIAN = -1  # Forward-evolving, irreversible
     NON_MARKOVIAN = math.e  # placeholder for sqrt(-1j)
+
 
 class TorusWinding:
     NULL = 0b00  # (0,0) - topological glue
@@ -1279,6 +1649,7 @@ class TorusWinding:
     @staticmethod
     def to_str(winding: int) -> str:
         return {0b00: "NULL", 0b01: "W1", 0b10: "W2", 0b11: "W12"}[winding & 0b11]
+
 
 class MorphicComplex:
     """Complex number with morphic properties."""
@@ -1298,9 +1669,7 @@ class MorphicComplex:
     def __sub__(self, other: "MorphicComplex") -> "MorphicComplex":
         return MorphicComplex(self.real - other.real, self.imag - other.imag)
 
-    def __mul__(
-        self, other: Union["MorphicComplex", float, int]
-    ) -> "MorphicComplex":
+    def __mul__(self, other: Union["MorphicComplex", float, int]) -> "MorphicComplex":
         if isinstance(other, (int, float)):
             return MorphicComplex(self.real * other, self.imag * other)
         return MorphicComplex(
@@ -1327,9 +1696,11 @@ class MorphicComplex:
         sign = "+" if self.imag >= 0 else ""
         return f"{self.real}{sign}{self.imag}j"
 
+
 # ==============================================================================
 # Matrix — Operator space
 # ==============================================================================
+
 
 class Matrix:
     """Simple matrix implementation using standard Python"""
@@ -1351,11 +1722,13 @@ class Matrix:
         if not (0 <= i < self.rows and 0 <= j < self.cols):
             raise IndexError(f"Matrix indices {i},{j} out of range")
         return self.data[i][j]
+
     def __setitem__(self, idx: Tuple[int, int], value: Any) -> None:
         i, j = idx
         if not (0 <= i < self.rows and 0 <= j < self.cols):
             raise IndexError(f"Matrix indices {i},{j} out of range")
         self.data[i][j] = value
+
     def __eq__(self, other) -> bool:
         if not isinstance(other, Matrix):
             return False
@@ -1366,6 +1739,7 @@ class Matrix:
             for i in range(self.rows)
             for j in range(self.cols)
         )
+
     def __matmul__(
         self, other: Union["Matrix", List[Any]]
     ) -> Union["Matrix", List[Any]]:
@@ -1393,43 +1767,53 @@ class Matrix:
                 for i in range(self.rows)
             ]
             return Matrix(result)
+
     def trace(self) -> Any:
         if self.rows != self.cols:
             raise ValueError("Trace is only defined for square matrices")
         return sum(self.data[i][i] for i in range(self.rows))
+
     def transpose(self) -> "Matrix":
         return Matrix(
             [[self.data[j][i] for j in range(self.rows)] for i in range(self.cols)]
         )
+
     @staticmethod
     def zeros(rows: int, cols: int) -> "Matrix":
         if rows <= 0 or cols <= 0:
             raise ValueError("Matrix dimensions must be positive")
         return Matrix([[0 for _ in range(cols)] for _ in range(rows)])
+
     @staticmethod
     def identity(n: int) -> "Matrix":
         if n <= 0:
             raise ValueError("Matrix dimension must be positive")
         return Matrix([[1 if i == j else 0 for j in range(n)] for i in range(n)])
+
     def __repr__(self) -> str:
         return "\n".join([str(row) for row in self.data])
+
 
 # ==============================================================================
 # MorphologicalRule — Symbolic rewrite system
 # ==============================================================================
 
+
 class MorphologicalRule:
     __slots__ = ("symmetry", "conservation", "lhs", "rhs")
+
     def __init__(self, symmetry: str, conservation: str, lhs: str, rhs: List[str]):
         self.symmetry = symmetry
         self.conservation = conservation
         self.lhs = lhs
         self.rhs = rhs
+
     def apply(self, seq: List[str]) -> List[str]:
         if self.lhs in seq:
             idx = seq.index(self.lhs)
             return seq[:idx] + self.rhs + seq[idx + 1 :]
         return seq
+
 
 class Frame(Generic[T, V, C]):
     """
@@ -1437,6 +1821,7 @@ class Frame(Generic[T, V, C]):
     It represents a region of memory that can exist in multiple states and maintains
     quantum-like properties while mapping directly to CPython's object system.
     """
+
     def __init__(self):
         # Map to CPython's object structure
         self._py_object = ctypes.py_object()
@@ -1449,14 +1834,17 @@ class Frame(Generic[T, V, C]):
         self._type_space: Optional[T] = None
         self._value_space: Optional[V] = None
         self._compute_space: Optional[C] = None
+
     @property
     def state(self) -> QuantumState:
         return self._state
+
     def collapse(self) -> V:
         """Forces materialization of the value space."""
         if self._state == QuantumState.SUPERPOSITION:
             self._materialize()
         return self._value_space
+
     def _materialize(self) -> None:
         """Maps the quantum state to actual CPython objects."""
         if self._value_space is not None:
@@ -1468,40 +1856,46 @@ class Frame(Generic[T, V, C]):
             self._type_ptr.value = ctypes.pythonapi.Py_TYPE(obj_ptr)
             self._state = QuantumState.COLLAPSED
 
+
 class Field(Frame[T, V, C], ABC):
     """
     A Field represents a region of spacetime in our quantum memory model.
     It extends Frame with composition and transformation capabilities.
     """
+
     def __init__(self):
         super().__init__()
         self.entangled_fields: set[weakref.ref[Field]] = set()
+
     def entangle(self, other: Field) -> None:
         """Creates quantum entanglement between fields."""
         self.entangled_fields.add(weakref.ref(other))
         other.entangled_fields.add(weakref.ref(self))
         self._state = QuantumState.ENTANGLED
         other._state = QuantumState.ENTANGLED
+
     @abstractmethod
     def transform(self, operator: Callable[[V], V]) -> None:
         """Applies a transformation operator to the value space."""
         pass
+
 
 class Space(Field[T, V, C]):
     """
     Space is the container for Fields and manages their interactions.
     It provides the high-level interface for our quantum memory model.
     """
+
     def __init__(self):
         super().__init__()
         self.fields: dict[str, Field] = {}
-        
+
     def create_field(self, handle: str) -> Field:
         """Creates a new field in this space."""
         field = Field()
         self.fields[handle] = field
         return field
-        
+
     def compose(self, other: Space) -> Space:
         """Composes two spaces, maintaining quantum properties."""
         new_space = Space()
@@ -1512,6 +1906,7 @@ class Space(Field[T, V, C]):
                 new_field.entangle(field)
                 new_field.entangle(other.fields[handle])
         return new_space
+
 
 # ==============================================================================
 # FutureParticiple Protocol — Core of deferred execution
@@ -1538,27 +1933,29 @@ class FutureParticiple(Protocol):
         """Late binding: add arguments that don't exist yet"""
         ...
 
+
 class FPSMixin:
     """
     Mixin that provides default FPS protocol implementation.
     Use via inheritance, not metaclass — cleaner for subinterpreters.
     """
+
     def __new__(mcs, name, bases, namespace, **kwargs):
         cls = super().__new__(mcs, name, bases, namespace)
-        
+
         # Inject FPS protocol methods if not present
         if not hasattr(cls, '__fps_serialize__'):
             cls.__fps_serialize__ = mcs._default_serialize
-        
+
         if not hasattr(cls, '__fps_deserialize__'):
             cls.__fps_deserialize__ = classmethod(mcs._default_deserialize)
-        
+
         if not hasattr(cls, '__fps_bind__'):
             cls.__fps_bind__ = mcs._default_bind
-        
+
         # Store original __init__ for replay
         cls.__fps_init_signature__ = inspect.signature(cls.__init__)
-        
+
         return cls
 
     def __fps_serialize__(self) -> bytes:
@@ -1580,10 +1977,10 @@ class FPSMixin:
         return obj
 
     def __fps_bind__(self, **kwargs) -> "FPSMixin":
-         """Default binding: store kwargs for future resolution"""
+        """Default binding: store kwargs for future resolution"""
         if not hasattr(self, "__fps_bindings__"):
             self.__fps_bindings__ = {}
-        self.__fps_bindings__.update(kwargs)
+            self.__fps_bindings__.update(kwargs)
         return self
 
     def __init_subclass__(cls, **kwargs) -> None:
@@ -1595,7 +1992,6 @@ class FPSMixin:
             cls.__fps_deserialize__ = classmethod(FPSMixin.__fps_deserialize__)
         if not hasattr(cls, "__fps_bind__"):
             cls.__fps_bind__ = FPSMixin.__fps_bind__
-
 
 
 class ByteWordInstruction(enum.IntEnum):  # Opcode set for IR
@@ -1703,6 +2099,7 @@ class ByteWord(FPSMixin):
 # ByteWordAction — Reified gerund (the Future Participle itself)
 # ==============================================================================
 
+
 @dataclass(slots=True)
 class ByteWordAction(FPSMixin):
     """
@@ -1715,18 +2112,18 @@ class ByteWordAction(FPSMixin):
     ir_opcode: ByteWordInstruction
     arguments: Dict[str, Any] = field(default_factory=dict)
 
-   def __init__(self, raw: int):
+    def __init__(self, raw: int):
         if not 0 <= raw <= 255:
             raise ValueError("ByteWord must be 8-bit (0-255)")
-        
+
         self.raw = raw
         self.value = raw & 0xFF
-        
+
         # Decompose (T=4, V=3, C=1)
         self.T = (raw >> 4) & 0x0F  # state_data
         self.V = (raw >> 1) & 0x07  # morphism
-        self.C = raw & 0x01         # floor_morphic
-        
+        self.C = raw & 0x01  # floor_morphic
+
         self._refcount = 1
         self._quantum_state = QuantumState.SUPERPOSITION
         self._entangled_words = set()
@@ -1753,34 +2150,28 @@ class ByteWordAction(FPSMixin):
     # ========================================================================
     # Gerund Forms (FPS Verbs)
     # ========================================================================
-    
+
     @property
     def collapsing(self) -> 'ByteWordAction':
         """Gerund: the act of collapsing (time-independent)"""
         return ByteWordAction(
-            verb='collapse',
-            subject=self,
-            ir_opcode=ByteWordInstruction.COLLAPSE
+            verb='collapse', subject=self, ir_opcode=ByteWordInstruction.COLLAPSE
         )
-    
+
     @property
     def entangling(self) -> 'ByteWordAction':
         """Gerund: the act of entangling"""
         return ByteWordAction(
-            verb='entangle',
-            subject=self,
-            ir_opcode=ByteWordInstruction.ENTANGLE
+            verb='entangle', subject=self, ir_opcode=ByteWordInstruction.ENTANGLE
         )
-    
+
     @property
     def measuring(self) -> 'ByteWordAction':
         """Gerund: the act of measuring"""
         return ByteWordAction(
-            verb='measure',
-            subject=self,
-            ir_opcode=ByteWordInstruction.MEASURE
+            verb='measure', subject=self, ir_opcode=ByteWordInstruction.MEASURE
         )
-    
+
     @property
     def collapse(self) -> 'ByteWord':
         """Execute collapse NOW"""
@@ -1802,15 +2193,18 @@ class ByteWordAction(FPSMixin):
             if not hasattr(self, '__fps_future_entanglements__'):
                 self.__fps_future_entanglements__ = []
             self.__fps_future_entanglements__.append(kwargs['entangle_with'])
-        
+
         if 'semantic_vector' in kwargs:
             # Deferred semantic embedding
             self._semantic_vector = kwargs['semantic_vector']
-        
+
         return self
+
+
 # ==============================================================================
 # MorphologicalBasis — Evolvable structure
 # ==============================================================================
+
 
 @dataclass
 class MorphologicalBasis(Generic[T, V, C]):
@@ -1841,7 +2235,10 @@ class MorphologicalBasis(Generic[T, V, C]):
             )
             result = Matrix(
                 [
-                    [identity.data[i][j] + scaled_gen.data[i][j] for j in range(identity.cols)]
+                    [
+                        identity.data[i][j] + scaled_gen.data[i][j]
+                        for j in range(identity.cols)
+                    ]
                     for i in range(identity.rows)
                 ]
             )
@@ -1850,9 +2247,11 @@ class MorphologicalBasis(Generic[T, V, C]):
             f"Cannot evolve compute_space of type {type(self.compute_space)}"
         )
 
+
 # ==============================================================================
 # Morphism & HermitianMorphism — Directional transformation
 # ==============================================================================
+
 
 class Morphism(Generic[T_co, T_anti]):
     """Abstract morphism between type structures"""
@@ -1883,9 +2282,7 @@ class HermitianMorphism(Generic[T, V, C, T_anti, V_anti, C_anti]):
     """
 
     def __init__(
-        self,
-        forward: Callable[[T, V], C],
-        adjoint: Callable[[T_anti, V_anti], C_anti],
+        self, forward: Callable[[T, V], C], adjoint: Callable[[T_anti, V_anti], C_anti]
     ):
         self.forward = forward
         self.adjoint = adjoint
@@ -1906,6 +2303,7 @@ class HermitianMorphism(Generic[T, V, C, T_anti, V_anti, C_anti]):
 # ==============================================================================
 # Category — Structural container (minimal, protocol-safe)
 # ==============================================================================
+
 
 class Category(Generic[T_co, V_co, C_co]):
     def __init__(self, name: str):
@@ -1930,9 +2328,11 @@ class Category(Generic[T_co, V_co, C_co]):
     def find_morphisms(self, source: T_co, target: T_co) -> List[C_co]:
         return self.morphisms.get((source, target), [])
 
+
 # ==============================================================================
 # Utility Functions
 # ==============================================================================
+
 
 def hash_state(value: Any) -> int:
     """Hash a state value in a deterministic way"""
@@ -1944,7 +2344,9 @@ def hash_state(value: Any) -> int:
         return hash(str(value)) % 2**32
 
 
-def kronecker_field(q1: "MorphologicPyOb", q2: "MorphologicPyOb", temperature: float) -> float:
+def kronecker_field(
+    q1: "MorphologicPyOb", q2: "MorphologicPyOb", temperature: float
+) -> float:
     dot = sum(a * b for a, b in zip(q1.state.vector, q2.state.vector))
     if temperature > 0.5:
         return math.cos(dot)
@@ -2051,6 +2453,7 @@ class PyWord(Generic[T]):
             return bytes(self._value.data)
         return self._value.tobytes()
 
+
 @dataclass
 class QSD:
     state: complex
@@ -2066,7 +2469,9 @@ class QSD:
     case_base: Dict[str, Callable[..., bool]] = field(default_factory=dict)
 
     def __post_init__(self):
-        self.state = complex(self.state) if not isinstance(self.state, complex) else self.state
+        self.state = (
+            complex(self.state) if not isinstance(self.state, complex) else self.state
+        )
         self._initialize_case_base()
         self.hash = hashlib.sha256(repr(self.state).encode()).hexdigest()
 
@@ -2086,7 +2491,10 @@ class QSD:
         return self.state
 
     def collapse(self):
-        probabilities = [abs(self.project(2 * math.pi * i / self.dimensions)) ** 2 for i in range(self.dimensions)]
+        probabilities = [
+            abs(self.project(2 * math.pi * i / self.dimensions)) ** 2
+            for i in range(self.dimensions)
+        ]
         cumulative = 0
         rng = math.fsum(probabilities) * random.random()
         for i, prob in enumerate(probabilities):
@@ -2103,7 +2511,11 @@ class QSD:
             raise ValueError("Tensor product requires another QSD instance.")
         new_state = self.state * other.state
         new_dimensions = self.dimensions * other.dimensions
-        return QSD(new_state, dimensions=new_dimensions, precision=min(self.precision, other.precision))
+        return QSD(
+            new_state,
+            dimensions=new_dimensions,
+            precision=min(self.precision, other.precision),
+        )
 
     def add_atom(self, atom):
         self.atoms.append(atom)
@@ -2120,7 +2532,7 @@ class QSD:
         return {
             'atoms': self.atoms,
             'relations': self.relations,
-            'metadata': self._metadata
+            'metadata': self._metadata,
         }
 
     def deserialize(self, data):
@@ -2163,10 +2575,12 @@ class QSD:
             '↔': lambda a, b: (a and b) or (not a and not b),
         }
 
-    def process_attributes(self, mapping_description: Dict[str, Any], input_data: Dict[str, Any]) -> None:
+    def process_attributes(
+        self, mapping_description: Dict[str, Any], input_data: Dict[str, Any]
+    ) -> None:
         """
         Use the `mapper` function to process input data and map it to attributes.
-        
+
         Args:
             mapping_description (Dict[str, Any]): The mapping description for transformation.
             input_data (Dict[str, Any]): Data to be processed and mapped.
@@ -2178,15 +2592,16 @@ class QSD:
                 setattr(self, key, value)
 
     def encode(self) -> bytes:
-        return json.dumps({
-            'id': self.id,
-            'attributes': self.__dict__
-        }).encode()
+        return json.dumps({'id': self.id, 'attributes': self.__dict__}).encode()
 
     @classmethod
     def decode(cls, data: bytes) -> 'QSD':
         decoded_data = json.loads(data.decode())
-        instance = cls(state=decoded_data['state'], dimensions=decoded_data['dimensions'], precision=decoded_data['precision'])
+        instance = cls(
+            state=decoded_data['state'],
+            dimensions=decoded_data['dimensions'],
+            precision=decoded_data['precision'],
+        )
         instance.deserialize(decoded_data['attributes'])
         return instance
 
@@ -2196,6 +2611,7 @@ class QSD:
         """
         import inspect
         import ast
+
         source_code = inspect.getsource(QSD)
         tree = ast.parse(source_code)
         return ast.dump(tree)
@@ -2251,7 +2667,9 @@ class QSD:
             await sub.receive_message(message, ttl - 1)
 
     async def receive_message(self, message: Any, ttl: int) -> None:
-        logging.info(f"Atom {self.id} processing received message: {message} with TTL {ttl}")
+        logging.info(
+            f"Atom {self.id} processing received message: {message} with TTL {ttl}"
+        )
         await self.send_message(message, ttl)
 
     def subscribe(self, atom: 'QSD') -> None:
@@ -2281,35 +2699,48 @@ class QSD:
 
 #  十十十十十 TRANSPORT LAYER: JSON-RPC Server - BaseModel  十十十十十
 _sandbox_commands = asyncio.Queue()  # In‐memory queue for sandbox commands
+
+
 @dataclass(frozen=True)
 class SandboxCommand(BaseModel):
     """A command to be executed by a sandboxed worker."""
+
     command_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     action: str
     params: Dict[str, Any] = field(default_factory=dict)
     created_at: float = field(default_factory=time.time)
+
+
 class JSONRPCError(Exception):
     """JSON-RPC 2.0 compliant error with BaseModel integration."""
+
     PARSE_ERROR = -32700
     INVALID_REQUEST = -32600
     METHOD_NOT_FOUND = -32601
     INVALID_PARAMS = -32602
     INTERNAL_ERROR = -32603
     VALIDATION_ERROR = -32001  # Custom
-    def __init__(self, code: int, message: str, data: Any = None, request_id: Any = None):
+
+    def __init__(
+        self, code: int, message: str, data: Any = None, request_id: Any = None
+    ):
         self.code = code
         self.message = message
         self.data = data
         self.request_id = request_id
         super().__init__(message)
+
     def to_dict(self) -> Dict[str, Any]:
         error = {"code": self.code, "message": self.message}
         if self.data is not None:
             error["data"] = self.data
         return error
+
+
 @dataclass
 class RPCConfig:
     """Server configuration."""
+
     host: str = "127.0.0.1"
     port: int = 8698
     max_content_length: int = 10_000_000
@@ -2319,9 +2750,12 @@ class RPCConfig:
     thread_pool_size: int = 4
     validate_requests: bool = True
     validate_responses: bool = True
+
+
 @dataclass
 class MethodInfo:
     """Metadata for a registered RPC method."""
+
     name: str
     func: Callable
     is_async: bool
@@ -2329,8 +2763,11 @@ class MethodInfo:
     input_model: Optional[Type[BaseModel]] = None
     output_model: Optional[Type[BaseModel]] = None
     raw_params: bool = False  # Skip model conversion for this method
+
+
 class JSONRPCDispatcher:
     """JSON-RPC dispatcher with BaseModel integration."""
+
     def __init__(self, config: RPCConfig):
         self.config = config
         self.methods: Dict[str, MethodInfo] = {}
@@ -2338,11 +2775,14 @@ class JSONRPCDispatcher:
         self.executor = ThreadPoolExecutor(max_workers=config.thread_pool_size)
         self.request_count = 0
         self.error_count = 0
-    def method(self, 
-               name: Optional[str] = None, 
-               input_model: Optional[Type[BaseModel]] = None,
-               output_model: Optional[Type[BaseModel]] = None,
-               raw_params: bool = False):
+
+    def method(
+        self,
+        name: Optional[str] = None,
+        input_model: Optional[Type[BaseModel]] = None,
+        output_model: Optional[Type[BaseModel]] = None,
+        raw_params: bool = False,
+    ):
         """
         Register a JSON-RPC method with optional BaseModel validation.
         Args:
@@ -2351,6 +2791,7 @@ class JSONRPCDispatcher:
             output_model: BaseModel class for response validation
             raw_params: Skip model conversion, pass raw params
         """
+
         def decorator(func: Callable):
             method_name = name or func.__name__
             # Auto-detect models from type hints if not provided
@@ -2359,16 +2800,22 @@ class JSONRPCDispatcher:
                 # Try to find input model from first parameter
                 if input_model is None:
                     params = list(inspect.signature(func).parameters.values())
-                    if params and not params[0].name in ('self', 'cls'):
+                    if params and params[0].name not in ('self', 'cls'):
                         first_param_type = hints.get(params[0].name)
-                        if (first_param_type and inspect.isclass(first_param_type) and 
-                            issubclass(first_param_type, BaseModel)):
+                        if (
+                            first_param_type
+                            and inspect.isclass(first_param_type)
+                            and issubclass(first_param_type, BaseModel)
+                        ):
                             input_model = first_param_type
                 # Try to find output model from return annotation
                 if output_model is None:
                     return_type = hints.get('return')
-                    if (return_type and inspect.isclass(return_type) and 
-                        issubclass(return_type, BaseModel)):
+                    if (
+                        return_type
+                        and inspect.isclass(return_type)
+                        and issubclass(return_type, BaseModel)
+                    ):
                         output_model = return_type
             method_info = MethodInfo(
                 name=method_name,
@@ -2377,20 +2824,25 @@ class JSONRPCDispatcher:
                 doc=inspect.getdoc(func),
                 input_model=input_model,
                 output_model=output_model,
-                raw_params=raw_params
+                raw_params=raw_params,
             )
             self.methods[method_name] = method_info
-            logger.info(f"Registered {'async' if method_info.is_async else 'sync'} method: {method_name}")
+            logger.info(
+                f"Registered {'async' if method_info.is_async else 'sync'} method: {method_name}"
+            )
             if input_model:
                 logger.info(f"  Input model: {input_model.__name__}")
             if output_model:
                 logger.info(f"  Output model: {output_model.__name__}")
             return func
+
         return decorator
+
     def middleware_handler(self, func: Callable):
         """Register middleware."""
         self.middleware.append(func)
         return func
+
     async def _prepare_params(self, method_info: MethodInfo, raw_params: Any) -> Any:
         """Convert raw parameters to BaseModel if configured."""
         if method_info.raw_params or not method_info.input_model:
@@ -2412,8 +2864,9 @@ class JSONRPCDispatcher:
             raise JSONRPCError(
                 JSONRPCError.VALIDATION_ERROR,
                 f"Parameter validation failed: {e}",
-                {"model": method_info.input_model.__name__, "error": str(e)}
+                {"model": method_info.input_model.__name__, "error": str(e)},
             )
+
     async def _validate_result(self, method_info: MethodInfo, result: Any) -> Any:
         """Validate and convert result using output model if configured."""
         if not self.config.validate_responses or not method_info.output_model:
@@ -2433,6 +2886,7 @@ class JSONRPCDispatcher:
         except Exception as e:
             logger.warning(f"Response validation failed for {method_info.name}: {e}")
             return result  # Return unvalidated rather than fail
+
     async def _call_method(self, method_info: MethodInfo, params: Any) -> Any:
         """Call method with proper parameter handling."""
         try:
@@ -2448,8 +2902,7 @@ class JSONRPCDispatcher:
                 else:
                     loop = asyncio.get_event_loop()
                     result = await loop.run_in_executor(
-                        self.executor, 
-                        lambda: method_info.func(processed_params)
+                        self.executor, lambda: method_info.func(processed_params)
                     )
             elif isinstance(processed_params, dict):
                 # Keyword arguments
@@ -2458,8 +2911,7 @@ class JSONRPCDispatcher:
                 else:
                     loop = asyncio.get_event_loop()
                     result = await loop.run_in_executor(
-                        self.executor, 
-                        lambda: method_info.func(**processed_params)
+                        self.executor, lambda: method_info.func(**processed_params)
                     )
             elif isinstance(processed_params, list):
                 # Positional arguments
@@ -2468,8 +2920,7 @@ class JSONRPCDispatcher:
                 else:
                     loop = asyncio.get_event_loop()
                     result = await loop.run_in_executor(
-                        self.executor, 
-                        lambda: method_info.func(*processed_params)
+                        self.executor, lambda: method_info.func(*processed_params)
                     )
             else:
                 # Single parameter
@@ -2478,8 +2929,7 @@ class JSONRPCDispatcher:
                 else:
                     loop = asyncio.get_event_loop()
                     result = await loop.run_in_executor(
-                        self.executor, 
-                        lambda: method_info.func(processed_params)
+                        self.executor, lambda: method_info.func(processed_params)
                     )
             # Validate result if configured
             return await self._validate_result(method_info, result)
@@ -2490,9 +2940,14 @@ class JSONRPCDispatcher:
             raise JSONRPCError(
                 JSONRPCError.INTERNAL_ERROR,
                 f"Method execution failed: {e}",
-                {"method": method_info.name, "error": str(e)} if self.config.debug else None
+                {"method": method_info.name, "error": str(e)}
+                if self.config.debug
+                else None,
             )
-    async def dispatch_single(self, request_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+
+    async def dispatch_single(
+        self, request_data: Dict[str, Any]
+    ) -> Optional[Dict[str, Any]]:
         """Dispatch single request with BaseModel integration."""
         start_time = time.time()
         request_id = request_data.get("id")
@@ -2500,16 +2955,24 @@ class JSONRPCDispatcher:
             # Validate request format
             if self.config.validate_requests:
                 try:
-                    request = RPCRequest.from_dict({
-                        "method": request_data.get("method"),
-                        "params": request_data.get("params"),
-                        "request_id": str(request_id) if request_id is not None else None,
-                        "client_info": {"timestamp": time.time()}
-                    })
+                    request = RPCRequest.from_dict(
+                        {
+                            "method": request_data.get("method"),
+                            "params": request_data.get("params"),
+                            "request_id": str(request_id)
+                            if request_id is not None
+                            else None,
+                            "client_info": {"timestamp": time.time()},
+                        }
+                    )
                 except Exception as e:
-                    raise JSONRPCError(JSONRPCError.INVALID_REQUEST, f"Request validation failed: {e}")
+                    raise JSONRPCError(
+                        JSONRPCError.INVALID_REQUEST, f"Request validation failed: {e}"
+                    )
             if request_data.get("jsonrpc") != "2.0":
-                raise JSONRPCError(JSONRPCError.INVALID_REQUEST, "Invalid JSON-RPC version")
+                raise JSONRPCError(
+                    JSONRPCError.INVALID_REQUEST, "Invalid JSON-RPC version"
+                )
             method_name = request_data.get("method")
             if not method_name:
                 raise JSONRPCError(JSONRPCError.INVALID_REQUEST, "Missing method")
@@ -2517,7 +2980,9 @@ class JSONRPCDispatcher:
             # Find method
             method_info = self.methods.get(method_name)
             if not method_info:
-                raise JSONRPCError(JSONRPCError.METHOD_NOT_FOUND, f"Method '{method_name}' not found")
+                raise JSONRPCError(
+                    JSONRPCError.METHOD_NOT_FOUND, f"Method '{method_name}' not found"
+                )
             # Run middleware
             for middleware in self.middleware:
                 await middleware(request_data)
@@ -2526,38 +2991,33 @@ class JSONRPCDispatcher:
             execution_time = (time.time() - start_time) * 1000
             # Return response (skip for notifications)
             if request_id is not None:
-                response_data = {
-                    "jsonrpc": "2.0",
-                    "id": request_id,
-                    "result": result
-                }
+                response_data = {"jsonrpc": "2.0", "id": request_id, "result": result}
                 if self.config.debug:
                     response_data["_meta"] = {
                         "execution_time_ms": execution_time,
-                        "method": method_name
+                        "method": method_name,
                     }
                 return response_data
             return None
         except JSONRPCError as e:
             self.error_count += 1
             if request_id is not None:
-                return {
-                    "jsonrpc": "2.0",
-                    "id": request_id,
-                    "error": e.to_dict()
-                }
+                return {"jsonrpc": "2.0", "id": request_id, "error": e.to_dict()}
             return None
+
     async def dispatch(self, payload: Union[Dict, List]) -> Optional[Union[Dict, List]]:
         """Dispatch requests with BaseModel support."""
         self.request_count += 1
         try:
             if isinstance(payload, list):
                 if not payload:
-                    raise JSONRPCError(JSONRPCError.INVALID_REQUEST, "Empty batch request")
-                
+                    raise JSONRPCError(
+                        JSONRPCError.INVALID_REQUEST, "Empty batch request"
+                    )
+
                 results = await asyncio.gather(
                     *[self.dispatch_single(req) for req in payload],
-                    return_exceptions=False
+                    return_exceptions=False,
                 )
                 filtered_results = [r for r in results if r is not None]
                 return filtered_results if filtered_results else None
@@ -2568,20 +3028,26 @@ class JSONRPCDispatcher:
             return {
                 "jsonrpc": "2.0",
                 "id": None,
-                "error": JSONRPCError(JSONRPCError.PARSE_ERROR, "Parse error").to_dict()
+                "error": JSONRPCError(
+                    JSONRPCError.PARSE_ERROR, "Parse error"
+                ).to_dict(),
             }
+
     def get_stats(self) -> Dict[str, Any]:
         """Get detailed statistics."""
         return {
             "methods_registered": len(self.methods),
             "requests_processed": self.request_count,
             "errors_encountered": self.error_count,
-            "active_threads": len(self.executor._threads) if self.executor._threads else 0,
+            "active_threads": len(self.executor._threads)
+            if self.executor._threads
+            else 0,
             "validation_enabled": {
                 "requests": self.config.validate_requests,
-                "responses": self.config.validate_responses
-            }
+                "responses": self.config.validate_responses,
+            },
         }
+
     def list_methods(self) -> Dict[str, Any]:
         """List all methods with BaseModel info."""
         return {
@@ -2590,56 +3056,66 @@ class JSONRPCDispatcher:
                 "async": info.is_async,
                 "doc": info.doc,
                 "input_model": info.input_model.__name__ if info.input_model else None,
-                "output_model": info.output_model.__name__ if info.output_model else None,
-                "raw_params": info.raw_params
+                "output_model": info.output_model.__name__
+                if info.output_model
+                else None,
+                "raw_params": info.raw_params,
             }
             for name, info in self.methods.items()
         }
 
+
 # ============================================================================
-# HTTP REQUEST HANDLER 
+# HTTP REQUEST HANDLER
 # ============================================================================
+
 
 class JSONRPCRequestHandler(BaseHTTPRequestHandler):
     """HTTP request handler for JSON-RPC with BaseModel support."""
-    
-    def __init__(self, dispatcher: JSONRPCDispatcher, config: RPCConfig, *args, **kwargs):
+
+    def __init__(
+        self, dispatcher: JSONRPCDispatcher, config: RPCConfig, *args, **kwargs
+    ):
         self.dispatcher = dispatcher
         self.config = config
         super().__init__(*args, **kwargs)
-    
+
     def log_message(self, format, *args):
         """Override to use our logger."""
         logger.info(f"{self.address_string()} - {format % args}")
-    
+
     def _send_cors_headers(self):
         """Send CORS headers if enabled."""
         if self.config.enable_cors:
             self.send_header('Access-Control-Allow-Origin', '*')
             self.send_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
-            self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-    
+            self.send_header(
+                'Access-Control-Allow-Headers', 'Content-Type, Authorization'
+            )
+
     def _send_json_response(self, data: Any, status: int = 200):
         """Send a JSON response."""
-        response_body = json.dumps(data, indent=2 if self.config.debug else None).encode('utf-8')
-        
+        response_body = json.dumps(
+            data, indent=2 if self.config.debug else None
+        ).encode('utf-8')
+
         self.send_response(status)
         self.send_header('Content-Type', 'application/json')
         self.send_header('Content-Length', str(len(response_body)))
         self._send_cors_headers()
         self.end_headers()
         self.wfile.write(response_body)
-    
+
     def _send_error_response(self, message: str, status: int = 400):
         """Send an error response."""
         self._send_json_response({"error": message}, status)
-    
+
     def do_OPTIONS(self):
         """Handle CORS preflight requests."""
         self.send_response(204)
         self._send_cors_headers()
         self.end_headers()
-    
+
     def do_GET(self):
         """Handle GET requests for introspection."""
         if self.path == '/health':
@@ -2650,7 +3126,7 @@ class JSONRPCRequestHandler(BaseHTTPRequestHandler):
             self._send_json_response(self.dispatcher.get_stats())
         else:
             self._send_error_response("Not Found", 404)
-    
+
     def do_POST(self):
         """Handle JSON-RPC POST requests."""
         try:
@@ -2659,11 +3135,11 @@ class JSONRPCRequestHandler(BaseHTTPRequestHandler):
             if content_length > self.config.max_content_length:
                 self._send_error_response("Request entity too large", 413)
                 return
-            
+
             if content_length == 0:
                 self._send_error_response("Empty request body", 400)
                 return
-            
+
             # Read and parse request
             raw_data = self.rfile.read(content_length)
             try:
@@ -2672,15 +3148,17 @@ class JSONRPCRequestHandler(BaseHTTPRequestHandler):
                 error_response = {
                     "jsonrpc": "2.0",
                     "id": None,
-                    "error": JSONRPCError(JSONRPCError.PARSE_ERROR, "Parse error").to_dict()
+                    "error": JSONRPCError(
+                        JSONRPCError.PARSE_ERROR, "Parse error"
+                    ).to_dict(),
                 }
                 self._send_json_response(error_response)
                 return
-            
+
             # Process request
             async def process_request():
                 return await self.dispatcher.dispatch(request_data)
-            
+
             try:
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
@@ -2691,11 +3169,13 @@ class JSONRPCRequestHandler(BaseHTTPRequestHandler):
                 error_response = {
                     "jsonrpc": "2.0",
                     "id": None,
-                    "error": JSONRPCError(JSONRPCError.INTERNAL_ERROR, "Internal server error").to_dict()
+                    "error": JSONRPCError(
+                        JSONRPCError.INTERNAL_ERROR, "Internal server error"
+                    ).to_dict(),
                 }
                 self._send_json_response(error_response, 500)
                 return
-            
+
             # Send response
             if response is not None:
                 self._send_json_response(response)
@@ -2703,10 +3183,11 @@ class JSONRPCRequestHandler(BaseHTTPRequestHandler):
                 self.send_response(204)
                 self._send_cors_headers()
                 self.end_headers()
-                
+
         except Exception as e:
             logger.exception(f"Unhandled error in request handler: {e}")
             self._send_error_response("Internal server error", 500)
+
     # === Utility Methods ===
     def checksum(self, algorithm: str = 'md5') -> str:
         """Generate checksum of the model data."""
@@ -2722,49 +3203,48 @@ class JSONRPCRequestHandler(BaseHTTPRequestHandler):
         """Return differences between this model and another."""
         if not isinstance(other, BaseModel):
             raise TypeError("Can only diff with another BaseModel")
-        
+
         self_dict = self.to_dict()
         other_dict = other.to_dict()
-        
+
         diff = {}
         all_keys = set(self_dict.keys()) | set(other_dict.keys())
-        
+
         for key in all_keys:
             self_val = self_dict.get(key, '<MISSING>')
             other_val = other_dict.get(key, '<MISSING>')
             if self_val != other_val:
                 diff[key] = {'self': self_val, 'other': other_val}
-        
+
         return diff
 
     def schema(self, include_metadata: bool = False) -> Dict[str, Any]:
         """Generate JSON schema-like description."""
-        schema = {
-            'type': 'object',
-            'title': self.__class__.__name__,
-            'properties': {}
-        }
-        
+        schema = {'type': 'object', 'title': self.__class__.__name__, 'properties': {}}
+
         type_hints = get_type_hints(self.__class__)
-        
+
         for field in fields(self):
             field_schema = {
                 'type': str(type_hints.get(field.name, 'Any')).replace('typing.', '')
             }
-            
+
             if field.default != field.default_factory():
                 field_schema['default'] = field.default
-                
+
             if include_metadata and field.metadata:
                 field_schema['metadata'] = field.metadata
-                
+
             schema['properties'][field.name] = field_schema
-        
+
         return schema
+
 
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     server: Optional[HTTPServer]
     daemon_threads = True
+
+
 class JSONRPCServer:
     """Threaded-server class with BaseModel integration."""
 
@@ -2784,6 +3264,7 @@ class JSONRPCServer:
 
     def start(self):
         """Start the JSON-RPC server."""
+
         def handler_factory(*args, **kwargs):
             return JSONRPCRequestHandler(self.dispatcher, self.config, *args, **kwargs)
 
@@ -2791,7 +3272,9 @@ class JSONRPCServer:
         self.server = ThreadedHTTPServer(server_address, handler_factory)
         self._running = True
 
-        logger.info(f"JSON-RPC server started on http://{self.config.host}:{self.config.port}")
+        logger.info(
+            f"JSON-RPC server started on http://{self.config.host}:{self.config.port}"
+        )
         try:
             if self.server is None:
                 raise RuntimeError("Server has not been initialized")
@@ -2808,10 +3291,12 @@ class JSONRPCServer:
             self.server.server_close()
             logger.info("JSON-RPC server stopped")
 
+
 class MonolithicServer:
     """
     The unified server class. Manages state, dispatchers, and the async loop.
     """
+
     def __init__(self, config: ServerConfig):
         self.config = config
         self.rpc_dispatcher = RpcDispatcher(config)
@@ -2826,6 +3311,7 @@ class MonolithicServer:
 
     def _register_internal_methods(self):
         """Register built-in methods for server management."""
+
         @self.method("server.health")
         async def health(_: Any) -> Dict[str, Any]:
             return {"status": "ok", "timestamp": time.time()}
@@ -2845,26 +3331,33 @@ class MonolithicServer:
             except asyncio.QueueEmpty:
                 return None
 
-    async def _handle_request(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
+    async def _handle_request(
+        self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
+    ):
         correlation_id = str(uuid.uuid4())
         logger = get_logger(correlation_id)
         peername = writer.get_extra_info('peername')
         logger.info(f"Connection from {peername}")
 
         response_body, status = b'', 204
-        headers = [("Content-Type", "application/json"), ("Access-Control-Allow-Origin", "*")]
+        headers = [
+            ("Content-Type", "application/json"),
+            ("Access-Control-Allow-Origin", "*"),
+        ]
 
         try:
             request_line = await reader.readline()
-            if not request_line: return
-            
+            if not request_line:
+                return
+
             method, path, _ = request_line.decode().split()
-            
+
             # Read headers
             http_headers = {}
             while True:
                 line = await reader.readline()
-                if line == b'\r\n': break
+                if line == b'\r\n':
+                    break
                 k, v = line.decode().strip().split(':', 1)
                 http_headers[k.lower()] = v.strip()
 
@@ -2872,7 +3365,7 @@ class MonolithicServer:
                 content_len = int(http_headers.get('content-length', 0))
                 if content_len > self.config.MAX_REQUEST_SIZE:
                     raise RpcError(INVALID_REQUEST, "Request body too large.")
-                
+
                 body = await reader.readexactly(content_len)
                 payload = json.loads(body)
 
@@ -2887,42 +3380,56 @@ class MonolithicServer:
                     if result:
                         response_body = json.dumps(result).encode()
                         status = 200
-            
+
             elif method == 'GET' and path == '/health':
                 response_body = json.dumps({"status": "healthy"}).encode()
                 status = 200
 
             elif method == 'OPTIONS' and path == '/rpc':
-                headers.extend([
-                    ("Access-Control-Allow-Methods", "POST, OPTIONS"),
-                    ("Access-Control-Allow-Headers", "Content-Type"),
-                ])
-                status = 204 # No Content
+                headers.extend(
+                    [
+                        ("Access-Control-Allow-Methods", "POST, OPTIONS"),
+                        ("Access-Control-Allow-Headers", "Content-Type"),
+                    ]
+                )
+                status = 204  # No Content
 
             else:
                 raise RpcError(METHOD_NOT_FOUND, "Not Found")
 
         except RpcError as e:
-            status = 400 # Bad Request for most RPC errors
-            response_body = json.dumps({"jsonrpc": "2.0", "id": None, "error": e.to_dict()}).encode()
+            status = 400  # Bad Request for most RPC errors
+            response_body = json.dumps(
+                {"jsonrpc": "2.0", "id": None, "error": e.to_dict()}
+            ).encode()
         except Exception as e:
-            logger.error(f"Unhandled error in request handler: {e}", exc_info=self.config.DEBUG)
+            logger.error(
+                f"Unhandled error in request handler: {e}", exc_info=self.config.DEBUG
+            )
             status = 500
             error = RpcError(INTERNAL_ERROR, "Internal Server Error").to_dict()
-            response_body = json.dumps({"jsonrpc": "2.0", "id": None, "error": error}).encode()
-        
+            response_body = json.dumps(
+                {"jsonrpc": "2.0", "id": None, "error": error}
+            ).encode()
+
         finally:
-            writer.write(f"HTTP/1.1 {status} {http.HTTPStatus(status).phrase}\r\n".encode())
+            writer.write(
+                f"HTTP/1.1 {status} {http.HTTPStatus(status).phrase}\r\n".encode()
+            )
             writer.write(f"Content-Length: {len(response_body)}\r\n".encode())
-            for k, v in headers: writer.write(f"{k}: {v}\r\n".encode())
+            for k, v in headers:
+                writer.write(f"{k}: {v}\r\n".encode())
             writer.write(b"\r\n")
-            if response_body: writer.write(response_body)
+            if response_body:
+                writer.write(response_body)
             await writer.drain()
             writer.close()
 
     async def start(self):
         """Starts the server and listens for connections."""
-        server = await asyncio.start_server(self._handle_request, self.config.HOST, self.config.PORT)
+        server = await asyncio.start_server(
+            self._handle_request, self.config.HOST, self.config.PORT
+        )
         addr = server.sockets[0].getsockname()
         self._logger.info(f"Monolithic server live on http://{addr[0]}:{addr[1]}")
         self._server_task = asyncio.create_task(server.serve_forever())
@@ -2939,7 +3446,10 @@ class MonolithicServer:
         if self._server_task and not self._server_task.done():
             self._server_task.cancel()
         self._logger.info("Server shutdown initiated.")
-    async def handle_raw_socket_client(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
+
+    async def handle_raw_socket_client(
+        self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
+    ):
         """Handles a single incoming raw TCP socket connection."""
         logger = get_logger("Socket")
         addr = writer.get_extra_info('peername')
@@ -2947,8 +3457,9 @@ class MonolithicServer:
         try:
             while True:
                 line = await reader.readline()
-                if not line: break
-                
+                if not line:
+                    break
+
                 request = json.loads(line)
                 response = await self.dispatcher.dispatch(request)
                 if response:
@@ -2957,9 +3468,18 @@ class MonolithicServer:
         except ConnectionResetError:
             logger.warning(f"Client {addr} disconnected abruptly.")
         except Exception as e:
-            logger.error(f"Error handling socket client: {e}", exc_info=self.config.debug)
-            error_resp = JSONRPCError(-32000, "Socket processing error", str(e)).to_dict()
-            writer.write(json.dumps({"jsonrpc": "2.0", "id": None, "error": error_resp}).encode('utf-8') + b'\n')
+            logger.error(
+                f"Error handling socket client: {e}", exc_info=self.config.debug
+            )
+            error_resp = JSONRPCError(
+                -32000, "Socket processing error", str(e)
+            ).to_dict()
+            writer.write(
+                json.dumps({"jsonrpc": "2.0", "id": None, "error": error_resp}).encode(
+                    'utf-8'
+                )
+                + b'\n'
+            )
             await writer.drain()
         finally:
             logger.info(f"Closing connection from {addr}")

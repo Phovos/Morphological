@@ -23,6 +23,7 @@ Morphological Analysis Engine
 ├── RPC Server (HTTP/JSON, threaded)
 └── CLI Interface (serve, analyze, demo)
 """
+
 """(MSC) Morphological Source Code Framework – V0.0.16
 ================================================================================
 <https://github.com/MOONLAPSED/Morphological> • Morphological Source Code © 2023 by MOONLAPSED
@@ -35,38 +36,38 @@ import ast
 import time
 import json
 import uuid
-import hmac
 import base64
 import hashlib
 import logging
 import logging.config
 import inspect
 import threading
-import traceback
-import weakref
-import gc
-import mmap
-import ctypes
 from pathlib import Path
-from abc import ABC, abstractmethod
-from enum import Enum, IntEnum, auto
+from enum import Enum, auto
 from dataclasses import dataclass, field, fields, asdict
 from typing import (
-    Any, Dict, List, Optional, Union, Callable, TypeVar, Tuple,
-    Generic, Protocol, runtime_checkable, Type, get_type_hints,
-    get_origin, get_args, Final, final
+    Any,
+    Dict,
+    List,
+    Optional,
+    Union,
+    Callable,
+    TypeVar,
+    Tuple,
+    Type,
+    get_type_hints,
+    get_origin,
+    get_args,
+    final,
 )
-from functools import wraps, lru_cache
-from contextlib import contextmanager
-from concurrent.futures import ThreadPoolExecutor
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer, HTTPServer
-from socketserver import ThreadingMixIn
 from types import ModuleType
 from importlib.metadata import distributions
 
 # Try to import sub-interpreters (Python 3.12+)
 try:
     from concurrent import interpreters
+
     HAS_INTERPRETERS = True
 except ImportError:
     HAS_INTERPRETERS = False
@@ -87,7 +88,7 @@ class JsonLogFormatter(logging.Formatter):
             "message": record.getMessage(),
             "source": record.name,
             "context": getattr(record, 'context', {}),
-            "correlation_id": getattr(record, 'correlation_id', 'SYSTEM')
+            "correlation_id": getattr(record, 'correlation_id', 'SYSTEM'),
         }
         if record.exc_info:
             log_object["exception"] = self.formatException(record.exc_info)
@@ -112,7 +113,7 @@ def setup_logging(
     log_dir: str = "logs",
     log_file: str = "morphological.log",
     level: int = logging.INFO,
-    json_format: bool = True
+    json_format: bool = True,
 ) -> logging.Logger:
     """Configure comprehensive logging system"""
     logs_path = Path(log_dir)
@@ -120,7 +121,11 @@ def setup_logging(
     log_filepath = logs_path / log_file
 
     formatter_class = JsonLogFormatter if json_format else logging.Formatter
-    format_str = '%(message)s' if json_format else '[%(levelname)s]%(asctime)s||%(name)s: %(message)s'
+    format_str = (
+        '%(message)s'
+        if json_format
+        else '[%(levelname)s]%(asctime)s||%(name)s: %(message)s'
+    )
 
     logging_config = {
         'version': 1,
@@ -129,15 +134,15 @@ def setup_logging(
             'default': {
                 '()': formatter_class,
                 'format': format_str,
-                'datefmt': '%Y-%m-%d~%H:%M:%S%z'
-            },
+                'datefmt': '%Y-%m-%d~%H:%M:%S%z',
+            }
         },
         'handlers': {
             'console': {
                 'level': level,
                 'class': 'logging.StreamHandler',
                 'formatter': 'default',
-                'stream': 'ext://sys.stdout'
+                'stream': 'ext://sys.stdout',
             },
             'file': {
                 'level': level,
@@ -145,13 +150,10 @@ def setup_logging(
                 'class': 'logging.handlers.RotatingFileHandler',
                 'filename': str(log_filepath),
                 'maxBytes': 10485760,  # 10MB
-                'backupCount': 10
+                'backupCount': 10,
             },
         },
-        'root': {
-            'level': level,
-            'handlers': ['console', 'file']
-        }
+        'root': {'level': level, 'handlers': ['console', 'file']},
     }
 
     logging.config.dictConfig(logging_config)
@@ -187,6 +189,7 @@ class MorphologicalError(Exception):
 
 class AnalyzerError(MorphologicalError):
     """Base for analysis-specific errors"""
+
     pass
 
 
@@ -199,6 +202,7 @@ class ConfigurationError(AnalyzerError):
 
 class SourceError(AnalyzerError):
     """Issues with source files"""
+
     pass
 
 
@@ -253,6 +257,7 @@ class ResourceLimitExceededError(MorphologicalError):
 
 class LspError(AnalyzerError):
     """LSP-specific errors"""
+
     pass
 
 
@@ -266,6 +271,7 @@ C = TypeVar('C', bound=Callable)
 
 class QuantumState(Enum):
     """Quantum-inspired state representation"""
+
     SUPERPOSITION = auto()
     ENTANGLED = auto()
     COLLAPSED = auto()
@@ -274,6 +280,7 @@ class QuantumState(Enum):
 
 class RuntimeMode(Enum):
     """Runtime execution mode"""
+
     SUBINTERPRETER = auto()
     THREADED = auto()
     SEQUENTIAL = auto()
@@ -281,6 +288,7 @@ class RuntimeMode(Enum):
 
 class Mutability(Enum):
     """Data mutability mode"""
+
     IMMUTABLE = auto()
     MUTABLE = auto()
     QUEINIC = auto()  # Quantum + homoiconic
@@ -288,10 +296,12 @@ class Mutability(Enum):
 
 class SerializationFormat(Enum):
     """Supported serialization formats"""
+
     JSON = "json"
     PICKLE = "pickle"
     REPR = "repr"
     MSGPACK = "msgpack"
+
 
 # ============================================================================
 # BASEMODEL: Validation and serialization foundation
@@ -315,7 +325,9 @@ def _matches_type(value: Any, tp: Any) -> bool:
             return all(_matches_type(v, args[0]) for v in value)
         if origin is dict and len(args) == 2:
             kt, vt = args
-            return all(_matches_type(k, kt) and _matches_type(v, vt) for k, v in value.items())
+            return all(
+                _matches_type(k, kt) and _matches_type(v, vt) for k, v in value.items()
+            )
         return True
 
     return isinstance(value, tp)
@@ -383,11 +395,12 @@ class BaseModel:
     Foundation for all data models with validation and serialization.
     Provides Pydantic-like semantics with stdlib-only implementation.
     """
+
     __slots__ = ('__weakref__',)
 
     def __post_init__(self):
         """Validate all fields after initialization"""
-        annotations = self.__annotations__
+        annotations = self.__annotate_func__
 
         for field_name, expected_type in annotations.items():
             value = getattr(self, field_name)
@@ -419,8 +432,7 @@ class BaseModel:
         for field_name, field_type in field_types.items():
             if field_name in init_data:
                 try:
-                    init_data[field_name] = _coerce(
-                        init_data[field_name], field_type)
+                    init_data[field_name] = _coerce(init_data[field_name], field_type)
                 except (TypeError, ValueError) as e:
                     raise ValueError(f"Failed to coerce {field_name}: {e}")
 
@@ -458,9 +470,9 @@ class BaseModel:
 
     def fingerprint(self) -> str:
         """Content-based fingerprint for caching"""
-        content = json.dumps(
-            self.to_dict(), sort_keys=True, separators=(',', ':'))
+        content = json.dumps(self.to_dict(), sort_keys=True, separators=(',', ':'))
         return hashlib.sha256(content.encode()).hexdigest()[:16]
+
 
 # CONFIGURATION MODELS
 
@@ -472,6 +484,7 @@ class AnalyzerConfig(BaseModel):
     Immutable configuration for static analysis engine.
     Enforces security boundaries and resource limits.
     """
+
     # Allowed source directories (security boundary)
     allowed_source_roots: Tuple[Path, ...]
 
@@ -481,7 +494,7 @@ class AnalyzerConfig(BaseModel):
 
     # File handling
     source_encoding: str = 'utf-8'
-    allowed_extensions: Tuple[str, ...] = ('.py', '.md', '.txt',)
+    allowed_extensions: Tuple[str, ...] = ('.py', '.md', '.txt')
 
     # Security
     hmac_secret_key: bytes = field(default_factory=lambda: os.urandom(32))
@@ -495,8 +508,7 @@ class AnalyzerConfig(BaseModel):
             if not p.is_absolute():
                 raise ConfigurationError(f"Path not absolute: {p}")
             if not p.exists() or not p.is_dir():
-                raise ConfigurationError(
-                    f"Path does not exist or not a directory: {p}")
+                raise ConfigurationError(f"Path does not exist or not a directory: {p}")
 
         if self.max_file_size_bytes <= 0:
             raise ConfigurationError("max_file_size_bytes must be positive")
@@ -505,6 +517,7 @@ class AnalyzerConfig(BaseModel):
 @dataclass
 class RuntimeConfig:
     """Configuration for runtime execution"""
+
     mode: RuntimeMode = RuntimeMode.THREADED
     max_workers: int = 4
     shared_memory_size: int = 8192
@@ -512,8 +525,10 @@ class RuntimeConfig:
     def __post_init__(self):
         if self.mode == RuntimeMode.SUBINTERPRETER and not HAS_INTERPRETERS:
             logger.warning(
-                "Sub-interpreters not available, falling back to THREADED mode")
+                "Sub-interpreters not available, falling back to THREADED mode"
+            )
             object.__setattr__(self, 'mode', RuntimeMode.THREADED)
+
 
 # ============================================================================
 # DATA TRANSFER OBJECTS (DTOs)
@@ -524,6 +539,7 @@ class RuntimeConfig:
 @dataclass(frozen=True)
 class SourceRequest(BaseModel):
     """Immutable analysis request"""
+
     source_path: Path
     request_id: uuid.UUID = field(default_factory=uuid.uuid4)
 
@@ -538,6 +554,7 @@ class SourceRequest(BaseModel):
 @dataclass(frozen=True)
 class AnalysisMetadata(BaseModel):
     """Metadata for analysis results"""
+
     request_id: uuid.UUID
     source_path: Path
     source_hash_sha256: str
@@ -554,6 +571,7 @@ class AnalysisMetadata(BaseModel):
 @dataclass(frozen=True)
 class SemanticGraph(BaseModel):
     """Analysis result with semantic information"""
+
     source_artifact_hash: str
     processed_at_unix_ts: float
     engine_version: str
@@ -565,6 +583,7 @@ class SemanticGraph(BaseModel):
 @dataclass(frozen=True)
 class AnalysisResult(BaseModel):
     """Complete analysis result with metadata"""
+
     metadata: AnalysisMetadata
     semantic_graph: Dict[str, Any]
 
@@ -575,15 +594,13 @@ class AnalysisResult(BaseModel):
 
         lines.append(f"# Python Module: `{meta.source_path.name}`")
         lines.append(f"- **Hash**: `{meta.source_hash_sha256[:16]}`")
-        lines.append(
-            f"- **Analyzed**: `{time.ctime(meta.analysis_timestamp_utc)}`")
+        lines.append(f"- **Analyzed**: `{time.ctime(meta.analysis_timestamp_utc)}`")
         lines.append("")
 
         lines.append("## Functions")
         for f in sg.get("functions", []):
             args = ", ".join(f["args"])
-            decs = " ⟶ " + ", ".join(f["decorators"]
-                                     ) if f["decorators"] else ""
+            decs = " ⟶ " + ", ".join(f["decorators"]) if f["decorators"] else ""
             line = f"- `{f['name']}({args})` (line {f['lineno']}){decs}"
             lines.append(line)
 
@@ -602,6 +619,7 @@ class AnalysisResult(BaseModel):
 
         lines.append(f"\n## Complexity Score: `{sg.get('complexity', 0)}`")
         return "\n".join(lines)
+
 
 # IWE LSP DTO
 
@@ -632,13 +650,12 @@ class LspMessage(BaseModel):
     result: Optional[Any] = None
     error: Optional[Dict[str, Any]] = None
 
+
 # DYNAMIC MODULE CREATION: Morphological self-modification
 
 
 def create_module(
-    module_name: str,
-    module_code: str,
-    main_module_path: str = None
+    module_name: str, module_code: str, main_module_path: str = None
 ) -> Optional[ModuleType]:
     """
     Dynamically create a module with injected code.
@@ -664,9 +681,9 @@ def create_module(
         logger.info(f"Created dynamic module: {module_name}")
         return dynamic_module
     except Exception as e:
-        logger.error(
-            f"Failed to create module {module_name}: {e}", exc_info=True)
+        logger.error(f"Failed to create module {module_name}: {e}", exc_info=True)
         return None
+
 
 # ============================================================================
 # STATIC ANALYSIS ENGINE: Core analysis logic
@@ -682,8 +699,9 @@ class StaticAnalysisEngine:
     def __init__(self, config: AnalyzerConfig):
         self._config = config
         self._logger = get_logger(self.__class__.__name__)
-        self._logger.info(f"Engine initialized", extra={
-                          'context': {'config': str(config)}})
+        self._logger.info(
+            "Engine initialized", extra={'context': {'config': str(config)}}
+        )
 
     def analyze(self, request: SourceRequest) -> AnalysisResult:
         """
@@ -699,29 +717,29 @@ class StaticAnalysisEngine:
             AnalyzerError: For any predictable failure
         """
         logger = get_logger(self.__class__.__name__, str(request.request_id))
-        logger.info(f"Analysis started", extra={
-                    'context': {'source': str(request.source_path)}})
+        logger.info(
+            "Analysis started", extra={'context': {'source': str(request.source_path)}}
+        )
         start_time = time.time()
         if request.source_path.suffix == '.md':
             # Proxy to IWE LSP for markdown
             if not hasattr(self, '_lsp_client'):
                 self._lsp_client = LspClient()  # Lazy init
             # Example: Get document symbols (outline)
-            params = {"textDocument": {
-                "uri": f"file://{request.source_path.absolute()}"}}
-            symbols = self._lsp_client.request(
-                "textDocument/documentSymbol", params)
+            params = {
+                "textDocument": {"uri": f"file://{request.source_path.absolute()}"}
+            }
+            symbols = self._lsp_client.request("textDocument/documentSymbol", params)
             return AnalysisResult(  # Adapt to your model
                 metadata=AnalysisMetadata(...),
-                semantic_graph={"symbols": symbols}  # Or process further
+                semantic_graph={"symbols": symbols},  # Or process further
             )
         try:
             # Stage 1: Security validation
             self._validate_source_path(request.source_path, logger)
 
             # Stage 2: Read content securely
-            content, file_hash = self._read_source_content(
-                request.source_path, logger)
+            content, file_hash = self._read_source_content(request.source_path, logger)
 
             # Stage 3: Parse to AST
             tree = self._parse_to_ast(content, request.source_path, logger)
@@ -734,21 +752,23 @@ class StaticAnalysisEngine:
                 request_id=request.request_id,
                 source_path=request.source_path,
                 source_hash_sha256=file_hash,
-                analysis_timestamp_utc=time.time()
+                analysis_timestamp_utc=time.time(),
             )
 
             result = AnalysisResult(metadata=metadata, semantic_graph=graph)
 
             duration = time.time() - start_time
-            logger.info(f"Analysis completed", extra={
-                        'context': {'duration': f"{duration:.4f}s"}})
+            logger.info(
+                "Analysis completed",
+                extra={'context': {'duration': f"{duration:.4f}s"}},
+            )
             return result
 
         except AnalyzerError:
-            logger.error(f"Analysis failed", exc_info=True)
+            logger.error("Analysis failed", exc_info=True)
             raise
         except Exception as e:
-            logger.critical(f"Unexpected error", exc_info=True)
+            logger.critical("Unexpected error", exc_info=True)
             raise AnalyzerError(f"Unexpected internal error: {e}") from e
 
     def _validate_source_path(self, source_path: Path, logger: ContextualLogger):
@@ -758,23 +778,24 @@ class StaticAnalysisEngine:
         try:
             real_path = source_path.resolve(strict=True)
         except FileNotFoundError:
-            raise SourceNotFoundError(
-                f"Source file does not exist: {source_path}")
+            raise SourceNotFoundError(f"Source file does not exist: {source_path}")
 
         # Check against allowed roots
-        if not any(real_path.is_relative_to(root) for root in self._config.allowed_source_roots):
-            raise SourcePermissionError(
-                f"Path outside allowed roots: {real_path}")
+        if not any(
+            real_path.is_relative_to(root) for root in self._config.allowed_source_roots
+        ):
+            raise SourcePermissionError(f"Path outside allowed roots: {real_path}")
 
         logger.info("Path validation passed")
 
-    def _read_source_content(self, source_path: Path, logger: ContextualLogger) -> Tuple[str, str]:
+    def _read_source_content(
+        self, source_path: Path, logger: ContextualLogger
+    ) -> Tuple[str, str]:
         """Securely read file content"""
         logger.info("Reading source content")
 
         if not os.access(source_path, os.R_OK):
-            raise SourcePermissionError(
-                f"Read permission denied: {source_path}")
+            raise SourcePermissionError(f"Read permission denied: {source_path}")
 
         file_size = source_path.stat().st_size
         if file_size > self._config.max_file_size_bytes:
@@ -788,13 +809,17 @@ class StaticAnalysisEngine:
 
             content_bytes = content.encode(self._config.source_encoding)
             file_hash = hashlib.sha256(content_bytes).hexdigest()
-            logger.info(f"Read {len(content_bytes)} bytes", extra={
-                        'context': {'hash': file_hash[:12]}})
+            logger.info(
+                f"Read {len(content_bytes)} bytes",
+                extra={'context': {'hash': file_hash[:12]}},
+            )
             return content, file_hash
         except (IOError, UnicodeDecodeError) as e:
             raise SourceError(f"Failed to read source: {e}") from e
 
-    def _parse_to_ast(self, content: str, source_path: Path, logger: ContextualLogger) -> ast.AST:
+    def _parse_to_ast(
+        self, content: str, source_path: Path, logger: ContextualLogger
+    ) -> ast.AST:
         """Parse Python source to AST"""
         logger.info("Parsing to AST")
         try:
@@ -802,10 +827,12 @@ class StaticAnalysisEngine:
         except SyntaxError as e:
             raise ParsingError(f"Invalid Python syntax: {e}") from e
 
-    def _build_semantic_graph(self, tree: ast.AST, logger: ContextualLogger) -> Dict[str, Any]:
+    def _build_semantic_graph(
+        self, tree: ast.AST, logger: ContextualLogger
+    ) -> Dict[str, Any]:
         """Build semantic graph from AST"""
         logger.info("Building semantic graph")
-        if source_path.suffix == ['.md', '.txt',]:
+        if source_path.suffix == ['.md', '.txt']:
             return self._build_markdown_graph(content, logger)
         else:
             return self._build_python_graph(tree, logger)
@@ -819,7 +846,7 @@ class StaticAnalysisEngine:
             "classes": visitor.classes,
             "imports": visitor.imports,
             "variables": visitor.variables,
-            "complexity": visitor.complexity_score
+            "complexity": visitor.complexity_score,
         }
 
 
@@ -834,52 +861,54 @@ class SemanticVisitor(ast.NodeVisitor):
         self.complexity_score = 0
 
     def visit_FunctionDef(self, node):
-        self.functions.append({
-            'name': node.name,
-            'lineno': node.lineno,
-            'args': [arg.arg for arg in node.args.args],
-            'decorators': [ast.unparse(d) for d in node.decorator_list]
-        })
+        self.functions.append(
+            {
+                'name': node.name,
+                'lineno': node.lineno,
+                'args': [arg.arg for arg in node.args.args],
+                'decorators': [ast.unparse(d) for d in node.decorator_list],
+            }
+        )
         self.complexity_score += 1
         self.generic_visit(node)
 
     def visit_ClassDef(self, node):
-        self.classes.append({
-            'name': node.name,
-            'lineno': node.lineno,
-            'bases': [ast.unparse(b) for b in node.bases],
-            'decorators': [ast.unparse(d) for d in node.decorator_list]
-        })
+        self.classes.append(
+            {
+                'name': node.name,
+                'lineno': node.lineno,
+                'bases': [ast.unparse(b) for b in node.bases],
+                'decorators': [ast.unparse(d) for d in node.decorator_list],
+            }
+        )
         self.complexity_score += 2
         self.generic_visit(node)
 
     def visit_Import(self, node):
         for alias in node.names:
-            self.imports.append({
-                'module': alias.name,
-                'alias': alias.asname,
-                'lineno': node.lineno
-            })
+            self.imports.append(
+                {'module': alias.name, 'alias': alias.asname, 'lineno': node.lineno}
+            )
         self.generic_visit(node)
 
     def visit_ImportFrom(self, node):
         for alias in node.names:
-            self.imports.append({
-                'module': node.module,
-                'name': alias.name,
-                'alias': alias.asname,
-                'lineno': node.lineno
-            })
+            self.imports.append(
+                {
+                    'module': node.module,
+                    'name': alias.name,
+                    'alias': alias.asname,
+                    'lineno': node.lineno,
+                }
+            )
         self.generic_visit(node)
 
     def visit_Assign(self, node):
         for target in node.targets:
             if isinstance(target, ast.Name):
-                self.variables.append({
-                    'name': target.id,
-                    'lineno': node.lineno
-                })
+                self.variables.append({'name': target.id, 'lineno': node.lineno})
         self.generic_visit(node)
+
 
 # HTTP RPC SERVER: Network interface for analysis
 
@@ -889,6 +918,7 @@ class AnalysisRequestHandler(BaseHTTPRequestHandler):
     HTTP request handler for analysis RPC endpoints.
     Enforces security and provides clean error handling.
     """
+
     # Class-level dependency injection
     engine: StaticAnalysisEngine
     config: AnalyzerConfig
@@ -913,26 +943,24 @@ class AnalysisRequestHandler(BaseHTTPRequestHandler):
             message = "Internal server error"
             self.logger.error("Unhandled exception", exc_info=True)
 
-        error_body = json.dumps({
-            "error": message,
-            "correlation_id": self.correlation_id
-        }).encode('utf-8')
+        error_body = json.dumps(
+            {"error": message, "correlation_id": self.correlation_id}
+        ).encode('utf-8')
         self._send_response(status_code, "application/json", error_body)
 
     def do_POST(self):
         """Handle POST requests"""
-        self.correlation_id = self.headers.get(
-            "X-Correlation-ID", str(uuid.uuid4()))
+        self.correlation_id = self.headers.get("X-Correlation-ID", str(uuid.uuid4()))
         logger = get_logger(self.__class__.__name__, self.correlation_id)
         self.logger = logger
 
-        logger.info("Request received", extra={'context': {
-                    'method': 'POST', 'path': self.path}})
+        logger.info(
+            "Request received", extra={'context': {'method': 'POST', 'path': self.path}}
+        )
 
         try:
             if self.path != "/analyze":
-                raise InputValidationError(
-                    "Endpoint not found. Use POST /analyze")
+                raise InputValidationError("Endpoint not found. Use POST /analyze")
 
             content_len = int(self.headers.get('Content-Length', 0))
             if content_len > self.config.max_request_body_size:
@@ -946,14 +974,14 @@ class AnalysisRequestHandler(BaseHTTPRequestHandler):
 
             if not path or not content_b64:
                 raise InputValidationError(
-                    "Request must contain 'path' and 'content_b64'")
+                    "Request must contain 'path' and 'content_b64'"
+                )
 
             content_bytes = base64.b64decode(content_b64)
 
             # Create source request
             request = SourceRequest(
-                request_id=uuid.UUID(self.correlation_id),
-                source_path=Path(path)
+                request_id=uuid.UUID(self.correlation_id), source_path=Path(path)
             )
 
             # Analyze
@@ -969,15 +997,16 @@ class AnalysisRequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         """Handle GET requests"""
-        self.correlation_id = self.headers.get(
-            "X-Correlation-ID", str(uuid.uuid4()))
+        self.correlation_id = self.headers.get("X-Correlation-ID", str(uuid.uuid4()))
 
         if self.path == "/health":
-            body = json.dumps({
-                "status": "healthy",
-                "timestamp": time.time(),
-                "correlation_id": self.correlation_id
-            }).encode('utf-8')
+            body = json.dumps(
+                {
+                    "status": "healthy",
+                    "timestamp": time.time(),
+                    "correlation_id": self.correlation_id,
+                }
+            ).encode('utf-8')
             self._send_response(200, "application/json", body)
         else:
             self._handle_error(InputValidationError("Endpoint not found"))
@@ -989,6 +1018,7 @@ class AnalysisRequestHandler(BaseHTTPRequestHandler):
 
 class ThreadedAnalysisServer(ThreadingHTTPServer):
     """Threaded HTTP server with dependency injection"""
+
     daemon_threads = True
 
     def __init__(
@@ -996,7 +1026,7 @@ class ThreadedAnalysisServer(ThreadingHTTPServer):
         server_address,
         RequestHandlerClass,
         engine: StaticAnalysisEngine,
-        config: AnalyzerConfig
+        config: AnalyzerConfig,
     ):
         RequestHandlerClass.engine = engine
         RequestHandlerClass.config = config
@@ -1007,18 +1037,21 @@ class SubinterpreterMixIn:
     from concurrent.futures import InterpreterPoolExecutor
     from concurrent import interpreters
     from socketserver import BaseServer
+
     """Mixin to process requests in subinterpreters"""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._executor = InterpreterPoolExecutor(
-            max_workers=4)  # Pool of subinterpreters
+            max_workers=4
+        )  # Pool of subinterpreters
         self._channel = interpreters.create_channel()  # For sending/receiving data
 
     def process_request(self, request, client_address):
         # Submit to executor: Run in subinterpreter
         future = self._executor.submit(
-            self._handle_in_subinterpreter, request, client_address)
+            self._handle_in_subinterpreter, request, client_address
+        )
         # Wait or async handle (for non-blocking, use as_completed)
         try:
             response = future.result()  # Get result from subinterpreter
@@ -1029,6 +1062,7 @@ class SubinterpreterMixIn:
     def _handle_in_subinterpreter(self, request_fd, client_address):
         # This runs in subinterpreter: Reconstruct socket from FD
         import socket
+
         sock = socket.fromfd(request_fd, socket.AF_INET, socket.SOCK_STREAM)
         # Run your handler logic here (e.g., AnalysisRequestHandler)
         handler = self.RequestHandlerClass(sock, client_address, self)
@@ -1049,7 +1083,12 @@ class SubinterpreterAnalysisServer(SubinterpreterMixIn, HTTPServer):
 class LspClient:
     """Stdlib-only LSP client for iwes"""
 
-    def __init__(self, iwes_path: str = 'iwes', project_root: Path = Path.cwd(), logger: ContextualLogger = None):
+    def __init__(
+        self,
+        iwes_path: str = 'iwes',
+        project_root: Path = Path.cwd(),
+        logger: ContextualLogger = None,
+    ):
         self.logger = logger or get_logger(self.__class__.__name__)
         self.process = subprocess.Popen(
             [iwes_path],
@@ -1092,21 +1131,20 @@ class LspClient:
 
     def initialize(self):
         """Initialize LSP session"""
-        init_id = uuid.uuid4().int & (1 << 32)-1  # Simple ID
+        init_id = uuid.uuid4().int & (1 << 32) - 1  # Simple ID
         params = {
             "processId": os.getpid(),
             "rootUri": f"file://{Path.cwd().absolute()}",
-            "capabilities": {}  # Add client caps as needed
+            "capabilities": {},  # Add client caps as needed
         }
-        self._send_message(LspMessage(
-            id=init_id, method="initialize", params=params))
+        self._send_message(LspMessage(id=init_id, method="initialize", params=params))
         response = self._read_message()
         if response.error:
             raise LspError(f"Initialize failed: {response.error}")
         self.logger.info("LSP initialized")
 
     def request(self, method: str, params: Dict[str, Any]) -> Any:
-        req_id = uuid.uuid4().int & (1 << 32)-1
+        req_id = uuid.uuid4().int & (1 << 32) - 1
         self._send_message(LspMessage(id=req_id, method=method, params=params))
         while True:  # Handle notifications if any
             response = self._read_message()
@@ -1141,7 +1179,7 @@ def main():
         max_file_size_bytes=1 * 1024 * 1024,  # 1 MiB
         max_request_body_size=10 * 1024 * 1024,  # 10 MiB
         source_encoding='utf-8',
-        allowed_extensions=('.py',)
+        allowed_extensions=('.py',),
     )
 
     logger.info(f"Configuration: {analyzer_config.to_dict()}")
@@ -1154,10 +1192,7 @@ def main():
     port = int(os.environ.get('PORT', '8698'))
 
     server = ThreadedAnalysisServer(
-        (host, port),
-        AnalysisRequestHandler,
-        engine,
-        analyzer_config
+        (host, port), AnalysisRequestHandler, engine, analyzer_config
     )
 
     logger.info(f"Server listening on http://{host}:{port}")
@@ -1173,6 +1208,7 @@ def main():
         server.shutdown()
         logger.info("Server stopped")
 
+
 # ============================================================================
 # DEMONSTRATION AND TESTING
 # ============================================================================
@@ -1187,8 +1223,7 @@ def demo_analysis():
     # Setup
     allowed_roots = [Path.cwd()]
     config = AnalyzerConfig(
-        allowed_source_roots=tuple(allowed_roots),
-        max_file_size_bytes=10 * 1024 * 1024
+        allowed_source_roots=tuple(allowed_roots), max_file_size_bytes=10 * 1024 * 1024
     )
 
     engine = StaticAnalysisEngine(config)
@@ -1231,16 +1266,11 @@ if __name__ == "__main__":
 
         logger.info("✓ Analysis completed successfully")
         logger.info(f"  Request ID: {result.metadata.request_id}")
-        logger.info(
-            f"  Source hash: {result.metadata.source_hash_sha256[:16]}...")
-        logger.info(
-            f"  Functions found: {len(result.semantic_graph['functions'])}")
-        logger.info(
-            f"  Classes found: {len(result.semantic_graph['classes'])}")
-        logger.info(
-            f"  Imports found: {len(result.semantic_graph['imports'])}")
-        logger.info(
-            f"  Complexity score: {result.semantic_graph['complexity']}")
+        logger.info(f"  Source hash: {result.metadata.source_hash_sha256[:16]}...")
+        logger.info(f"  Functions found: {len(result.semantic_graph['functions'])}")
+        logger.info(f"  Classes found: {len(result.semantic_graph['classes'])}")
+        logger.info(f"  Imports found: {len(result.semantic_graph['imports'])}")
+        logger.info(f"  Complexity score: {result.semantic_graph['complexity']}")
 
         # Display details
         logger.info("\n  Functions:")
@@ -1318,7 +1348,8 @@ def greet():
 
         # Verify it's in sys.modules
         logger.info(
-            f"\n✓ Module registered in sys.modules: {module_name in sys.modules}")
+            f"\n✓ Module registered in sys.modules: {module_name in sys.modules}"
+        )
     else:
         logger.error("✗ Failed to create dynamic module")
 
@@ -1348,13 +1379,11 @@ class Calculator:
 
     # Encode as base64
     import base64
+
     content_b64 = base64.b64encode(test_code.encode('utf-8')).decode('ascii')
 
     # Create request payload
-    payload = {
-        "path": "test_client.py",
-        "content_b64": content_b64
-    }
+    payload = {"path": "test_client.py", "content_b64": content_b64}
 
     logger.info("RPC Request Payload:")
     logger.info(json.dumps(payload, indent=2))
@@ -1411,8 +1440,7 @@ def analyze_complexity(code: str) -> dict:
         # 2. Setup analysis engine
         logger.info("\n2. Initializing static analysis engine...")
         config = AnalyzerConfig(
-            allowed_source_roots=(Path.cwd(),),
-            max_file_size_bytes=1024 * 1024
+            allowed_source_roots=(Path.cwd(),), max_file_size_bytes=1024 * 1024
         )
         engine = StaticAnalysisEngine(config)
         logger.info("✓ Engine initialized")
@@ -1461,13 +1489,12 @@ def main():
 
         # 6. Compare results
         logger.info("\n6. Results comparison:")
-        logger.info(f"  Static analysis:")
-        logger.info(
-            f"    Functions: {len(result.semantic_graph['functions'])}")
+        logger.info("  Static analysis:")
+        logger.info(f"    Functions: {len(result.semantic_graph['functions'])}")
         logger.info(f"    Classes: {len(result.semantic_graph['classes'])}")
         logger.info(f"    Complexity: {result.semantic_graph['complexity']}")
 
-        logger.info(f"\n  Dynamic analysis:")
+        logger.info("\n  Dynamic analysis:")
         logger.info(f"    Functions: {dynamic_result['functions']}")
         logger.info(f"    Classes: {dynamic_result['classes']}")
         logger.info(f"    Loops: {dynamic_result['loops']}")
@@ -1491,6 +1518,7 @@ def main():
             test_file.unlink()
             logger.info("✓ Cleanup completed")
 
+
 # ============================================================================
 # CLI INTERFACE
 # ============================================================================
@@ -1505,41 +1533,30 @@ def cli():
     )
 
     parser.add_argument(
-        'command',
-        choices=['serve', 'analyze', 'demo'],
-        help='Command to execute'
+        'command', choices=['serve', 'analyze', 'demo'], help='Command to execute'
     )
 
     parser.add_argument(
-        '--file',
-        type=Path,
-        help='File to analyze (for analyze command)'
+        '--file', type=Path, help='File to analyze (for analyze command)'
     )
 
     parser.add_argument(
-        '--host',
-        default='127.0.0.1',
-        help='Server host (for serve command)'
+        '--host', default='127.0.0.1', help='Server host (for serve command)'
     )
 
     parser.add_argument(
-        '--port',
-        type=int,
-        default=8698,
-        help='Server port (for serve command)'
+        '--port', type=int, default=8698, help='Server port (for serve command)'
     )
 
     parser.add_argument(
         '--log-level',
         choices=['DEBUG', 'INFO', 'WARNING', 'ERROR'],
         default='INFO',
-        help='Logging level'
+        help='Logging level',
     )
 
     parser.add_argument(
-        '--json-logs',
-        action='store_true',
-        help='Output logs in JSON format'
+        '--json-logs', action='store_true', help='Output logs in JSON format'
     )
 
     args = parser.parse_args()
@@ -1561,7 +1578,7 @@ def cli():
 
         config = AnalyzerConfig(
             allowed_source_roots=(args.file.parent.resolve(),),
-            max_file_size_bytes=10 * 1024 * 1024
+            max_file_size_bytes=10 * 1024 * 1024,
         )
 
         engine = StaticAnalysisEngine(config)
@@ -1580,6 +1597,7 @@ def cli():
         demo_rpc_client()
         demo_integration()
 
+
 # ============================================================================
 # EXPORT PUBLIC API
 # ============================================================================
@@ -1589,23 +1607,19 @@ __all__ = [
     # Core classes
     'StaticAnalysisEngine',
     'SemanticVisitor',
-
     # Data models
     'SourceRequest',
     'AnalysisMetadata',
     'AnalysisResult',
     'SemanticGraph',
-
     # Configuration
     'AnalyzerConfig',
     'RuntimeConfig',
-
     # Enums
     'QuantumState',
     'RuntimeMode',
     'Mutability',
     'SerializationFormat',
-
     # Exceptions
     'MorphologicalError',
     'AnalyzerError',
@@ -1618,16 +1632,13 @@ __all__ = [
     'InputValidationError',
     'SecurityViolationError',
     'ResourceLimitExceededError',
-
     # Utilities
     'create_module',
     'setup_logging',
     'get_logger',
-
     # Server
     'ThreadedAnalysisServer',
     'AnalysisRequestHandler',
-
     # Base
     'BaseModel',
     'ContextualLogger',
@@ -1636,7 +1647,9 @@ __all__ = [
 __version__ = "1.0.0"
 __author__ = "MOONLAPSED"
 __license__ = "BSD-3 & CC BY"
-__description__ = "Morphological Analysis Engine: Static analysis with RPC/LSP capabilities"
+__description__ = (
+    "Morphological Analysis Engine: Static analysis with RPC/LSP capabilities"
+)
 
 # ============================================================================
 # ENTRY POINT
