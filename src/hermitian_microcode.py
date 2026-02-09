@@ -11,10 +11,7 @@ from __future__ import annotations
 # https://github.com/Moonlapsed/Morphological © 2023 by MOONLAPSED:MOONLAPSED@gmail.com BSD-3 & CC ND
 """
 4-bit Hermitian micro-code for consumer ISAs
-Needs only:  numpy  (for the SIMD wrappers)
 """
-
-import numpy as np
 
 # ------------------------------------------------------------------
 # Consumer-ISA fast-path
