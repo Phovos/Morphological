@@ -617,6 +617,7 @@ Bit 4: V₀   — Third Deputy. Takes command if C=0 AND V₂=0 AND V₁=0.
 | 0 | 0 | 0 | 0 | **NOBODY** |  The Ghost State  |
 
 Captaincy is like a mnemonic for epistemic [[Tail Call]] delegation; `< 000__V₀__ | ... >` pronounced 'dunder-Vzero', and its 'responsibilities' often include an [[Oracle]]-like character to them. Which makes sense when you think about their role as the last observable quanta of a runtime series, they are the fixed endpoint that is required for the wave function to be rooted. You can ask yourself, "what does my Captain `__enter__` and alternativly his lowest deputy DunderC `__exit__` have to do (each one is not implemented in python and as such does not have a full eneter/exit context manager, this is semantic tagging for your general understanding and categorization).
+
 ---
 
 ## THE GHOST STATE: `⟨ 0000 | TTTT ⟩`
