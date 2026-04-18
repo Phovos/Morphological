@@ -199,18 +199,16 @@ class FileSystem:
                 # Cache binary content if it's not too large
                 if metadata.file_size < 5 * 1024 * 1024:  # 5MB per file limit
                     with self._lock:
-                        # Check if we need to free some space
                         if self.binary_cache_size + metadata.file_size > self.binary_cache_limit:
-                            # Simple LRU: just clear the entire cache if we exceed the limit
-                            self.binary_cache_size = 0
-                            # Remove binary files from content cache
-                            keys_to_remove = [k for k, v in self.content_cache.items()
-                                              if isinstance(v, bytes)]
+                            # Check if we need to free some space
+                            keys_to_remove = [k for k, v in self.content_cache.items() if isinstance(v, bytes)]
+                            # Clear selectively while holding the lock
                             for key in keys_to_remove:
                                 del self.content_cache[key]
-                        # Add to cache
-                        self.content_cache[rel_path_str] = content
-                        self.binary_cache_size += metadata.file_size
+                            self.binary_cache_size = 0
+                            # Add to cache
+                            self.content_cache[rel_path_str] = content
+                            self.binary_cache_size += metadata.file_size
             else:
                 # Binary data loaded but not stored in cache
                 with open(metadata.path, 'rb') as f:
