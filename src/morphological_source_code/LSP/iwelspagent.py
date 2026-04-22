@@ -22,7 +22,7 @@ from dataclasses import dataclass
 import re
 
 # Import morphic classes
-from . import BYTE, QuantumState, HilbertSpace, MorphicComplex, least_significant_unit, WordSize
+from ...LSP import BYTE, QuantumState, HilbertSpace, MorphicComplex, least_significant_unit, WordSize
 
 
 @dataclass

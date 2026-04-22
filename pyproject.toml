@@ -3,7 +3,7 @@ name = "Morphological-Source-Code"
 description = "Morphological Source Code"
 authors = [{ name = "Phovos", email = "phovos@outlook.com" }]
 requires-python = ">=3.14"
-version = "0.4.24"
+version = "0.4.28"
 
 [project.readme]
 file = "README.md"
@@ -15,7 +15,6 @@ main = "main:main"
 [project.optional-dependencies]
 dev = [
     "uv",
-    "pre-commit",
 ]
 
 [project.scripts]

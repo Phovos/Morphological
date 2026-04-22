@@ -1,4 +1,5 @@
-"""Very dangerous conceptual implementation do not mess with this if you aren't sandboxed."""
+"""Dangerous conceptual implementation do not mess with this if you aren't sandboxed."""
+
 # quine_agent_demo.py
 import inspect
 import types
@@ -21,7 +22,8 @@ class SafeQuineAgent:
     # --- “Normal” behaviour ----------------------------------------------
     def greet(self) -> None:
         print(
-            f"[{self.name}] Hello, human. Time is {datetime.now().isoformat(timespec='seconds')}.")
+            f"[{self.name}] Hello, human. Time is {datetime.now().isoformat(timespec='seconds')}."
+        )
 
     def generate_prompt(self, user_input: str) -> str:
         self._history.append(user_input)
@@ -32,14 +34,19 @@ class SafeQuineAgent:
         """Return *current* class source as text."""
         return inspect.getsource(self.__class__)
 
+
 # ──────────────────────────────────────────────────────────────────────────────
 # 2)  Context manager that swaps the agent's class in-place
 # ──────────────────────────────────────────────────────────────────────────────
 
 
 @contextmanager
-def quine_patch(obj: SafeQuineAgent, patch_source: str, *,
-                on_error: Callable[[Exception], None] | None = None):
+def quine_patch(
+    obj: SafeQuineAgent,
+    patch_source: str,
+    *,
+    on_error: Callable[[Exception], None] | None = None,
+):
     """
     Temporarily replace `obj`'s class definition with code in `patch_source`.
 
@@ -52,11 +59,12 @@ def quine_patch(obj: SafeQuineAgent, patch_source: str, *,
     # Build a new namespace seeded with the current class dict
     ns: dict[str, object] = original_class.__dict__.copy()
     try:
-        exec(patch_source, ns)          # may add / replace attrs in ns
+        exec(patch_source, ns)  # may add / replace attrs in ns
         # Dynamically create patched subclass with same name
         PatchedCls = types.new_class(
-            original_class.__name__, (), {}, lambda d: d.update(ns))
-        obj.__class__ = PatchedCls      # hot-swap!
+            original_class.__name__, (), {}, lambda d: d.update(ns)
+        )
+        obj.__class__ = PatchedCls  # hot-swap!
         yield obj
     except Exception as exc:
         if on_error:
@@ -66,6 +74,7 @@ def quine_patch(obj: SafeQuineAgent, patch_source: str, *,
     finally:
         # Restore original behaviour
         obj.__class__ = original_class
+
 
 # ──────────────────────────────────────────────────────────────────────────────
 # 3)  Demonstrative main()
@@ -89,7 +98,7 @@ new_template = "🤖 {input}  // patched"
 
     with quine_patch(agent, patch_code):
         print("=== INSIDE PATCH CONTEXT ===")
-        agent.greet()                                  # uses patched greet
+        agent.greet()  # uses patched greet
         agent.prompt_template = locals().get("new_template", agent.prompt_template)
         print(agent.generate_prompt("Patched world?"), "\n")
 

@@ -10,7 +10,7 @@
 # ruff: noqa: E401,F401,I001,F811,TC003,TC004,E402,E702,UP029,PLR0402,PLC0415,F406,E301,E302,E305
 # fmt: off
 import ast, os, sys, pathlib, logging, threading, datetime, inspect, uuid, base64, json, asyncio, functools, time, random, queue, hashlib, math, cmath, enum, re, types, dataclasses, typing, contextlib, collections, abc, io, string, itertools, operator, copy, weakref, gc, marshal, struct, array, mmap, ssl, socket, concurrent, multiprocessing, subprocess, tempfile, shutil, glob, fnmatch, csv, pickle, sqlite3, urllib, http, ftplib, smtplib, email, mimetypes, hmac, secrets, ipaddress, socketserver, http.server, xml, html, webbrowser, turtle, tkinter, ctypes, ctypes.wintypes, site  # noqa: E401, F401, F811, E702 # fmt: skip
-from dataclasses import dataclass, field; from enum import Enum, auto, IntEnum; from types import SimpleNamespace, ModuleType  # noqa: E702, F401 # fmt: skip
+from dataclasses import dataclass, field; from enum import Enum, auto, IntEnum; from types import SimpleNamespace, ModuleType; from functools import lru_cache  # noqa: E702, F401 # fmt: skip
 
 Path = pathlib.Path; Queue = queue.Queue  # noqa: E702 # fmt: skip
 from typing import (
@@ -831,7 +831,7 @@ def _coerce(raw: Any, tp: Any) -> Any:
                 return None
             try:
                 return _coerce(raw, arg_type)
-            except (TypeError, ValueError):
+            except TypeError, ValueError:
                 continue
         raise TypeError(f"Cannot coerce {raw!r} to any type in {tp}")
     # Handle generic types
@@ -1155,7 +1155,7 @@ class BaseModel:
             # Re-run post_init validation
             self.__post_init__()
             return True
-        except (TypeError, ValueError):
+        except TypeError, ValueError:
             return False
 
     def validate(self) -> List[str]:
@@ -3144,7 +3144,7 @@ class JSONRPCRequestHandler(BaseHTTPRequestHandler):
             raw_data = self.rfile.read(content_length)
             try:
                 request_data = json.loads(raw_data.decode('utf-8'))
-            except (json.JSONDecodeError, UnicodeDecodeError):
+            except json.JSONDecodeError, UnicodeDecodeError:
                 error_response = {
                     "jsonrpc": "2.0",
                     "id": None,

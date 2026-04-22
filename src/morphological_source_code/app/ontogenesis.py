@@ -1,6 +1,4 @@
 from __future__ import annotations
-import os
-import sys
 import json
 import uuid
 import http.client
@@ -15,8 +13,7 @@ from collections import defaultdict
 import enum
 import math
 import hashlib
-import typing
-from typing import Any, List, Union, Tuple, Dict, Optional, Callable, Set
+from typing import Any, List, Union, Tuple, Dict, Optional, Callable
 from enum import auto
 
 
@@ -26,15 +23,16 @@ class Morphology(enum.Enum):
     C = 0: Floor morphic state (stable, low-energy)
     C = 1: Dynamic or high-energy state
     """
-    MORPHIC = 0        # Stable, low-energy state
-    DYNAMIC = 1        # High-energy, potentially transformative state
+
+    MORPHIC = 0  # Stable, low-energy state
+    DYNAMIC = 1  # High-energy, potentially transformative state
 
     # Fundamental computational orientation and symmetry
-    MARKOVIAN = -1     # Forward-evolving, irreversible
+    MARKOVIAN = -1  # Forward-evolving, irreversible
     NON_MARKOVIAN = math.e  # Reversible, with memory
 
     LITTLE_ENDIAN = auto()  # LSB-first, canonical smaller representation
-    BIG_ENDIAN = auto()     # MSB-first, extended representation
+    BIG_ENDIAN = auto()  # MSB-first, extended representation
 
     LSB_MASK = 0b00001111  # Mask for Least Significant Bits
     MSB_MASK = 0b11110000  # Mask for Most Significant Bits
@@ -43,7 +41,7 @@ class Morphology(enum.Enum):
 class ByteWord:
     """
     Fundamental unit of computation in our morphological system.
-    Optimized for 8-bit to 64-bit architectures, with adaptability for 
+    Optimized for 8-bit to 64-bit architectures, with adaptability for
     future cognitive computation systems.
     """
 
@@ -56,8 +54,7 @@ class ByteWord:
         """Convert any input type to canonical bytes representation"""
         if isinstance(value, int):
             # Convert int to bytes, ensuring proper word size
-            return value.to_bytes((self.word_size + 7) // 8,
-                                  byteorder='little')
+            return value.to_bytes((self.word_size + 7) // 8, byteorder='little')
         elif isinstance(value, str):
             return value.encode('utf-8')
         elif isinstance(value, bytes):
@@ -93,7 +90,7 @@ class ByteWord:
         strategies = {
             'entropy': lambda s: hashlib.sha256(s).digest()[-1],
             'locality': lambda s: (hash(s) & 0xFF) ^ self.word_size,
-            'coherence': lambda s: sum(bin(b).count('1') for b in s) % 256
+            'coherence': lambda s: sum(bin(b).count('1') for b in s) % 256,
         }
 
         if self.word_size >= 32:
@@ -120,6 +117,7 @@ class MorphicTransformation:
     """
     Rules that map structural transformations in code morphologies.
     """
+
     symmetry: str  # e.g., "Translation", "Rotation", "Phase"
     conservation: str  # e.g., "Information", "Coherence", "Behavioral"
     # Left-hand side element (morphological pattern)
@@ -166,13 +164,12 @@ class TripartiteAtom:
     C: Computation space (transformative)
     """
 
-    def __init__(self,
-                 type_structure: type,
-                 value: Any,
-                 computation: Optional[Callable] = None):
+    def __init__(
+        self, type_structure: type, value: Any, computation: Optional[Callable] = None
+    ):
         self.T = type_structure  # Type structure
-        self.V = value           # Value space
-        self.C = computation     # Computation space (callable)
+        self.V = value  # Value space
+        self.C = computation  # Computation space (callable)
 
     def __call__(self, *args, **kwargs):
         """Make the atom callable if it has computation capability"""
@@ -288,8 +285,7 @@ class SemanticVector:
         # Ensure we have exactly the specified number of dimensions
         if len(components) < dimensions:
             # Pad with zeros
-            self.components = components + \
-                [0.0] * (dimensions - len(components))
+            self.components = components + [0.0] * (dimensions - len(components))
         else:
             # Truncate if too many
             self.components = components[:dimensions]
@@ -298,6 +294,7 @@ class SemanticVector:
 
     def to_rgb(self) -> Tuple[int, int, int]:
         """Convert semantic vector to RGB representation"""
+
         # Normalize first 3 components to [0, 1] using sigmoid
         def sigmoid(x: float) -> float:
             return 1 / (1 + math.exp(-x))
@@ -310,7 +307,9 @@ class SemanticVector:
         return tuple(rgb)
 
     @classmethod
-    def from_rgb(cls, rgb: Tuple[int, int, int], dimensions: int = 64) -> 'SemanticVector':
+    def from_rgb(
+        cls, rgb: Tuple[int, int, int], dimensions: int = 64
+    ) -> 'SemanticVector':
         """Create semantic vector from RGB representation"""
         # Normalize RGB to [0, 1]
         normalized = [x / 255.0 for x in rgb]
@@ -321,7 +320,7 @@ class SemanticVector:
             if x <= 0:
                 return -10.0  # A large negative number
             if x >= 1:
-                return 10.0   # A large positive number
+                return 10.0  # A large positive number
             return -math.log((1 / x) - 1)
 
         # Convert back to semantic vector components
@@ -350,8 +349,8 @@ class SemanticVector:
     def cosine_similarity(self, other: 'SemanticVector') -> float:
         """Calculate cosine similarity between vectors"""
         dot_product = self.dot(other)
-        magnitude_self = math.sqrt(sum(x*x for x in self.components))
-        magnitude_other = math.sqrt(sum(x*x for x in other.components))
+        magnitude_self = math.sqrt(sum(x * x for x in self.components))
+        magnitude_other = math.sqrt(sum(x * x for x in other.components))
 
         if magnitude_self == 0 or magnitude_other == 0:
             return 0
@@ -381,9 +380,10 @@ async def bootstrap_ontogenesis(seed_text: str):
     #    (type, initial value, computation function)
     atoms = {
         "int_adder": TripartiteAtom(int, 0, lambda v, x: v + x),
-        "greet":       TripartiteAtom(str, "Hello", lambda v, x: v + x),
-        "sem":         TripartiteAtom(SemanticVector, SemanticVector([0.1, 0.2, 0.3]),
-                                      lambda v, other: v + other),
+        "greet": TripartiteAtom(str, "Hello", lambda v, x: v + x),
+        "sem": TripartiteAtom(
+            SemanticVector, SemanticVector([0.1, 0.2, 0.3]), lambda v, other: v + other
+        ),
     }
     for name, atom in atoms.items():
         quine.register(name, atom)
@@ -392,8 +392,7 @@ async def bootstrap_ontogenesis(seed_text: str):
     # 5) Define and apply some MorphicTransformations inside the quine
     transforms = [
         MorphicTransformation("ByteSwap", "ByteCount", lhs=0x01, rhs=0xFF),
-        MorphicTransformation("PhaseFlip", "Coherence",
-                              lhs=b"Hello", rhs=b"Hallo"),
+        MorphicTransformation("PhaseFlip", "Coherence", lhs=b"Hello", rhs=b"Hallo"),
     ]
 
     # 6) Enter the quine‘s dynamic context: allow self‐serialization on exit
@@ -405,7 +404,8 @@ async def bootstrap_ontogenesis(seed_text: str):
         atom = quine.namespace.get("int_adder")
         if atom is None or not isinstance(atom, TripartiteAtom):
             raise RuntimeError(
-                f"Expected TripartiteAtom, got {type(atom)} for key 'int_adder'")
+                f"Expected TripartiteAtom, got {type(atom)} for key 'int_adder'"
+            )
         int_res = atom(42)
         logger.info("int_adder result: %s", int_res.V)
         # end debugging block
@@ -414,7 +414,8 @@ async def bootstrap_ontogenesis(seed_text: str):
         atom = quine.namespace["core"]["int_adder"]
         if not isinstance(atom, TripartiteAtom):
             raise RuntimeError(
-                f"Expected TripartiteAtom, got {type(atom)} for key 'int_adder'")
+                f"Expected TripartiteAtom, got {type(atom)} for key 'int_adder'"
+            )
         int_res = atom(42)
         # 6a) Apply each transformation once
         for t in transforms:
@@ -438,6 +439,7 @@ async def bootstrap_ontogenesis(seed_text: str):
 
     logger.info("Ontogenesis complete. Check ./states/ for snapshots.")
 
+
 # --- Core data & helpers ---
 
 
@@ -457,10 +459,12 @@ class OperatorType:
 
 
 class EmbeddingConfig:
-    def __init__(self,
-                 dimensions: int = 768,
-                 precision: str = 'float32',
-                 cache_path: str = 'runtime_cache.json'):
+    def __init__(
+        self,
+        dimensions: int = 768,
+        precision: str = 'float32',
+        cache_path: str = 'runtime_cache.json',
+    ):
         self.dimensions = dimensions
         self.precision = precision
         self.cache_path = cache_path
@@ -518,14 +522,17 @@ class OllamaClient:
         self.host = host
         self.port = port
 
-    async def generate_embedding(self, text: str, model: str = "nomic-embed-text") -> Optional[List[float]]:
+    async def generate_embedding(
+        self, text: str, model: str = "nomic-embed-text"
+    ) -> Optional[List[float]]:
         """Call Ollama’s embeddings endpoint and normalize to a flat list of floats."""
         conn = None
         try:
             conn = http.client.HTTPConnection(self.host, self.port)
             body = json.dumps({"model": model, "prompt": text})
-            conn.request("POST", "/api/embeddings", body,
-                         {'Content-Type': 'application/json'})
+            conn.request(
+                "POST", "/api/embeddings", body, {'Content-Type': 'application/json'}
+            )
             resp = conn.getresponse()
             raw = resp.read().decode()
             data = json.loads(raw)
@@ -537,7 +544,8 @@ class OllamaClient:
             if "embedding" in data:
                 return data["embedding"]
             logger.error(
-                "Unexpected embedding payload; got keys: %s", list(data.keys()))
+                "Unexpected embedding payload; got keys: %s", list(data.keys())
+            )
             return None
         except Exception as e:
             logger.error("Embedding exception: %s", e, exc_info=True)
@@ -550,16 +558,20 @@ class OllamaClient:
         conn = None
         try:
             conn = http.client.HTTPConnection(self.host, self.port)
-            body = json.dumps(
-                {"model": model, "prompt": prompt, "stream": False})
-            conn.request("POST", "/api/generate", body,
-                         {'Content-Type': 'application/json'})
+            body = json.dumps({"model": model, "prompt": prompt, "stream": False})
+            conn.request(
+                "POST", "/api/generate", body, {'Content-Type': 'application/json'}
+            )
             resp = conn.getresponse()
             raw = resp.read().decode()
             data = json.loads(raw)
             logger.debug("Generate raw response: %s", data)
 
-            if "choices" in data and isinstance(data["choices"], list) and data["choices"]:
+            if (
+                "choices" in data
+                and isinstance(data["choices"], list)
+                and data["choices"]
+            ):
                 return data["choices"][0].get("text", "").strip()
 
             if "response" in data:
@@ -568,8 +580,7 @@ class OllamaClient:
             if "error" in data:
                 logger.error(f"Ollama API error: {data['error']}")
 
-            logger.error(
-                "Unexpected generate payload; got keys: %s", list(data.keys()))
+            logger.error("Unexpected generate payload; got keys: %s", list(data.keys()))
             return ""
         except Exception as e:
             logger.error("Generate exception: %s", e, exc_info=True)
@@ -591,7 +602,9 @@ class EnhancedRuntimeSystem:
         self.clusters: Dict[int, List[str]] = defaultdict(list)
         self._load_store()
 
-    async def add_document(self, content: str, metadata: Dict[str, Any] = None) -> Optional[Document]:
+    async def add_document(
+        self, content: str, metadata: Dict[str, Any] = None
+    ) -> Optional[Document]:
         emb = await self.ollama.generate_embedding(content)
         if not emb:
             return None
@@ -603,7 +616,7 @@ class EnhancedRuntimeSystem:
         cid = self._assign_to_cluster(doc.uuid)
         self.clusters[cid].append(doc.uuid)
         await self._update_merkle_state()
-        self._save_store()         # ← save to disk
+        self._save_store()  # ← save to disk
         return doc
 
     def _save_store(self) -> None:
@@ -611,13 +624,15 @@ class EnhancedRuntimeSystem:
         self._store_path.parent.mkdir(exist_ok=True, parents=True)
         store = []
         for d in self.documents:
-            store.append({
-                'uuid': d.uuid,
-                'content': d.content,
-                'metadata': d.metadata,
-                # store raw list so we can reconstruct array
-                'embedding': d.embedding
-            })
+            store.append(
+                {
+                    'uuid': d.uuid,
+                    'content': d.content,
+                    'metadata': d.metadata,
+                    # store raw list so we can reconstruct array
+                    'embedding': d.embedding,
+                }
+            )
         with open(self._store_path, 'w', encoding='utf-8') as f:
             json.dump(store, f, indent=2)
 
@@ -628,10 +643,12 @@ class EnhancedRuntimeSystem:
         with open(self._store_path, encoding='utf-8') as f:
             store = json.load(f)
         for rec in store:
-            d = Document(content=rec['content'],
-                         embedding=rec['embedding'],
-                         metadata=rec['metadata'],
-                         uuid=rec['uuid'])
+            d = Document(
+                content=rec['content'],
+                embedding=rec['embedding'],
+                metadata=rec['metadata'],
+                uuid=rec['uuid'],
+            )
             self.documents.append(d)
             arr = array(self.config.get_format_char(), rec['embedding'])
             self.embeddings[d.uuid] = arr
@@ -654,9 +671,8 @@ class EnhancedRuntimeSystem:
     def _centroid(self, cid: int) -> array:
         ids = self.clusters[cid]
         if not ids:
-            return array(self.config.get_format_char(), [0.0]*self.config.dimensions)
-        acc = array(self.config.get_format_char(),
-                    [0.0]*self.config.dimensions)
+            return array(self.config.get_format_char(), [0.0] * self.config.dimensions)
+        acc = array(self.config.get_format_char(), [0.0] * self.config.dimensions)
         for uid in ids:
             for i, val in enumerate(self.embeddings[uid]):
                 acc[i] += val
@@ -666,22 +682,21 @@ class EnhancedRuntimeSystem:
         return acc
 
     def _cosine(self, v1: array, v2: array) -> float:
-        dot = sum(a*b for a, b in zip(v1, v2))
-        n1 = math.sqrt(sum(x*x for x in v1))
-        n2 = math.sqrt(sum(x*x for x in v2))
-        return dot/(n1*n2) if n1 and n2 else 0.0
+        dot = sum(a * b for a, b in zip(v1, v2))
+        n1 = math.sqrt(sum(x * x for x in v1))
+        n2 = math.sqrt(sum(x * x for x in v2))
+        return dot / (n1 * n2) if n1 and n2 else 0.0
 
     async def _update_merkle_state(self):
         state = {
             'timestamp': datetime.now(timezone.utc).isoformat(),
             'doc_count': len(self.documents),
             'cluster_count': len(self.clusters),
-            'config': vars(self.config)
+            'config': vars(self.config),
         }
         root = MerkleNode(state)
         for doc in self.documents:
-            root.add_child(MerkleNode(
-                {'uuid': doc.uuid, 'content': doc.content}))
+            root.add_child(MerkleNode({'uuid': doc.uuid, 'content': doc.content}))
         self.runtime_state.merkle_root = root
         self.runtime_state.state_history.append(root.hash)
         await self._save_state()
@@ -699,8 +714,11 @@ class EnhancedRuntimeSystem:
             'documents': [vars(d) for d in self.documents],
             'clusters': dict(self.clusters),
         }
-        p = Path(
-            'states') / self.runtime_state.merkle_root.hash[:2] / self.runtime_state.merkle_root.hash[2:4]
+        p = (
+            Path('states')
+            / self.runtime_state.merkle_root.hash[:2]
+            / self.runtime_state.merkle_root.hash[2:4]
+        )
         p.mkdir(parents=True, exist_ok=True)
         with open(p / f"{self.runtime_state.merkle_root.hash}.json", 'w') as f:
             json.dump(data, f, indent=2)
@@ -710,8 +728,9 @@ class EnhancedRuntimeSystem:
         if not q_emb:
             return {'error': 'Embedding failed'}
         q_arr = array(self.config.get_format_char(), q_emb)
-        sims = [(d, self._cosine(q_arr, self.embeddings[d.uuid]))
-                for d in self.documents]
+        sims = [
+            (d, self._cosine(q_arr, self.embeddings[d.uuid])) for d in self.documents
+        ]
         sims.sort(key=lambda x: -x[1])
         top = sims[:top_k]
         ctx = "\n".join(d.content for d, _ in top)
@@ -720,16 +739,18 @@ class EnhancedRuntimeSystem:
         return {
             'query': text,
             'response': resp,
-            'matches': [{'uuid': d.uuid, 'score': s} for d, s in top]
+            'matches': [{'uuid': d.uuid, 'score': s} for d, s in top],
         }
 
 
 # Utility functions
 
+
 def semantic_vector_to_rgb(vector: List[float]) -> Tuple[int, int, int]:
     def norm(x: float) -> float:
         return 1 / (1 + math.exp(-x))
-    regs = [min(255, max(0, int(norm(x)*255))) for x in vector[:3]]
+
+    regs = [min(255, max(0, int(norm(x) * 255))) for x in vector[:3]]
     while len(regs) < 3:
         regs.append(0)
     return tuple(regs)
@@ -737,11 +758,12 @@ def semantic_vector_to_rgb(vector: List[float]) -> Tuple[int, int, int]:
 
 def rgb_to_semantic_vector(rgb: Tuple[int, int, int], dims: int = 64) -> List[float]:
     def inv(c: int) -> float:
-        y = c/255.0
-        y = min(max(y, 1e-6), 1-1e-6)
-        return math.log(y/(1-y))
+        y = c / 255.0
+        y = min(max(y, 1e-6), 1 - 1e-6)
+        return math.log(y / (1 - y))
+
     vec = [inv(c) for c in rgb]
-    return vec + [0.0]*(dims - len(vec))
+    return vec + [0.0] * (dims - len(vec))
 
 
 # CLI entrypoint
@@ -766,23 +788,23 @@ def create_demo_runtime():
 
     # Create and register some atoms
     int_atom = TripartiteAtom(
-        int,                         # Type
-        42,                          # Value
-        lambda v, x: v + x           # Computation (addition)
+        int,  # Type
+        42,  # Value
+        lambda v, x: v + x,  # Computation (addition)
     )
 
     str_atom = TripartiteAtom(
-        str,                         # Type
+        str,  # Type
         "Hello, homoiconic world!",  # Value
-        lambda v, x: v + x           # Computation (concatenation)
+        lambda v, x: v + x,  # Computation (concatenation)
     )
 
     # Define a simple morphological transformation
     byte_flip = MorphicTransformation(
         symmetry="Bit Flip",
         conservation="Information Content",
-        lhs=0x01,                    # Pattern to match
-        rhs=0x10                     # Replacement pattern
+        lhs=0x01,  # Pattern to match
+        rhs=0x10,  # Replacement pattern
     )
 
     # Register atoms in runtime
@@ -792,9 +814,9 @@ def create_demo_runtime():
     # Create a semantic vector and register it
     vector = SemanticVector([0.5, -0.3, 0.8, 0.1, -0.2])
     vector_atom = TripartiteAtom(
-        SemanticVector,              # Type
-        vector,                      # Value
-        lambda v, other: v + other   # Computation (vector addition)
+        SemanticVector,  # Type
+        vector,  # Value
+        lambda v, other: v + other,  # Computation (vector addition)
     )
     runtime.register("semantic", vector_atom)
 
@@ -802,6 +824,7 @@ def create_demo_runtime():
 
 
 # Demonstrate the system
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -843,10 +866,7 @@ if __name__ == "__main__":
 
         # Define a transformation
         transform = MorphicTransformation(
-            symmetry="Byte Swap",
-            conservation="Byte Count",
-            lhs=0x01,
-            rhs=0xFF
+            symmetry="Byte Swap", conservation="Byte Count", lhs=0x01, rhs=0xFF
         )
 
         # Switch word to dynamic state to allow transformation

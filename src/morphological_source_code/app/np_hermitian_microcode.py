@@ -61,7 +61,7 @@ def born_rule(a: int, b: int) -> int:
 # Quantum-aware Atom subclass
 # ------------------------------------------------------------------
 from dataclasses import dataclass, field
-from baseModel import QuantumAtom
+from morphological_source_code.baseModel import QuantumAtom
 
 
 @dataclass

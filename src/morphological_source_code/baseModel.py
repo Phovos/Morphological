@@ -1229,7 +1229,7 @@ def main():
 
 
 if __name__ == "__main__":
-    from hermitian_microcode import HermitianAtom
+    from morphological_source_code.app.np_hermitian_microcode import HermitianAtom
 
     m = main()
     print(f'"main" object:\n{m}')
