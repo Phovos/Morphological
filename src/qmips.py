@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
+# © 2024-2026 https://github.com/Phovos/Morphological-Source-Code
+# © 2023-2026 https://github.com/MOONLAPSED/cognosis
 """
 Quantum Morphological Information Processing System
 
-This module integrates quantum state processing, SKI combinators, 
-Maxwell's Demon sorting, and morphological tree structures with 
+This module integrates quantum state processing, SKI combinators,
+Maxwell's Demon sorting, and morphological tree structures with
 advanced hashing and transformation capabilities.
 
 Key Concepts:
@@ -16,18 +18,22 @@ Key Concepts:
 
 import hashlib
 import math
-import os
 import random
 from collections import deque
-from contextlib import contextmanager
 from typing import (
-    Any, Callable, Generic, List, Optional, Protocol, 
-    TypeVar, Union, Dict, Tuple
+    Any,
+    Callable,
+    Generic,
+    List,
+    Optional,
+    Protocol,
+    TypeVar,
+    Union,
+    Dict,
 )
 from functools import wraps
 from dataclasses import dataclass, field, asdict
 from collections.abc import Hashable
-import inspect
 import ast
 
 # Type Variables for Generic Programming
@@ -36,10 +42,12 @@ S = TypeVar('S')
 
 # === Utility Functions ===
 
+
 def validate_instance(obj: Any, expected_type: Any) -> None:
     """Ensures the object is of the expected type."""
     if not isinstance(obj, expected_type):
         raise TypeError(f"Expected type {expected_type}, got {type(obj)} instead.")
+
 
 def singleton(cls: Callable) -> Callable:
     """Ensures a class is a singleton."""
@@ -53,22 +61,30 @@ def singleton(cls: Callable) -> Callable:
 
     return get_instance
 
+
 def debug_log(func: Callable) -> Callable:
     """Decorator to log the function call and its return value."""
+
     @wraps(func)
     def wrapper(*args, **kwargs):
-        arg_str = ", ".join([repr(a) for a in args] + [f"{k}={v!r}" for k, v in kwargs.items()])
+        arg_str = ", ".join(
+            [repr(a) for a in args] + [f"{k}={v!r}" for k, v in kwargs.items()]
+        )
         print(f"Calling {func.__name__}({arg_str})")
         result = func(*args, **kwargs)
         print(f"{func.__name__} returned {result!r}")
         return result
+
     return wrapper
 
+
 # === Core Data Classes ===
+
 
 @dataclass(frozen=True, slots=True)
 class AtomicModel:
     """A base immutable model with slots for runtime efficiency."""
+
     name: str
     attributes: Dict[str, Any] = field(default_factory=dict)
 
@@ -82,11 +98,15 @@ class AtomicModel:
             if not isinstance(key, Hashable):
                 raise ValueError(f"Attribute key {key} is not hashable.")
             if isinstance(value, (list, dict, set)):
-                raise ValueError(f"Attribute value for {key} must be immutable, got {type(value)}.")
+                raise ValueError(
+                    f"Attribute value for {key} must be immutable, got {type(value)}."
+                )
+
 
 @dataclass
 class AtomicTheory:
     """Represents an advanced atomic structure."""
+
     model: AtomicModel
     annotations: Dict[str, Any] = field(default_factory=dict)
 
@@ -97,8 +117,11 @@ class AtomicTheory:
             if key not in self.model.attributes:
                 raise KeyError(f"Missing key {key} in model attributes.")
             if not isinstance(self.model.attributes[key], annotation):
-                raise TypeError(f"Key {key} should be {annotation}, got {type(self.model.attributes[key])}.")
+                raise TypeError(
+                    f"Key {key} should be {annotation}, got {type(self.model.attributes[key])}."
+                )
         return True
+
 
 # Utility Functions for Hashing and Color Generation
 def hash_data(data: Union[str, bytes]) -> str:
@@ -107,6 +130,7 @@ def hash_data(data: Union[str, bytes]) -> str:
         data = data.encode()
     return hashlib.sha256(data).hexdigest()
 
+
 def generate_color_from_hash(hash_str: str) -> str:
     """Generate an ANSI color code based on the hash string."""
     color_value = int(hash_str[:6], 16)
@@ -114,9 +138,12 @@ def generate_color_from_hash(hash_str: str) -> str:
     g = (color_value >> 8) % 256
     b = color_value % 256
     return f"\033[38;2;{r};{g};{b}m"
+
+
 # SKI Combinator for Functional Transformations
 class SKICombinator:
     """Implementation of SKI combinators for information processing."""
+
     @staticmethod
     def S(f: Callable, g: Callable, x: Any) -> Any:
         """
@@ -135,10 +162,12 @@ class SKICombinator:
         """Identity combinator"""
         return x
 
+
 # Quantum State Processing
 @dataclass
 class QuantumState(Generic[T]):
     """Represents a quantum superposition of states."""
+
     possibilities: list[T]
     amplitudes: list[float]
 
@@ -151,9 +180,11 @@ class QuantumState(Generic[T]):
         """Collapses the wave function to a single state."""
         return random.choices(self.possibilities, weights=self.amplitudes)[0]
 
+
 # Quantum Processor for Complex Information Processing
 class QuantumProcessor:
     """Main quantum information processing system."""
+
     def __init__(self):
         self.ski = SKICombinator()
         self.demon = MaxwellDemon()
@@ -161,6 +192,7 @@ class QuantumProcessor:
 
     def apply_ski(self, data: T, transform: Callable[[T], S]) -> S:
         """Apply SKI combinator transformation."""
+
         def transformed_func(x):
             transformed = transform(x)
             return lambda _: transformed
@@ -168,8 +200,8 @@ class QuantumProcessor:
         # Use S combinator with the transformed function
         return self.ski.S(
             transformed_func,  # First function
-            self.ski.I,        # Second function (identity)
-            data               # Input data
+            self.ski.I,  # Second function (identity)
+            data,  # Input data
         )
 
     def measure(self, quantum_state: QuantumState) -> T:
@@ -184,6 +216,7 @@ class QuantumProcessor:
 # Maxwell's Demon for Energy-Based Sorting
 class MaxwellDemon:
     """Information sorter based on Maxwell's Demon concept."""
+
     def __init__(self, energy_threshold: float = 0.5):
         self.energy_threshold = energy_threshold
         self.high_energy = deque()
@@ -198,14 +231,17 @@ class MaxwellDemon:
     def get_sorted(self) -> tuple[deque, deque]:
         return self.high_energy, self.low_energy
 
+
 # Morphological Node for State Reflection
 class MorphType(Protocol):
     def morph(self) -> None:
         """Dynamically adapt or evolve"""
 
+
 @dataclass
 class MorphologicalNode:
     """A node capable of self-reflection and transformation."""
+
     data: str
     hash: str = field(init=False)
     morph_operations: List[Callable[[str], str]] = field(default_factory=list)
@@ -230,25 +266,32 @@ class MorphologicalNode:
             self.morph()
             self.hash = self.calculate_hash(self.data)
 
+
 # Morphological Tree for Complex Data Structures
 class MorphologicalTree:
-    def __init__(self, data_chunks: List[str], transformations: List[Callable[[str], str]]):
+    def __init__(
+        self, data_chunks: List[str], transformations: List[Callable[[str], str]]
+    ):
         """
         Initialize a MorphologicalTree with data chunks and transformation operations.
-        
+
         :param data_chunks: List of initial data to create leaf nodes
         :param transformations: List of transformation functions to apply to nodes
         """
-        self.leaves = [MorphologicalNode(data, morph_operations=transformations) for data in data_chunks]
+        self.leaves = [
+            MorphologicalNode(data, morph_operations=transformations)
+            for data in data_chunks
+        ]
         self.root = self.build_tree(self.leaves)
 
     def build_tree(self, nodes: List[MorphologicalNode]):
         """
         Recursively build a binary tree from the input nodes.
-        
+
         :param nodes: List of nodes to be organized into a tree
         :return: Root node of the constructed tree
         """
+
         @dataclass
         class InternalNode:
             left: MorphologicalNode
@@ -262,12 +305,12 @@ class MorphologicalTree:
 
         if not nodes:
             raise ValueError("Cannot build tree with empty nodes list")
-        
+
         while len(nodes) > 1:
             new_level = []
             for i in range(0, len(nodes), 2):
                 if i + 1 < len(nodes):
-                    new_node = InternalNode(left=nodes[i], right=nodes[i+1])
+                    new_node = InternalNode(left=nodes[i], right=nodes[i + 1])
                 else:
                     new_node = InternalNode(left=nodes[i])
                 new_level.append(new_node)
@@ -277,12 +320,14 @@ class MorphologicalTree:
     def print_node_info(self, node, prefix=""):
         """
         Recursively print information about nodes in the tree.
-        
+
         :param node: Current node to print information for
         :param prefix: Prefix for indentation and tree structure visualization
         """
         if hasattr(node, 'right'):  # Internal node
-            print(f"{prefix}Internal Node [Hash: {generate_color_from_hash(node.hash)}{node.hash[:8]}...\033[0m]")
+            print(
+                f"{prefix}Internal Node [Hash: {generate_color_from_hash(node.hash)}{node.hash[:8]}...\033[0m]"
+            )
             print(f"{prefix}├── Left:")
             self.print_node_info(node.left, prefix + "│   ")
             if node.right:
@@ -291,7 +336,9 @@ class MorphologicalTree:
         else:  # Leaf node (MorphologicalNode)
             print(f"{prefix}Leaf Node:")
             print(f"{prefix}├── Data: {node.data}")
-            print(f"{prefix}└── Hash: {generate_color_from_hash(node.hash)}{node.hash[:8]}...\033[0m")
+            print(
+                f"{prefix}└── Hash: {generate_color_from_hash(node.hash)}{node.hash[:8]}...\033[0m"
+            )
 
     def visualize(self):
         """Print a visual representation of the tree."""
@@ -299,9 +346,11 @@ class MorphologicalTree:
         print("==============")
         self.print_node_info(self.root)
 
+
 # Quantum Morph for State Manipulation
 class Morph:
     """Represents a morphable quantum state."""
+
     def __init__(self, state: QuantumState, processor: QuantumProcessor):
         self.state = state
         self.processor = processor
@@ -309,10 +358,12 @@ class Morph:
 
     def transition(self, transform: Callable[[T], S]) -> None:
         """Transition the state using a transformation function."""
-        self.state = QuantumState([
-            self.processor.apply_ski(possibility, transform)
-            for possibility in self.state.possibilities
-        ])
+        self.state = QuantumState(
+            [
+                self.processor.apply_ski(possibility, transform)
+                for possibility in self.state.possibilities
+            ]
+        )
 
     def measure(self) -> T:
         """Collapse the state to a single outcome."""
@@ -320,23 +371,29 @@ class Morph:
         self.history.append(result)
         return result
 
+
 # === Tokenization and I/O ===
+
 
 @debug_log
 def tokenize_string(data: str) -> List[str]:
     """Simple tokenizer that splits a string into words."""
     return data.split()
 
+
 @debug_log
 def process_io(data: str) -> List[str]:
     """Processes input and outputs a tokenized version."""
     return tokenize_string(data)
 
+
 # === Reflection and AST ===
+
 
 @dataclass
 class ReflectiveModel:
     """Model to support reflective coding capabilities."""
+
     source: str = field(default_factory=str)
 
     @debug_log
@@ -352,8 +409,11 @@ class ReflectiveModel:
         tree.body.insert(0, ast.Pass())
         return compile(tree, filename="<ast>", mode="exec")
 
+
 # Pipeline Functions for Complex Data Processing
-def transducer_pipeline(data: list[T], energy_function: Callable[[T], float], processor: QuantumProcessor) -> tuple[list[S], tuple[deque, deque]]:
+def transducer_pipeline(
+    data: list[T], energy_function: Callable[[T], float], processor: QuantumProcessor
+) -> tuple[list[S], tuple[deque, deque]]:
     """Pipeline to process, transform, and sort data."""
     # Process data into quantum superposition
     quantum_state = processor.process(data)
@@ -362,7 +422,9 @@ def transducer_pipeline(data: list[T], energy_function: Callable[[T], float], pr
     measured = processor.measure(quantum_state)
 
     # Apply transformation
-    transformed = processor.apply_ski(measured, lambda x: x * 2 if isinstance(x, (int, float)) else x)
+    transformed = processor.apply_ski(
+        measured, lambda x: x * 2 if isinstance(x, (int, float)) else x
+    )
 
     # Sort using Maxwell's Demon
     for item in data:
@@ -371,7 +433,10 @@ def transducer_pipeline(data: list[T], energy_function: Callable[[T], float], pr
 
     return transformed, processor.demon.get_sorted()
 
-def omega_pipeline(omega: list[T], transform: Callable[[T], S], energy_function: Callable[[T], float]) -> tuple[list[S], tuple[deque, deque]]:
+
+def omega_pipeline(
+    omega: list[T], transform: Callable[[T], S], energy_function: Callable[[T], float]
+) -> tuple[list[S], tuple[deque, deque]]:
     """Processes omega algebra with transformations and sorting."""
     processor = QuantumProcessor()
     morph = Morph(QuantumState(omega), processor)
@@ -387,11 +452,14 @@ def omega_pipeline(omega: list[T], transform: Callable[[T], S], energy_function:
 
     return final_state, sorted_states
 
+
 # Demonstration and Main Execution
-def demo_transformations(input_data: str, transformations: List[Callable[[str], str]]) -> None:
+def demo_transformations(
+    input_data: str, transformations: List[Callable[[str], str]]
+) -> None:
     """
     Demonstrate the effect of each transformation on input data.
-    
+
     :param input_data: Initial data to transform
     :param transformations: List of transformation functions
     """
@@ -400,6 +468,7 @@ def demo_transformations(input_data: str, transformations: List[Callable[[str], 
     for i, transform in enumerate(transformations, 1):
         current_data = transform(current_data)
         print(f"After transformation {i}: '{current_data}'")
+
 
 def omega_demo():
     """Demonstrate quantum processing and morphological transformations."""
@@ -417,12 +486,16 @@ def omega_demo():
     print(f"High energy states: {list(high)}")
     print(f"Low energy states: {list(low)}")
 
+
 # === Example Usage ===
+
 
 def pre_main():
     # Create a model and theory
     atomic_model = AtomicModel(name="Sample", attributes={"mass": 1.0, "charge": -1.0})
-    atomic_theory = AtomicTheory(model=atomic_model, annotations={"mass": float, "charge": float})
+    atomic_theory = AtomicTheory(
+        model=atomic_model, annotations={"mass": float, "charge": float}
+    )
 
     # Validate the theory
     try:
@@ -436,9 +509,10 @@ def pre_main():
     tokens = process_io(example_string)
     print(f"Tokens: {tokens}")
 
-    # Reflection
-    reflective_model = ReflectiveModel(source="print('Hello, world!')")
-    reflective_model.modify_ast()
+    # Reflection - TODO
+    # reflective_model = ReflectiveModel(source="print('Hello, world!')")
+    # reflective_model.modify_ast()
+
 
 def main():
     """
@@ -448,22 +522,24 @@ def main():
     HEADER_COLOR = "\033[95m"  # Magenta
     RESET_COLOR = "\033[0m"  # Reset to default
 
-    print(f"{HEADER_COLOR}=== Quantum Morphological Information Processing Demonstration ==={RESET_COLOR}\n")
+    print(
+        f"{HEADER_COLOR}=== Quantum Morphological Information Processing Demonstration ==={RESET_COLOR}\n"
+    )
     # Quantum Omega Demo
     print(f"{HEADER_COLOR}1. Quantum Omega Pipeline{RESET_COLOR}")
     omega_demo()
 
     # Define transformations
     transformations = [
-        lambda s: s.upper(),                    # Transform 1: Convert to uppercase
-        lambda s: s[::-1],                      # Transform 2: Reverse the string
-        lambda s: ''.join(sorted(s)),           # Transform 3: Sort characters
-        lambda s: s.replace('e', '@'),          # Transform 4: Replace 'e' with '@'
+        lambda s: s.upper(),  # Transform 1: Convert to uppercase
+        lambda s: s[::-1],  # Transform 2: Reverse the string
+        lambda s: ''.join(sorted(s)),  # Transform 3: Sort characters
+        lambda s: s.replace('e', '@'),  # Transform 4: Replace 'e' with '@'
     ]
 
     # Morphological Tree Demo
     input_data = ["hello", "world", "morphological", "tree"]
-    
+
     print(f"\n{HEADER_COLOR}2. Morphological Tree Demonstration{RESET_COLOR}")
     tree = MorphologicalTree(input_data, transformations)
     tree.visualize()
@@ -473,6 +549,7 @@ def main():
     for data in input_data:
         demo_transformations(data, transformations)
 
+
 if __name__ == "__main__":
-  pre_main()  
-  main()
+    pre_main()
+    main()
