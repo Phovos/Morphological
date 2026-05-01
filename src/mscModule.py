@@ -1,522 +1,327 @@
-from __future__ import annotations
-
 #!/usr/bin/env -S uv run
-# /* script
-# requires-python = ">=3.12"
-# dependencies = [
-#     "uv==*.*",
-# ]
-# */
-# mscModule.py: a rare canonical "module" for MSC
 # © 2024-2026 https://github.com/Phovos/Morphological-Source-Code
 # © 2023-2026 https://github.com/MOONLAPSED/cognosis
-# Optional dependency handling (also add to '/* script..' comment, just above)
-try:
-    import flask
-
-    USE_FLASK = True
-    # if we omit "flask==*.*", or any non-std lib from the '/* script..' comment, then this should always fail
-    pass
-except ImportError:
-    USE_FLASK = False
-    coreLSP = False
-# Import standard library components
-import os
+# mscModule.py: a rare canonical "module" for MSC
+from __future__ import annotations
 import sys
 import ast
 import json
-import uuid
-import time
 import logging
-import inspect
-import hashlib
+import argparse
+import logging.config
+import logging.handlers
+import re
 from socketserver import ThreadingMixIn
-from typing import Any, Dict, Callable, TypeVar
-from types import ModuleType
-from dataclasses import dataclass
-from functools import wraps
-from pathlib import Path
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from importlib.metadata import distributions
+from pathlib import Path
+from types import ModuleType
+from typing import Any, Dict, List, Optional
 
-"""`importlib.metadata` is part of Python's standard library (since 3.8) and is used to access package metadata,
-including entry points, version info, and other package-specific data that resides in `.dist-info`."""
+"""
+mscModule.py — Morphological Analysis Engine
+
+Stdlib-first orchestration layer for:
+- static analysis (Python + Markdown)
+- structured logging
+- HTTP/JSON RPC (stdlib)
+- dynamic module creation
+- plugin/capability system
+
+© 2023-2026 Phovos / MOONLAPSED
+"""
+# ---------------------------------------------------------------------------
+# Versioning / Metadata
+# ---------------------------------------------------------------------------
+__version__ = "0.0.69"
+__description__ = "Morphological Analysis Engine: stdlib-only static analysis with HTTP/RPC and LSP bridging, with optional capability injection. © 2023-2026 Phovos / MOONLAPSED"
+__man__ = """
+mscModule.py Morphological Analysis Module
+=================================
+Stdlib-only orchestration layer for source validation, static analysis,
+structured logging, HTTP/JSON RPC, and optional LSP-sidecar bridging.
+
+This module is designed to be import-safe:
+- no optional dependency assumptions
+- no hidden global mutation beyond a NullHandler on the module logger
+
+Design Principles:
+------------------
+- Import-safe (no side effects)
+- Stdlib-only baseline
+- Optional dependencies are injected externally (e.g. via uv in main.py)
+- Graceful degradation when optional capabilities are absent
+- No environment mutation (no installs, no subprocess re-exec)
+
+© 2023-2026 Phovos / MOONLAPSED
+"""
+
+# ---------------------------------------------------------------------------
+# Logging (import-safe)
+# ---------------------------------------------------------------------------
+
 logger = logging.getLogger(__name__)
-logger.addHandler(logging.NullHandler())  # Add a NullHandler by default
-for dist in distributions():
-    print(f"Package: {dist.metadata['Name']}, Version: {dist.metadata['Version']}")
-"""This provides a way to dynamically generate modules and inject code into them at runtime. This is useful for creating a
-module from a source code string or AST and then executing the module in the runtime. Runtime module (main)
-is the module that the source code is injected into."""
-
-
-def create_module(
-    module_name: str, module_code: str, main_module_path: str
-) -> ModuleType | None:
-    """
-    Dynamically creates a module with the specified name, injects code into it,
-    and adds it to sys.modules.
-
-    Args:
-        module_name (str): Name of the module to create.
-        module_code (str): Source code to inject into the module.
-        main_module_path (str): File path of the main module.
-
-    Returns:
-        ModuleType | None: The dynamically created module, or None if an error occurs.
-    """
-    dynamic_module = ModuleType(module_name)
-    dynamic_module.__file__ = main_module_path or "runtime_generated"
-    dynamic_module.__package__ = module_name
-    dynamic_module.__path__ = None
-    dynamic_module.__doc__ = None
-    try:
-        exec(module_code, dynamic_module.__dict__)
-        sys.modules[module_name] = dynamic_module
-        return dynamic_module
-    except Exception as e:
-        print(f"Error injecting code into module {module_name}: {e}")
-        return None
-
-
-def setup_logging(log_dir="logs", log_file="app.log", level=logging.INFO):
-    """Sets up logging configuration and returns a logger for the calling module."""
-    logs_path = Path(log_dir)
-    logs_path.mkdir(parents=True, exist_ok=True)
-    log_filepath = logs_path / log_file
-    logging_config = {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'formatters': {
-            'default': {
-                'format': '[%(levelname)s]%(asctime)s||%(name)s: %(message)s',
-                'datefmt': '%Y-%m-%d~%H:%M:%S%z',
-            }
-        },
-        'handlers': {
-            'console': {
-                'level': level,
-                'class': 'logging.StreamHandler',
-                'formatter': 'default',
-                'stream': 'ext://sys.stdout',
-            },
-            'file': {
-                'level': level,
-                'formatter': 'default',
-                'class': 'logging.handlers.RotatingFileHandler',
-                'filename': str(log_filepath),
-                'maxBytes': 10485760,  # 10MB
-                'backupCount': 10,
-            },
-        },
-        'loggers': {
-            __name__: {
-                'level': level,
-                'handlers': ['console', 'file'],
-                'propagate': False,
-            }
-        },
-        'root': {'level': level, 'handlers': ['console', 'file']},
-    }
-    logging.config.dictConfig(logging_config)
-    frame = inspect.currentframe().f_back  # Get the name of the calling module
-    module_name = frame.f_globals['__name__']
-    return logging.getLogger(module_name)
-
-
-class ContextualLogger(logging.LoggerAdapter):
-    """A logger adapter to inject contextual request_id into every log message."""
-
-    def process(self, msg, kwargs):
-        if 'request_id' not in self.extra:
-            self.extra['request_id'] = 'SYSTEM'
-        return '[%s] %s' % (self.extra['request_id'], msg), kwargs
-
-
-# Type Variables for Generic Programming
-T = TypeVar('T')
-S = TypeVar('S')
-
-
-# === Utility Functions ===
-def validate_instance(obj: Any, expected_type: Any) -> None:
-    """Ensures the object is of the expected type."""
-    if not isinstance(obj, expected_type):
-        raise TypeError(f"Expected type {expected_type}, got {type(obj)} instead.")
-
-
-def singleton(cls: Callable) -> Callable:
-    """Ensures a class is a singleton."""
-    instances = {}
-
-    @wraps(cls)
-    def get_instance(*args, **kwargs):
-        if cls not in instances:
-            instances[cls] = cls(*args, **kwargs)
-        return instances[cls]
-
-    return get_instance
-
-
-def debug_log(func: Callable) -> Callable:
-    """Decorator to log the function call and its return value."""
-
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        arg_str = ", ".join(
-            [repr(a) for a in args] + [f"{k}={v!r}" for k, v in kwargs.items()]
-        )
-        print(f"Calling {func.__name__}({arg_str})")
-        result = func(*args, **kwargs)
-        print(f"{func.__name__} returned {result!r}")
-        return result
-
-    return wrapper
-
-
-class EngineError(Exception):
-    """Base exception for all custom engine errors for clean catching."""
-
-    def __init__(self, message: str, status_code: int = 500):
-        self.status_code = status_code
-        super().__init__(message)
-
-
-class InputValidationError(EngineError):
-    """Raised for hostile or malformed input."""
-
-    def __init__(self, message: str):
-        super().__init__(message, status_code=400)
-
-
-class SecurityViolationError(EngineError):
-    """Raised for actions that violate security policy (e.g., path traversal)."""
-
-    def __init__(self, message: str):
-        super().__init__(message, status_code=403)
-
-
-class ResourceLimitExceededError(EngineError):
-    """Raised when input exceeds configured resource limits."""
-
-    def __init__(self, message: str):
-        super().__init__(message, status_code=413)
+logger.addHandler(logging.NullHandler())
 
 
 class JsonLogFormatter(logging.Formatter):
-    """
-    Formats log records as JSON strings. This is non-negotiable for machine
-    parsing and integration with modern log aggregation systems.
-    """
+    """Structured JSON logging formatter."""
 
     def format(self, record: logging.LogRecord) -> str:
-        log_object = {
-            "timestamp": self.formatTime(record, self.datefmt),
+        payload = {
             "level": record.levelname,
+            "time": self.formatTime(record),
+            "logger": record.name,
             "message": record.getMessage(),
-            "source": record.name,
-            "context": getattr(record, 'context', {}),
-        }
-        return json.dumps(log_object)
-
-
-def get_logger(
-    name: str, request_id: str = 'SYSTEM'
-) -> ContextualLogger:  # logging.Logger poly
-    """Configures and returns a root logger for the engine."""
-    logger = logging.getLogger("HAES_Engine")
-    logger.setLevel(logging.INFO)
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setFormatter(JsonLogFormatter())
-    if not logger.handlers:
-        logger.addHandler(handler)
-    return ContextualLogger(logger, {'request_id': request_id})
-
-
-@dataclass(frozen=True)
-class InputArtifact:
-    """
-    An immutable data transfer object representing the validated input.
-    Ensures data integrity from the point of ingestion.
-    """
-
-    correlation_id: str
-    source_path: str
-    content: str
-    content_hash_sha256: str
-    size_bytes: int
-
-    def __post_init__(self):
-        # Final integrity check upon instantiation
-        actual_hash = hashlib.sha256(self.content.encode('utf-8')).hexdigest()
-        if self.content_hash_sha256 != actual_hash:
-            raise SecurityViolationError(
-                "Content hash mismatch during artifact creation."
-            )
-
-
-@dataclass(frozen=True)
-class SemanticGraph:
-    """
-    The final, signed output artifact. Represents the result of the analysis.
-    The 'graph_data' is where the future semantic analysis output will reside.
-    """
-
-    source_artifact_hash: str
-    processed_at_unix_ts: float
-    engine_version: str
-    graph_data: Dict[str, Any]
-    signature_hmac_sha256: str
-
-    def to_json(self) -> str:
-        """Serializes the object to a JSON string for transport."""
-        data = {
-            "source_artifact_hash": self.source_artifact_hash,
-            "processed_at_unix_ts": self.processed_at_unix_ts,
-            "engine_version": "1.0.0",
-            "graph_data": self.graph_data,
-            "signature_hmac_sha256": self.signature_hmac_sha256,
-        }
-        return json.dumps(data, indent=2)
-
-
-class ArtifactProcessor:
-    """Encapsulates the core business logic of the engine."""
-
-    def __init__(self, config: EngineConfig, logger: logging.Logger):
-        self.config = config
-        self.logger = logger
-
-    def _validate_and_sanitize_path(self, path: str, correlation_id: str) -> str:
-        """
-        Performs rigorous validation on the input file path.
-        """
-        log_ctx = {"correlation_id": correlation_id, "path": path}
-
-        if not path or not isinstance(path, str):
-            raise InputValidationError("File path must be a non-empty string.")
-
-        # Security: Prevent path traversal attacks.
-        normalized_path = os.path.normpath(path)
-        if os.path.isabs(normalized_path) or normalized_path.startswith(".."):
-            raise SecurityViolationError("Path traversal attempt detected.")
-
-        # Hygiene: Enforce allowed file extensions.
-        _, ext = os.path.splitext(normalized_path)
-        if ext not in self.config.ALLOWED_EXTENSIONS:
-            raise InputValidationError(
-                f"Invalid file extension. Allowed: {self.config.ALLOWED_EXTENSIONS}"
-            )
-
-        self.logger.info("Path validated and sanitized.", extra={"context": log_ctx})
-        return normalized_path
-
-    def _validate_content(self, content: bytes, correlation_id: str) -> str:
-        """
-        Validates the raw file content for size and syntax.
-        """
-        log_ctx = {"correlation_id": correlation_id, "size_bytes": len(content)}
-
-        # Security: Enforce file size limits to prevent DoS.
-        if len(content) > self.config.MAX_FILE_SIZE_BYTES:
-            raise ResourceLimitExceededError(
-                f"File size exceeds limit of {self.config.MAX_FILE_SIZE_BYTES} bytes."
-            )
-
-        # Hygiene: Decode and perform a preliminary syntax check.
-        try:
-            decoded_content = content.decode('utf-8')
-            ast.parse(decoded_content)
-        except UnicodeDecodeError:
-            raise InputValidationError("File content is not valid UTF-8.")
-        except SyntaxError as e:
-            raise InputValidationError(f"Invalid Python syntax: {e}")
-
-        self.logger.info("Content validated.", extra={"context": log_ctx})
-        return decoded_content
-
-    def process_source_file(
-        self, path: str, content: bytes, correlation_id: str
-    ) -> SemanticGraph:
-        """
-        The main entry point for processing a single source file.
-        Orchestrates validation, artifact creation, and analysis.
-        """
-        log_ctx = {"correlation_id": correlation_id}
-        self.logger.info("Beginning artifact processing.", extra={"context": log_ctx})
-
-        # 1. Validate and create the input artifact
-        sanitized_path = self._validate_and_sanitize_path(path, correlation_id)
-        validated_content = self._validate_content(content, correlation_id)
-
-        input_artifact = InputArtifact(
-            correlation_id=correlation_id,
-            source_path=sanitized_path,
-            content=validated_content,
-            content_hash_sha256=hashlib.sha256(
-                validated_content.encode('utf-8')
-            ).hexdigest(),
-            size_bytes=len(validated_content.encode('utf-8')),
-        )
-        log_ctx["input_artifact_hash"] = input_artifact.content_hash_sha256
-        self.logger.info("Input artifact created.", extra={"context": log_ctx})
-
-        # 2. Perform the "semantic analysis" (placeholder as requested)
-        # In the real implementation, this is where the AST would be walked
-        # to build the complex semantic graph.
-        analysis_start_time = time.time()
-
-        # For this scaffolding, the graph is just a metadata wrapper.
-        graph_data = {
-            "source_path": input_artifact.source_path,
-            "size_bytes": input_artifact.size_bytes,
-            "content_preview": input_artifact.content[:256] + "...",
         }
 
-        analysis_duration_ms = (time.time() - analysis_start_time) * 1000
-        log_ctx["analysis_duration_ms"] = round(analysis_duration_ms, 2)
-        self.logger.info("Semantic analysis complete.", extra={"context": log_ctx})
+        if hasattr(record, "context"):
+            payload["context"] = record.context
 
-        # 3. Create and sign the output artifact
-        output_payload = {
-            "source_artifact_hash": input_artifact.content_hash_sha256,
-            "processed_at_unix_ts": time.time(),
-            "engine_version": "1.0.0",
-            "graph_data": graph_data,
-        }
+        if record.exc_info:
+            payload["exception"] = self.formatException(record.exc_info)
 
-        # Security: Sign the payload to ensure authenticity and integrity.
-        payload_bytes = json.dumps(output_payload, sort_keys=True).encode('utf-8')
-        signature = hmac.new(
-            self.config.HMAC_SECRET_KEY, payload_bytes, hashlib.sha256
-        ).hexdigest()
+        return json.dumps(payload, ensure_ascii=False)
 
-        semantic_graph = SemanticGraph(
-            **output_payload, signature_hmac_sha256=signature
-        )
-        self.logger.info(
-            "Semantic graph created and signed.", extra={"context": log_ctx}
+
+def setup_logging(json_format: bool = False, level: int = logging.INFO) -> None:
+    """Configure logging for the module."""
+
+    handler = logging.StreamHandler()
+
+    if json_format:
+        handler.setFormatter(JsonLogFormatter())
+    else:
+        handler.setFormatter(
+            logging.Formatter("[%(levelname)s] %(asctime)s || %(name)s: %(message)s")
         )
 
-        return semantic_graph
+    root = logging.getLogger()
+    root.setLevel(level)
+    root.handlers.clear()
+    root.addHandler(handler)
 
 
-# ============================================================================
-# 5. THE PUBLIC INTERFACE: Hardened HTTP Service
-# ============================================================================
+# ---------------------------------------------------------------------------
+# Capability Injection (Optional Dependencies)
+# ---------------------------------------------------------------------------
 
 
-class EngineRequestHandler(BaseHTTPRequestHandler):
+class Deps:
     """
-    Handles incoming HTTP requests, enforcing security and protocol hygiene.
+    Container for optional dependencies.
+
+    These are injected externally (e.g. by main.py after uv resolution).
     """
 
-    # These are class-level to be set by the server factory
-    processor: ArtifactProcessor
-    config: EngineConfig
-    logger: logging.Logger
+    flask: Any = None
+    pylsp: Any = None
 
-    def _send_response(self, status_code: int, content_type: str, body: bytes):
-        self.send_response(status_code)
-        self.send_header("Content-Type", content_type)
-        self.send_header("Content-Length", str(len(body)))
-        self.send_header("X-Correlation-ID", self.correlation_id)
-        self.end_headers()
-        self.wfile.write(body)
 
-    def _handle_error(self, e: Exception):
-        if isinstance(e, EngineError):
-            status_code = e.status_code
-            message = str(e)
-        else:
-            status_code = 500
-            message = "An unexpected internal error occurred."
-            self.logger.error(
-                "Unhandled exception.",
-                exc_info=True,
-                extra={"context": {"correlation_id": self.correlation_id}},
-            )
+def register_dependency(name: str, module: Any) -> None:
+    """Register an optional dependency at runtime."""
+    if hasattr(Deps, name):
+        setattr(Deps, name, module)
+        logger.debug(f"Registered dependency: {name}")
 
-        error_body = json.dumps({"error": message}).encode('utf-8')
-        self._send_response(status_code, "application/json", error_body)
+
+# ---------------------------------------------------------------------------
+# Dynamic Module Creation
+# ---------------------------------------------------------------------------
+
+
+def create_module(
+    module_name: str, module_code: str, main_module_path: str | None = None
+) -> Optional[ModuleType]:
+    """
+    Dynamically create and execute a module.
+
+    WARNING: Executes arbitrary code.
+    """
+
+    dynamic_module = ModuleType(module_name)
+    dynamic_module.__file__ = main_module_path or "runtime_generated"
+    dynamic_module.__package__ = module_name.rpartition(".")[0]
+
+    try:
+        sys.modules[module_name] = dynamic_module
+        exec(module_code, dynamic_module.__dict__)
+
+        logger.info(
+            "Dynamic module created", extra={"context": {"module": module_name}}
+        )
+        return dynamic_module
+
+    except Exception:
+        logger.error(
+            "Dynamic module creation failed",
+            exc_info=True,
+            extra={"context": {"module": module_name}},
+        )
+        sys.modules.pop(module_name, None)
+        return None
+
+
+# ---------------------------------------------------------------------------
+# Static Analysis (Python)
+# ---------------------------------------------------------------------------
+
+
+class SemanticVisitor(ast.NodeVisitor):
+    """Basic semantic graph extractor."""
+
+    def __init__(self):
+        self.functions: List[str] = []
+        self.classes: List[str] = []
+
+    def visit_FunctionDef(self, node: ast.FunctionDef):
+        self.functions.append(node.name)
+        self.generic_visit(node)
+
+    def visit_ClassDef(self, node: ast.ClassDef):
+        self.classes.append(node.name)
+        self.generic_visit(node)
+
+
+class ParsingError(Exception):
+    pass
+
+
+def analyze_python(content: str) -> Dict[str, Any]:
+    """Analyze Python source code."""
+
+    try:
+        tree = ast.parse(content)
+    except SyntaxError as e:
+        raise ParsingError(f"Invalid Python syntax: {e}") from e
+
+    visitor = SemanticVisitor()
+    visitor.visit(tree)
+
+    return {"functions": visitor.functions, "classes": visitor.classes}
+
+
+# ---------------------------------------------------------------------------
+# Static Analysis (Markdown)
+# ---------------------------------------------------------------------------
+
+
+def analyze_markdown(content: str) -> Dict[str, Any]:
+    """Extract headings and structure from Markdown."""
+
+    headings = re.findall(r"^(#+)\s+(.*)", content, re.MULTILINE)
+
+    return {"headings": [{"level": len(h[0]), "text": h[1]} for h in headings]}
+
+
+# ---------------------------------------------------------------------------
+# HTTP Server (stdlib)
+# ---------------------------------------------------------------------------
+
+
+class RequestHandler(BaseHTTPRequestHandler):
+    """Minimal JSON RPC handler."""
 
     def do_POST(self):
-        self.correlation_id = self.headers.get("X-Correlation-ID", str(uuid.uuid4()))
-        log_ctx = {
-            "correlation_id": self.correlation_id,
-            "method": "POST",
-            "path": self.path,
-        }
-        self.logger.info("Request received.", extra={"context": log_ctx})
+        length = int(self.headers.get("Content-Length", 0))
+        body = self.rfile.read(length)
 
         try:
-            if self.path != "/analyze":
-                raise InputValidationError("Endpoint not found. Use POST /analyze.")
-
-            content_len = int(self.headers.get('Content-Length', 0))
-            if content_len > self.config.MAX_REQUEST_BODY_SIZE:
-                raise ResourceLimitExceededError("Request body too large.")
-
-            body = self.rfile.read(content_len)
             data = json.loads(body)
-
-            path = data.get("path")
-            content_b64 = data.get("content_b64")
-            if not path or not content_b64:
-                raise InputValidationError(
-                    "Request body must contain 'path' and 'content_b64'."
-                )
-
-            import base64
-
-            content_bytes = base64.b64decode(content_b64)
-
-            # Process the artifact
-            result_graph = self.processor.process_source_file(
-                path, content_bytes, self.correlation_id
-            )
-
-            # Send successful response
-            response_body = result_graph.to_json().encode('utf-8')
-            self._send_response(200, "application/json", response_body)
-            self.logger.info(
-                "Request processed successfully.", extra={"context": log_ctx}
-            )
+            result = self.handle_request(data)
+            self._send_json(200, result)
 
         except Exception as e:
-            self._handle_error(e)
+            logger.exception("Request failed")
+            self._send_json(500, {"error": str(e)})
 
-    def do_GET(self):
-        self.correlation_id = self.headers.get("X-Correlation-ID", str(uuid.uuid4()))
-        if self.path == "/health":
-            body = json.dumps({"status": "healthy", "timestamp": time.time()}).encode(
-                'utf-8'
-            )
-            self._send_response(200, "application/json", body)
-        else:
-            self._handle_error(InputValidationError("Endpoint not found."))
+    def handle_request(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        action = data.get("action")
+        content = data.get("content", "")
+
+        if action == "analyze_python":
+            return analyze_python(content)
+
+        if action == "analyze_markdown":
+            return analyze_markdown(content)
+
+        return {"error": "Unknown action"}
+
+    def _send_json(self, code: int, payload: Dict[str, Any]):
+        self.send_response(code)
+        self.send_header("Content-Type", "application/json")
+        self.end_headers()
+        self.wfile.write(json.dumps(payload).encode("utf-8"))
 
 
-class ThreadedEngineServer(ThreadingHTTPServer, ThreadingMixIn):
-    """A ThreadingHTTPServer that allows for dependency injection."""
-
+class ThreadedHTTPServer(ThreadingHTTPServer, ThreadingMixIn):
     daemon_threads = True
 
-    def __init__(self, server_address, RequestHandlerClass, processor, config, logger):
-        RequestHandlerClass.processor = processor
-        RequestHandlerClass.config = config
-        RequestHandlerClass.logger = logger
-        super().__init__(server_address, RequestHandlerClass)
+
+def run_server(host: str = "127.0.0.1", port: int = 8080):
+    server = ThreadedHTTPServer((host, port), RequestHandler)
+    logger.info(f"Server running at http://{host}:{port}")
+    server.serve_forever()
 
 
-# Example usage
-module_name = "quine"
-module_code = """
-def greet():
-    print("Hello from the Morphological Source Code module! This is Replicator-code ('Quine-like behavior')!")
-"""
-main_module_path = getattr(sys.modules['__main__'], '__file__', 'runtime_generated')
+# ---------------------------------------------------------------------------
+# Plugin System (Capability-Based)
+# ---------------------------------------------------------------------------
 
-dynamic_module = create_module(module_name, module_code, main_module_path)
-if dynamic_module:
-    sys.exit(dynamic_module.greet())
+
+class Plugin:
+    """Base plugin interface."""
+
+    name: str = "base"
+
+    def setup(self):
+        pass
+
+    def run(self, *args, **kwargs):
+        raise NotImplementedError
+
+
+def load_plugins() -> Dict[str, Plugin]:
+    """Load plugins based on available dependencies."""
+
+    plugins: Dict[str, Plugin] = {}
+
+    if Deps.flask:
+
+        class FlaskPlugin(Plugin):
+            name = "flask"
+
+        plugins["flask"] = FlaskPlugin()
+
+    return plugins
+
+
+# ---------------------------------------------------------------------------
+# CLI (stdlib-only fallback)
+# ---------------------------------------------------------------------------
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__description__)
+    parser.add_argument("--serve", action="store_true")
+    parser.add_argument("--analyze", type=str)
+
+    args = parser.parse_args()
+
+    setup_logging()
+
+    if args.serve:
+        run_server()
+        return
+
+    if args.analyze:
+        path = Path(args.analyze)
+        content = path.read_text()
+
+        if path.suffix == ".py":
+            print(json.dumps(analyze_python(content), indent=2))
+        else:
+            print(json.dumps(analyze_markdown(content), indent=2))
+
+
+if __name__ == "__main__":
+    main()
