@@ -6,9 +6,9 @@ from __future__ import annotations
 #     "uv==*.*",
 # ]
 # */
-# <a href="https://github.com/Moonlapsed/Morphological">Morphological Source Code</a> © 2023 by MOONLAPSED:MOONLAPSED@gmail.com CC ND
-from __future__ import annotations
-
+# mscModule.py: a rare canonical "module" for MSC
+# © 2024-2026 https://github.com/Phovos/Morphological-Source-Code
+# © 2023-2026 https://github.com/MOONLAPSED/cognosis
 # Optional dependency handling (also add to '/* script..' comment, just above)
 try:
     import flask
