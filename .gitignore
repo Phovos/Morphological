@@ -84,6 +84,8 @@ target/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+.jupyter.log
+iwe-morphological.log
 
 # IPython
 profile_default/
