@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 #!/usr/bin/env -S uv run
 # /* script
 # requires-python = ">=3.12"
@@ -20,81 +21,22 @@ except ImportError:
     USE_FLASK = False
     coreLSP = False
 # Import standard library components
-import io
 import os
-import gc
-import re
 import sys
 import ast
-import dis
-import mmap
 import json
 import uuid
 import time
-import math
-import enum
-import array
-import cmath
-import errno
-import shlex
-import ctypes
-import random
-import pickle
-import socket
-import struct
-import pstats
-import shutil
-import weakref
-import tomllib
-import decimal
-import pathlib
 import logging
 import inspect
-import asyncio
 import hashlib
-import argparse
-import cProfile
-import platform
-import tempfile
-import mimetypes
-import functools
-import linecache
-import traceback
-import threading
-import importlib
-import subprocess
-import tracemalloc
-import http.server
 from socketserver import ThreadingMixIn
-from math import sqrt, log2
-from io import StringIO
-from array import array
-from queue import Queue, Empty
-from abc import ABC, abstractmethod
-from enum import Enum, IntEnum, StrEnum, IntFlag, auto
-from collections import namedtuple
-from operator import mul, xor
-from typing import (
-    Any, Dict, List, Optional, Union, Callable, TypeVar,
-    Tuple, Generic, Set, Coroutine, Type, NamedTuple,
-    ClassVar, Protocol, runtime_checkable, AsyncIterator,
-    get_type_hints, get_origin, get_args
-)
-from types import (
-    SimpleNamespace, ModuleType, MethodType,
-    FunctionType, CodeType, TracebackType, FrameType
-)
-from dataclasses import dataclass, field
-from functools import reduce, lru_cache, partial, wraps
-from collections.abc import Iterable, Mapping
-from datetime import datetime, timedelta
-from logging.handlers import RotatingFileHandler
-from pathlib import Path, PureWindowsPath
+from typing import Any, Dict, Callable, TypeVar
+from types import ModuleType
+from dataclasses import dataclass
+from functools import wraps
+from pathlib import Path
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from contextlib import contextmanager, asynccontextmanager
-from concurrent.futures import ThreadPoolExecutor
-from functools import reduce
-from importlib.util import spec_from_file_location, module_from_spec
 from importlib.metadata import distributions
 
 """`importlib.metadata` is part of Python's standard library (since 3.8) and is used to access package metadata,
@@ -102,14 +44,15 @@ including entry points, version info, and other package-specific data that resid
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())  # Add a NullHandler by default
 for dist in distributions():
-    print(
-        f"Package: {dist.metadata['Name']}, Version: {dist.metadata['Version']}")
+    print(f"Package: {dist.metadata['Name']}, Version: {dist.metadata['Version']}")
 """This provides a way to dynamically generate modules and inject code into them at runtime. This is useful for creating a
 module from a source code string or AST and then executing the module in the runtime. Runtime module (main)
 is the module that the source code is injected into."""
 
 
-def create_module(module_name: str, module_code: str, main_module_path: str) -> ModuleType | None:
+def create_module(
+    module_name: str, module_code: str, main_module_path: str
+) -> ModuleType | None:
     """
     Dynamically creates a module with the specified name, injects code into it,
     and adds it to sys.modules.
@@ -147,15 +90,15 @@ def setup_logging(log_dir="logs", log_file="app.log", level=logging.INFO):
         'formatters': {
             'default': {
                 'format': '[%(levelname)s]%(asctime)s||%(name)s: %(message)s',
-                'datefmt': '%Y-%m-%d~%H:%M:%S%z'
-            },
+                'datefmt': '%Y-%m-%d~%H:%M:%S%z',
+            }
         },
         'handlers': {
             'console': {
                 'level': level,
                 'class': 'logging.StreamHandler',
                 'formatter': 'default',
-                'stream': 'ext://sys.stdout'
+                'stream': 'ext://sys.stdout',
             },
             'file': {
                 'level': level,
@@ -163,31 +106,26 @@ def setup_logging(log_dir="logs", log_file="app.log", level=logging.INFO):
                 'class': 'logging.handlers.RotatingFileHandler',
                 'filename': str(log_filepath),
                 'maxBytes': 10485760,  # 10MB
-                'backupCount': 10
+                'backupCount': 10,
             },
         },
         'loggers': {
             __name__: {
                 'level': level,
                 'handlers': ['console', 'file'],
-                'propagate': False
+                'propagate': False,
             }
         },
-        'root': {
-            'level': level,
-            'handlers': ['console', 'file']
-        }
+        'root': {'level': level, 'handlers': ['console', 'file']},
     }
     logging.config.dictConfig(logging_config)
-    frame = inspect.currentframe().f_back    # Get the name of the calling module
+    frame = inspect.currentframe().f_back  # Get the name of the calling module
     module_name = frame.f_globals['__name__']
     return logging.getLogger(module_name)
 
-# We use a custom adapter to inject the request_id into every log message.
-
 
 class ContextualLogger(logging.LoggerAdapter):
-    """A logger adapter to inject contextual information into log messages."""
+    """A logger adapter to inject contextual request_id into every log message."""
 
     def process(self, msg, kwargs):
         if 'request_id' not in self.extra:
@@ -195,11 +133,45 @@ class ContextualLogger(logging.LoggerAdapter):
         return '[%s] %s' % (self.extra['request_id'], msg), kwargs
 
 
-def get_logger(name: str, request_id: str = 'SYSTEM') -> ContextualLogger:
-    """Configures and returns a context-aware logger."""
-    logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
-    logger = logging.getLogger(name)
-    return ContextualLogger(logger, {'request_id': request_id})
+# Type Variables for Generic Programming
+T = TypeVar('T')
+S = TypeVar('S')
+
+
+# === Utility Functions ===
+def validate_instance(obj: Any, expected_type: Any) -> None:
+    """Ensures the object is of the expected type."""
+    if not isinstance(obj, expected_type):
+        raise TypeError(f"Expected type {expected_type}, got {type(obj)} instead.")
+
+
+def singleton(cls: Callable) -> Callable:
+    """Ensures a class is a singleton."""
+    instances = {}
+
+    @wraps(cls)
+    def get_instance(*args, **kwargs):
+        if cls not in instances:
+            instances[cls] = cls(*args, **kwargs)
+        return instances[cls]
+
+    return get_instance
+
+
+def debug_log(func: Callable) -> Callable:
+    """Decorator to log the function call and its return value."""
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        arg_str = ", ".join(
+            [repr(a) for a in args] + [f"{k}={v!r}" for k, v in kwargs.items()]
+        )
+        print(f"Calling {func.__name__}({arg_str})")
+        result = func(*args, **kwargs)
+        print(f"{func.__name__} returned {result!r}")
+        return result
+
+    return wrapper
 
 
 class EngineError(Exception):
@@ -243,12 +215,14 @@ class JsonLogFormatter(logging.Formatter):
             "level": record.levelname,
             "message": record.getMessage(),
             "source": record.name,
-            "context": getattr(record, 'context', {})
+            "context": getattr(record, 'context', {}),
         }
         return json.dumps(log_object)
 
 
-def setup_logging() -> logging.Logger:
+def get_logger(
+    name: str, request_id: str = 'SYSTEM'
+) -> ContextualLogger:  # logging.Logger poly
     """Configures and returns a root logger for the engine."""
     logger = logging.getLogger("HAES_Engine")
     logger.setLevel(logging.INFO)
@@ -256,7 +230,7 @@ def setup_logging() -> logging.Logger:
     handler.setFormatter(JsonLogFormatter())
     if not logger.handlers:
         logger.addHandler(handler)
-    return logger
+    return ContextualLogger(logger, {'request_id': request_id})
 
 
 @dataclass(frozen=True)
@@ -265,6 +239,7 @@ class InputArtifact:
     An immutable data transfer object representing the validated input.
     Ensures data integrity from the point of ingestion.
     """
+
     correlation_id: str
     source_path: str
     content: str
@@ -276,7 +251,8 @@ class InputArtifact:
         actual_hash = hashlib.sha256(self.content.encode('utf-8')).hexdigest()
         if self.content_hash_sha256 != actual_hash:
             raise SecurityViolationError(
-                "Content hash mismatch during artifact creation.")
+                "Content hash mismatch during artifact creation."
+            )
 
 
 @dataclass(frozen=True)
@@ -285,6 +261,7 @@ class SemanticGraph:
     The final, signed output artifact. Represents the result of the analysis.
     The 'graph_data' is where the future semantic analysis output will reside.
     """
+
     source_artifact_hash: str
     processed_at_unix_ts: float
     engine_version: str
@@ -301,10 +278,6 @@ class SemanticGraph:
             "signature_hmac_sha256": self.signature_hmac_sha256,
         }
         return json.dumps(data, indent=2)
-
-# ============================================================================
-# 4. THE ENGINE ROOM: The Core Processing Logic
-# ============================================================================
 
 
 class ArtifactProcessor:
@@ -332,23 +305,23 @@ class ArtifactProcessor:
         _, ext = os.path.splitext(normalized_path)
         if ext not in self.config.ALLOWED_EXTENSIONS:
             raise InputValidationError(
-                f"Invalid file extension. Allowed: {self.config.ALLOWED_EXTENSIONS}")
+                f"Invalid file extension. Allowed: {self.config.ALLOWED_EXTENSIONS}"
+            )
 
-        self.logger.info("Path validated and sanitized.",
-                         extra={"context": log_ctx})
+        self.logger.info("Path validated and sanitized.", extra={"context": log_ctx})
         return normalized_path
 
     def _validate_content(self, content: bytes, correlation_id: str) -> str:
         """
         Validates the raw file content for size and syntax.
         """
-        log_ctx = {"correlation_id": correlation_id,
-                   "size_bytes": len(content)}
+        log_ctx = {"correlation_id": correlation_id, "size_bytes": len(content)}
 
         # Security: Enforce file size limits to prevent DoS.
         if len(content) > self.config.MAX_FILE_SIZE_BYTES:
             raise ResourceLimitExceededError(
-                f"File size exceeds limit of {self.config.MAX_FILE_SIZE_BYTES} bytes.")
+                f"File size exceeds limit of {self.config.MAX_FILE_SIZE_BYTES} bytes."
+            )
 
         # Hygiene: Decode and perform a preliminary syntax check.
         try:
@@ -362,14 +335,15 @@ class ArtifactProcessor:
         self.logger.info("Content validated.", extra={"context": log_ctx})
         return decoded_content
 
-    def process_source_file(self, path: str, content: bytes, correlation_id: str) -> SemanticGraph:
+    def process_source_file(
+        self, path: str, content: bytes, correlation_id: str
+    ) -> SemanticGraph:
         """
         The main entry point for processing a single source file.
         Orchestrates validation, artifact creation, and analysis.
         """
         log_ctx = {"correlation_id": correlation_id}
-        self.logger.info("Beginning artifact processing.",
-                         extra={"context": log_ctx})
+        self.logger.info("Beginning artifact processing.", extra={"context": log_ctx})
 
         # 1. Validate and create the input artifact
         sanitized_path = self._validate_and_sanitize_path(path, correlation_id)
@@ -380,8 +354,9 @@ class ArtifactProcessor:
             source_path=sanitized_path,
             content=validated_content,
             content_hash_sha256=hashlib.sha256(
-                validated_content.encode('utf-8')).hexdigest(),
-            size_bytes=len(validated_content.encode('utf-8'))
+                validated_content.encode('utf-8')
+            ).hexdigest(),
+            size_bytes=len(validated_content.encode('utf-8')),
         )
         log_ctx["input_artifact_hash"] = input_artifact.content_hash_sha256
         self.logger.info("Input artifact created.", extra={"context": log_ctx})
@@ -395,13 +370,12 @@ class ArtifactProcessor:
         graph_data = {
             "source_path": input_artifact.source_path,
             "size_bytes": input_artifact.size_bytes,
-            "content_preview": input_artifact.content[:256] + "..."
+            "content_preview": input_artifact.content[:256] + "...",
         }
 
         analysis_duration_ms = (time.time() - analysis_start_time) * 1000
         log_ctx["analysis_duration_ms"] = round(analysis_duration_ms, 2)
-        self.logger.info("Semantic analysis complete.",
-                         extra={"context": log_ctx})
+        self.logger.info("Semantic analysis complete.", extra={"context": log_ctx})
 
         # 3. Create and sign the output artifact
         output_payload = {
@@ -412,17 +386,20 @@ class ArtifactProcessor:
         }
 
         # Security: Sign the payload to ensure authenticity and integrity.
-        payload_bytes = json.dumps(
-            output_payload, sort_keys=True).encode('utf-8')
-        signature = hmac.new(self.config.HMAC_SECRET_KEY,
-                             payload_bytes, hashlib.sha256).hexdigest()
+        payload_bytes = json.dumps(output_payload, sort_keys=True).encode('utf-8')
+        signature = hmac.new(
+            self.config.HMAC_SECRET_KEY, payload_bytes, hashlib.sha256
+        ).hexdigest()
 
         semantic_graph = SemanticGraph(
-            **output_payload, signature_hmac_sha256=signature)
-        self.logger.info("Semantic graph created and signed.",
-                         extra={"context": log_ctx})
+            **output_payload, signature_hmac_sha256=signature
+        )
+        self.logger.info(
+            "Semantic graph created and signed.", extra={"context": log_ctx}
+        )
 
         return semantic_graph
+
 
 # ============================================================================
 # 5. THE PUBLIC INTERFACE: Hardened HTTP Service
@@ -433,6 +410,7 @@ class EngineRequestHandler(BaseHTTPRequestHandler):
     """
     Handles incoming HTTP requests, enforcing security and protocol hygiene.
     """
+
     # These are class-level to be set by the server factory
     processor: ArtifactProcessor
     config: EngineConfig
@@ -453,23 +431,27 @@ class EngineRequestHandler(BaseHTTPRequestHandler):
         else:
             status_code = 500
             message = "An unexpected internal error occurred."
-            self.logger.error("Unhandled exception.", exc_info=True, extra={
-                              "context": {"correlation_id": self.correlation_id}})
+            self.logger.error(
+                "Unhandled exception.",
+                exc_info=True,
+                extra={"context": {"correlation_id": self.correlation_id}},
+            )
 
         error_body = json.dumps({"error": message}).encode('utf-8')
         self._send_response(status_code, "application/json", error_body)
 
     def do_POST(self):
-        self.correlation_id = self.headers.get(
-            "X-Correlation-ID", str(uuid.uuid4()))
-        log_ctx = {"correlation_id": self.correlation_id,
-                   "method": "POST", "path": self.path}
+        self.correlation_id = self.headers.get("X-Correlation-ID", str(uuid.uuid4()))
+        log_ctx = {
+            "correlation_id": self.correlation_id,
+            "method": "POST",
+            "path": self.path,
+        }
         self.logger.info("Request received.", extra={"context": log_ctx})
 
         try:
             if self.path != "/analyze":
-                raise InputValidationError(
-                    "Endpoint not found. Use POST /analyze.")
+                raise InputValidationError("Endpoint not found. Use POST /analyze.")
 
             content_len = int(self.headers.get('Content-Length', 0))
             if content_len > self.config.MAX_REQUEST_BODY_SIZE:
@@ -482,30 +464,34 @@ class EngineRequestHandler(BaseHTTPRequestHandler):
             content_b64 = data.get("content_b64")
             if not path or not content_b64:
                 raise InputValidationError(
-                    "Request body must contain 'path' and 'content_b64'.")
+                    "Request body must contain 'path' and 'content_b64'."
+                )
 
             import base64
+
             content_bytes = base64.b64decode(content_b64)
 
             # Process the artifact
             result_graph = self.processor.process_source_file(
-                path, content_bytes, self.correlation_id)
+                path, content_bytes, self.correlation_id
+            )
 
             # Send successful response
             response_body = result_graph.to_json().encode('utf-8')
             self._send_response(200, "application/json", response_body)
-            self.logger.info("Request processed successfully.",
-                             extra={"context": log_ctx})
+            self.logger.info(
+                "Request processed successfully.", extra={"context": log_ctx}
+            )
 
         except Exception as e:
             self._handle_error(e)
 
     def do_GET(self):
-        self.correlation_id = self.headers.get(
-            "X-Correlation-ID", str(uuid.uuid4()))
+        self.correlation_id = self.headers.get("X-Correlation-ID", str(uuid.uuid4()))
         if self.path == "/health":
-            body = json.dumps(
-                {"status": "healthy", "timestamp": time.time()}).encode('utf-8')
+            body = json.dumps({"status": "healthy", "timestamp": time.time()}).encode(
+                'utf-8'
+            )
             self._send_response(200, "application/json", body)
         else:
             self._handle_error(InputValidationError("Endpoint not found."))
@@ -513,6 +499,7 @@ class EngineRequestHandler(BaseHTTPRequestHandler):
 
 class ThreadedEngineServer(ThreadingHTTPServer, ThreadingMixIn):
     """A ThreadingHTTPServer that allows for dependency injection."""
+
     daemon_threads = True
 
     def __init__(self, server_address, RequestHandlerClass, processor, config, logger):
@@ -528,8 +515,7 @@ module_code = """
 def greet():
     print("Hello from the Morphological Source Code module! This is Replicator-code ('Quine-like behavior')!")
 """
-main_module_path = getattr(
-    sys.modules['__main__'], '__file__', 'runtime_generated')
+main_module_path = getattr(sys.modules['__main__'], '__file__', 'runtime_generated')
 
 dynamic_module = create_module(module_name, module_code, main_module_path)
 if dynamic_module:

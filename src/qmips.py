@@ -36,46 +36,6 @@ from dataclasses import dataclass, field, asdict
 from collections.abc import Hashable
 import ast
 
-# Type Variables for Generic Programming
-T = TypeVar('T')
-S = TypeVar('S')
-
-# === Utility Functions ===
-
-
-def validate_instance(obj: Any, expected_type: Any) -> None:
-    """Ensures the object is of the expected type."""
-    if not isinstance(obj, expected_type):
-        raise TypeError(f"Expected type {expected_type}, got {type(obj)} instead.")
-
-
-def singleton(cls: Callable) -> Callable:
-    """Ensures a class is a singleton."""
-    instances = {}
-
-    @wraps(cls)
-    def get_instance(*args, **kwargs):
-        if cls not in instances:
-            instances[cls] = cls(*args, **kwargs)
-        return instances[cls]
-
-    return get_instance
-
-
-def debug_log(func: Callable) -> Callable:
-    """Decorator to log the function call and its return value."""
-
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        arg_str = ", ".join(
-            [repr(a) for a in args] + [f"{k}={v!r}" for k, v in kwargs.items()]
-        )
-        print(f"Calling {func.__name__}({arg_str})")
-        result = func(*args, **kwargs)
-        print(f"{func.__name__} returned {result!r}")
-        return result
-
-    return wrapper
 
 
 # === Core Data Classes ===
