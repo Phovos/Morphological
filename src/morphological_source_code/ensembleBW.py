@@ -1,18 +1,33 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run
+from __future__ import annotations
+
+# /* script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "uv==*.*",
+# ]
+# */
+# Optional dependency handling (also add to '/* script..' comment, just above)
+#   "© 2026 `Phovos` (phovos@outlook.com)":
+#     - "Morphological Source Code: MSC&QSD"
+#     - https://gitlab.com/morphological/source/code
+#     - https://github.com/Morphological-Source-Code
+#     - https://reddit.com/r/morphological
+# © 2024-2026 https://github.com/Phovos/Morphological-Source-Code
+# © 2023-2026 https://github.com/MOONLAPSED/cognosis
+
+import math
+import cmath
+import hashlib
+from dataclasses import dataclass
+from typing import List
+
 """
 Determinism Proof for Morphological Source Code (MSC) + QSD
 This script evolves a ByteWord ensemble (light-cone in cache), sorts it topologically (useful computation),
 self-verifies the sort (self-proof), and demonstrates determinism across full shutdown/rehydration.
 Scales to 256 ByteWords (L1 cache fit).
 """
-
-# > © 2024-2025 Phovos https://github.com/Phovos/Morphologic BSD-3 & CC ND
-# > © 2023-2025 Moonlapsed https://github.com/MOONLAPSED/Cognosis
-import math
-import cmath
-import hashlib
-from dataclasses import dataclass
-from typing import List
 
 
 @dataclass(frozen=True)

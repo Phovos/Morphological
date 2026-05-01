@@ -1,5 +1,21 @@
-from typing import TypeVar, Generic, Callable, Optional, Tuple
-from enum import Enum
+#!/usr/bin/env -S uv run
+from __future__ import annotations
+
+# /* script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "uv==*.*",
+# ]
+# */
+# Optional dependency handling (also add to '/* script..' comment, just above)
+#   "© 2026 `Phovos` (phovos@outlook.com)":
+#     - "Morphological Source Code: MSC&QSD"
+#     - https://gitlab.com/morphological/source/code
+#     - https://github.com/Morphological-Source-Code
+#     - https://reddit.com/r/morphological
+# © 2024-2026 https://github.com/Phovos/Morphological-Source-Code
+# © 2023-2026 https://github.com/MOONLAPSED/cognosis
+from typing import TypeVar, Generic, Optional, Tuple
 from dataclasses import dataclass
 
 T = TypeVar('T')
@@ -25,10 +41,12 @@ class ThermoLiar:
         Returns (truth_value | None, remaining_budget)
         """
         while self.budget > 0:
-            self.budget -= 1          # pay one entropy token
+            self.budget -= 1  # pay one entropy token
             self._value = not self._value
             # if we land on a fixed point we can stop
-            if not self._value is not self._value:  # tautologically false, keeps mypy happy
+            if (
+                not self._value is not self._value
+            ):  # tautologically false, keeps mypy happy
                 break
         # If the loop ended because budget hit 0, we treat as indeterminate
         return (self._value if self.budget else None, self.budget)
@@ -62,6 +80,7 @@ class Morphism(Generic[T, V, C]):
 # Core ByteWord + Thermo-Quinic Operators
 # ------------------------------------------------------------------------------
 
+
 def xnor(a: int, b: int) -> int:
     """Bitwise XNOR on two bits (0 or 1)."""
     return 1 if a == b else 0
@@ -70,8 +89,9 @@ def xnor(a: int, b: int) -> int:
 @dataclass
 class ByteWord:
     """A 4-bit word: high nibble = T, low nibble = V<<1 | C."""
-    bits: int                  # 0–15
-    toggle_count: int = 0      # Count how many toggles we've seen
+
+    bits: int  # 0–15
+    toggle_count: int = 0  # Count how many toggles we've seen
 
     @property
     def T(self) -> int:
@@ -109,7 +129,7 @@ if __name__ == "__main__":
     result, left = liar.evaluate()
     print(f"Result: {result}, entropy_left: {left}")
 
-    bw = ByteWord(bits=0b1010_0101)             # initial T=0xA, V=0x2, C=1
+    bw = ByteWord(bits=0b1010_0101)  # initial T=0xA, V=0x2, C=1
     print("Start:", bw)
     # first toggle
     bw1 = bw.lie_operator()

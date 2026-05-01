@@ -1,4 +1,20 @@
+#!/usr/bin/env -S uv run
 from __future__ import annotations
+
+# /* script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "uv==*.*",
+# ]
+# */
+# Optional dependency handling (also add to '/* script..' comment, just above)
+#   "© 2026 `Phovos` (phovos@outlook.com)":
+#     - "Morphological Source Code: MSC&QSD"
+#     - https://gitlab.com/morphological/source/code
+#     - https://github.com/Morphological-Source-Code
+#     - https://reddit.com/r/morphological
+# © 2024-2026 https://github.com/Phovos/Morphological-Source-Code
+# © 2023-2026 https://github.com/MOONLAPSED/cognosis
 import json
 import uuid
 import http.client

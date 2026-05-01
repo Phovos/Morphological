@@ -1,68 +1,46 @@
+#!/usr/bin/env -S uv run
 from __future__ import annotations
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-#------------------------------------------------------------------------------
-# 3.13 std libs **ONLY** | Platform(s): Win11 (production), Ubuntu-22.04 (dev, staging);
-# master branch is for immutable releases, only;
-#------------------------------------------------------------------------------
-# PLATFORM, INIT, MONOLITHIC NUTS & BOLTS + IMPORTS;
-#------------------------------------------------------------------------------
-import re
+
+# /* script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "uv==*.*",
+# ]
+# */
+# Optional dependency handling (also add to '/* script..' comment, just above)
+#   "© 2026 `Phovos` (phovos@outlook.com)":
+#     - "Morphological Source Code: MSC&QSD"
+#     - https://gitlab.com/morphological/source/code
+#     - https://github.com/Morphological-Source-Code
+#     - https://reddit.com/r/morphological
+# © 2024-2026 https://github.com/Phovos/Morphological-Source-Code
+# © 2023-2026 https://github.com/MOONLAPSED/cognosis
 import os
-import io
-import abc
-import dis
 import sys
-import ast
 import time
-import json
 import math
-import uuid
 import enum
-import heapq
 import array
-import shlex
 import types
-import struct
-import shutil
-import pickle
 import socket
 import select
 import ctypes
 import random
 import logging
-import weakref
-import tomllib
-import pathlib
 import asyncio
-import inspect
 import hashlib
-import platform
-import importlib
 import functools
 import linecache
-import traceback
-import mimetypes
-import threading
-import subprocess
-import contextvars
 import collections
 import tracemalloc
-from pathlib import Path
-from enum import Enum, auto, StrEnum, IntFlag, IntEnum
-from queue import Queue, Empty
-from datetime import datetime, timezone
+from enum import Enum, auto, StrEnum
 from abc import ABC, abstractmethod
 from contextlib import contextmanager
 from functools import wraps, lru_cache
 from dataclasses import dataclass, field
-from concurrent.futures import ThreadPoolExecutor
-from importlib.util import spec_from_file_location, module_from_spec
-from types import SimpleNamespace, MethodType, MethodWrapperType, LambdaType, coroutine, CodeType
 from typing import (
     Any, Dict, List, Optional, Union, Callable, TypeVar, Tuple, Generic, Set,
-    Coroutine, Type, NamedTuple, ClassVar, Protocol, runtime_checkable, AsyncContextManager,
-    AsyncGenerator, AsyncIterator, cast, overload, Generator, Awaitable, Hashable, Iterator
+    Type, cast, Hashable, Iterator
 )
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

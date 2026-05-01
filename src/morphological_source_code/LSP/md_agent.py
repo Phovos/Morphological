@@ -1,7 +1,39 @@
+#!/usr/bin/env -S uv run
 from __future__ import annotations
 
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+# /* script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "uv==*.*",
+# ]
+# */
+# Optional dependency handling (also add to '/* script..' comment, just above)
+#   "© 2026 `Phovos` (phovos@outlook.com)":
+#     - "Morphological Source Code: MSC&QSD"
+#     - https://gitlab.com/morphological/source/code
+#     - https://github.com/Morphological-Source-Code
+#     - https://reddit.com/r/morphological
+# © 2024-2026 https://github.com/Phovos/Morphological-Source-Code
+# © 2023-2026 https://github.com/MOONLAPSED/cognosis
+# ------------------------------------------------------------------------------
+# Special thanks to Doctors Chuck ['Python4Everyone' (.com)] &
+# Michael Sugrue ['Great Minds of the Western Intellectual Tradition']
+# ------------------------------------------------------------------------------
+# 3.13 std libs | Platform(s): Win11 (production), Ubuntu-22.04 (dev, staging);
+# ------------------------------------------------------------------------------
+
+import os
+import re
+import sys
+import json
+import logging
+import threading
+from pathlib import Path
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional, Tuple
+from urllib.parse import urlparse
+from urllib.request import url2pathname
+
 """
 ==================
 Legagy:
@@ -28,24 +60,6 @@ Combines:
 - LSP 3.17 protocol compliance
 
 """
-# ------------------------------------------------------------------------------
-# Special thanks to Doctors Chuck ['Python4Everyone' (.com)] &
-# Michael Sugrue ['Great Minds of the Western Intellectual Tradition']
-# ------------------------------------------------------------------------------
-# 3.13 std libs | Platform(s): Win11 (production), Ubuntu-22.04 (dev, staging);
-# ------------------------------------------------------------------------------
-
-import os
-import re
-import sys
-import json
-import logging
-import threading
-from pathlib import Path
-from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Tuple
-from urllib.parse import urlparse
-from urllib.request import url2pathname
 
 # ---------------------------------------------------------------------------
 # Logging

@@ -1,7 +1,21 @@
+#!/usr/bin/env -S uv run
 from __future__ import annotations
-import ast
+
+# /* script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "uv==*.*",
+# ]
+# */
+# Optional dependency handling (also add to '/* script..' comment, just above)
+#   "© 2026 `Phovos` (phovos@outlook.com)":
+#     - "Morphological Source Code: MSC&QSD"
+#     - https://gitlab.com/morphological/source/code
+#     - https://github.com/Morphological-Source-Code
+#     - https://reddit.com/r/morphological
+# © 2024-2026 https://github.com/Phovos/Morphological-Source-Code
+# © 2023-2026 https://github.com/MOONLAPSED/cognosis
 import textwrap
-import inspect
 import enum
 import time
 import os
@@ -12,7 +26,6 @@ import random
 import sys
 import hashlib
 import math
-from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import (
     Any,
@@ -23,16 +36,13 @@ from typing import (
     Dict,
     Set,
     Callable,
-    Protocol,
-    runtime_checkable,
     Tuple,
 )
-from functools import wraps
 
 """
 (MSC) Morphological Source Code Framework – V0.5.12-aleph
 ================================================================================
-<https://github.com/Phovos/msc> • MSC: Morphological Source Code © 2026 by Phovos
+<https://github.com/Phovos/Morphological-Source-Code> • MSC: Morphological Source Code © 2026 by Phovos
 --------------------------------------------------------------------------------
 
 MSC implements *quantum-coherent computational morphogenesis* through tripartite

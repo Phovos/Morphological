@@ -1,26 +1,53 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run
+from __future__ import annotations
+
+# /* script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "uv==*.*",
+# ]
+# */
+# Optional dependency handling (also add to '/* script..' comment, just above)
+#   "© 2026 `Phovos` (phovos@outlook.com)":
+#     - "Morphological Source Code: MSC&QSD"
+#     - https://gitlab.com/morphological/source/code
+#     - https://github.com/Morphological-Source-Code
+#     - https://reddit.com/r/morphological
+# © 2024-2026 https://github.com/Phovos/Morphological-Source-Code
+# © 2023-2026 https://github.com/MOONLAPSED/cognosis
+
+import sys
+import re
+import json
+import hashlib
+from pathlib import Path
+from typing import Dict, List, Optional, Any
+from dataclasses import dataclass
+from enum import Enum
+
 """
 Markdown Agent - Bridge between LSP actions and ontological computing
 Usage: md_agent.py {extract|inline|quantum_state|morphic_transform} [args...]
 """
 
-import sys
-import os
-import re
-import json
-import hashlib
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Any
-from dataclasses import dataclass
-from enum import Enum
-
 # Import your ontology classes (assuming they're available)
 try:
-    from your_ontology import BYTE, QuantumState, HilbertSpace, MorphicComplex, least_significant_unit, WordSize
+    from your_ontology import (
+        BYTE,
+        QuantumState,
+        HilbertSpace,
+        MorphicComplex,
+        least_significant_unit,
+        WordSize,
+    )
+
     ONTOLOGY_AVAILABLE = True
 except ImportError:
     ONTOLOGY_AVAILABLE = False
-    print("Warning: Ontology classes not available, running in basic mode", file=sys.stderr)
+    print(
+        "Warning: Ontology classes not available, running in basic mode",
+        file=sys.stderr,
+    )
 
 
 class ActionType(Enum):
@@ -34,6 +61,7 @@ class ActionType(Enum):
 @dataclass
 class DocumentState:
     """Represents the state of a document in our ontological framework"""
+
     path: str
     content: str
     hash: str
@@ -54,8 +82,7 @@ class MarkdownAgent:
 
         # Initialize ontological structures if available
         if ONTOLOGY_AVAILABLE:
-            self.hilbert_space = HilbertSpace(
-                dimension=8)  # 8D for BYTE compatibility
+            self.hilbert_space = HilbertSpace(dimension=8)  # 8D for BYTE compatibility
             self._init_quantum_operators()
 
     def _load_state(self) -> Dict[str, Any]:
@@ -64,7 +91,7 @@ class MarkdownAgent:
             try:
                 with open(self.state_file, 'r') as f:
                     return json.load(f)
-            except (json.JSONDecodeError, IOError):
+            except json.JSONDecodeError, IOError:
                 pass
         return {"documents": {}, "extractions": {}, "quantum_states": {}}
 
@@ -94,6 +121,7 @@ class MarkdownAgent:
         # Example: Create a simple extraction operator
         # In practice, this would be more sophisticated
         from your_ontology import QuantumOperator
+
         return QuantumOperator(self.hilbert_space)
 
     def _create_inline_operator(self):
@@ -102,6 +130,7 @@ class MarkdownAgent:
             return None
 
         from your_ontology import QuantumOperator
+
         return QuantumOperator(self.hilbert_space)
 
     def _compute_document_hash(self, content: str) -> str:
@@ -136,7 +165,7 @@ class MarkdownAgent:
                     'title': title,
                     'start_line': i,
                     'content': '',
-                    'end_line': i
+                    'end_line': i,
                 }
                 current_content = [line]
             else:
@@ -186,7 +215,9 @@ class MarkdownAgent:
 
         return QuantumState(amplitudes, self.hilbert_space)
 
-    def extract_section(self, document_path: str, cursor_line: int = None) -> Dict[str, Any]:
+    def extract_section(
+        self, document_path: str, cursor_line: int = None
+    ) -> Dict[str, Any]:
         """Extract a section from a document"""
         doc_path = Path(document_path)
         if not doc_path.exists():
@@ -222,9 +253,9 @@ class MarkdownAgent:
         # Update original document
         lines = content.split('\n')
         new_lines = (
-            lines[:target_section['start_line']] +
-            [link_text] +
-            lines[target_section['end_line'] + 1:]
+            lines[: target_section['start_line']]
+            + [link_text]
+            + lines[target_section['end_line'] + 1 :]
         )
         new_content = '\n'.join(new_lines)
 
@@ -236,20 +267,22 @@ class MarkdownAgent:
             "original_doc": str(doc_path),
             "extracted_path": str(extracted_path),
             "title": target_section['title'],
-            "original_content": target_section['content']
+            "original_content": target_section['content'],
         }
 
         # Compute ontological signatures
         if ONTOLOGY_AVAILABLE:
-            morphic_sig = self._compute_morphic_signature(
-                target_section['content'])
+            morphic_sig = self._compute_morphic_signature(target_section['content'])
             quantum_state = self._create_quantum_state_from_content(
-                target_section['content'])
+                target_section['content']
+            )
 
             self.state["quantum_states"][note_id] = {
                 "morphic_signature": morphic_sig,
                 "dimension": self.hilbert_space.dimension,
-                "amplitudes": [(amp.real, amp.imag) for amp in quantum_state.amplitudes] if quantum_state else []
+                "amplitudes": [(amp.real, amp.imag) for amp in quantum_state.amplitudes]
+                if quantum_state
+                else [],
             }
 
         self._save_state()
@@ -258,7 +291,7 @@ class MarkdownAgent:
             "success": True,
             "note_id": note_id,
             "extracted_path": str(extracted_path),
-            "link_text": link_text
+            "link_text": link_text,
         }
 
     def inline_section(self, document_path: str, note_id: str) -> Dict[str, Any]:
@@ -285,7 +318,9 @@ class MarkdownAgent:
             doc_content = f.read()
 
         # Replace link with content
-        link_pattern = rf"\[{re.escape(extraction_info['title'])}\]\({re.escape(note_id)}\)"
+        link_pattern = (
+            rf"\[{re.escape(extraction_info['title'])}\]\({re.escape(note_id)}\)"
+        )
         new_content = re.sub(link_pattern, extracted_content, doc_content)
 
         # Write updated document
@@ -296,7 +331,7 @@ class MarkdownAgent:
             "success": True,
             "inlined_content": extracted_content,
             "note_id": note_id,
-            "message": f"Content inlined. Extracted file {extracted_path} still exists."
+            "message": f"Content inlined. Extracted file {extracted_path} still exists.",
         }
 
     def analyze_document(self, document_path: str) -> Dict[str, Any]:
@@ -313,23 +348,26 @@ class MarkdownAgent:
             "content_hash": self._compute_document_hash(content),
             "sections": self._parse_markdown_sections(content),
             "line_count": len(content.split('\n')),
-            "char_count": len(content)
+            "char_count": len(content),
         }
 
         if ONTOLOGY_AVAILABLE:
-            analysis["morphic_signature"] = self._compute_morphic_signature(
-                content)
+            analysis["morphic_signature"] = self._compute_morphic_signature(content)
             quantum_state = self._create_quantum_state_from_content(content)
             if quantum_state:
                 analysis["quantum_state"] = {
                     "dimension": self.hilbert_space.dimension,
-                    "amplitudes": [(amp.real, amp.imag) for amp in quantum_state.amplitudes],
-                    "norm": self.hilbert_space.norm(quantum_state.amplitudes)
+                    "amplitudes": [
+                        (amp.real, amp.imag) for amp in quantum_state.amplitudes
+                    ],
+                    "norm": self.hilbert_space.norm(quantum_state.amplitudes),
                 }
 
         return analysis
 
-    def morphic_transform(self, document_path: str, transform_type: str = "identity") -> Dict[str, Any]:
+    def morphic_transform(
+        self, document_path: str, transform_type: str = "identity"
+    ) -> Dict[str, Any]:
         """Apply morphic transformation to document"""
         if not ONTOLOGY_AVAILABLE:
             return {"error": "Ontology not available for morphic operations"}
@@ -354,6 +392,7 @@ class MarkdownAgent:
         else:
             # Identity transformation
             from your_ontology import QuantumOperator
+
             operator = QuantumOperator(self.hilbert_space)
 
         # Apply operator to quantum state
@@ -364,16 +403,17 @@ class MarkdownAgent:
             "success": True,
             "transform_type": transform_type,
             "final_state": {
-                "amplitudes": [(amp.real, amp.imag) for amp in quantum_state.amplitudes],
-                "norm": self.hilbert_space.norm(quantum_state.amplitudes)
-            }
+                "amplitudes": [
+                    (amp.real, amp.imag) for amp in quantum_state.amplitudes
+                ],
+                "norm": self.hilbert_space.norm(quantum_state.amplitudes),
+            },
         }
 
 
 def main():
     if len(sys.argv) < 2:
-        print(
-            "Usage: md_agent.py {extract|inline|analyze|morphic_transform} [args...]")
+        print("Usage: md_agent.py {extract|inline|analyze|morphic_transform} [args...]")
         sys.exit(1)
 
     action = sys.argv[1]

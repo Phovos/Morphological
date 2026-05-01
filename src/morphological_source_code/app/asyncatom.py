@@ -1,22 +1,34 @@
+#!/usr/bin/env -S uv run
 from __future__ import annotations
+
+# /* script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "uv==*.*",
+# ]
+# */
+# Optional dependency handling (also add to '/* script..' comment, just above)
+#   "© 2026 `Phovos` (phovos@outlook.com)":
+#     - "Morphological Source Code: MSC&QSD"
+#     - https://gitlab.com/morphological/source/code
+#     - https://github.com/Morphological-Source-Code
+#     - https://reddit.com/r/morphological
+# © 2024-2026 https://github.com/Phovos/Morphological-Source-Code
+# © 2023-2026 https://github.com/MOONLAPSED/cognosis
 import asyncio
 import time
-import array
 import json
 import math
-import http.client
 import os
 import ast
 import hashlib
 from abc import ABC, abstractmethod
 from collections import defaultdict
-from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import (
-    TypeVar, Generic, Callable, Dict, Any, Optional, Set, Union,
-    Awaitable, List, Tuple
-)
+from typing import TypeVar, Generic, Callable, Dict, Any, Optional, Set, Awaitable, List
+
+
 class __Atom__(ABC):
     __slots__ = ("_refcount",)
 
@@ -35,55 +47,74 @@ class __Atom__(ABC):
     def cleanup(self) -> None:
         """Cleanup resources when the atom is no longer referenced."""
         pass
+
+
 T_co = TypeVar('T_co', covariant=True)
 V_co = TypeVar('V_co', covariant=True)
 C_co = TypeVar('C_co', bound=Callable, covariant=True)
+
+
 class AsyncAtom(__Atom__, Generic[T_co, V_co, C_co], ABC):
     __slots__ = (
-        '_code', '_value', '_local_env', '_ttl', '_created_at',
-        '_last_access_time', 'request_data', 'session', 'runtime_namespace',
-        'security_context', '_pending_tasks', '_lock', '_buffer_size', '_buffer'
+        '_code',
+        '_value',
+        '_local_env',
+        '_ttl',
+        '_created_at',
+        '_last_access_time',
+        'request_data',
+        'session',
+        'runtime_namespace',
+        'security_context',
+        '_pending_tasks',
+        '_lock',
+        '_buffer_size',
+        '_buffer',
     )
     _start_delimiter: str = "<<CONTENT>>"
     _end_delimiter: str = "<<END_CONTENT>>"
 
     def __init__(
         self,
-        code: str, # This 'code' is now the raw content string
+        code: str,  # This 'code' is now the raw content string
         value: Optional[V_co] = None,
         ttl: Optional[int] = None,
         request_data: Optional[Dict[str, Any]] = None,
         buffer_size: int = 1024 * 64,
         # Add KnowledgeEntry specific fields here or in the subclass
-        atom_id: Optional[str] = None, # Allow setting ID, maybe hash-based later
+        atom_id: Optional[str] = None,  # Allow setting ID, maybe hash-based later
         title: str = "Untitled",
         content_type: str = "text/markdown",
         last_updated: Optional[datetime] = None,
         metadata: Optional[Dict[str, Any]] = None,
         tags: Optional[Set[str]] = None,
-        related_entries: Optional[List[str]] = None, # Links found in content
+        related_entries: Optional[List[str]] = None,  # Links found in content
         keywords: Optional[List[str]] = None,
     ):
         # Initialize the base AsyncAtom (which calls the refcounted __Atom__ init)
         # The 'code' parameter in the base AsyncAtom will now store the *delimited* content
         delimited_code = self._start_delimiter + code + self._end_delimiter
         super().__init__(
-            code=delimited_code, # Store the delimited content here
+            code=delimited_code,  # Store the delimited content here
             value=value,
             ttl=ttl,
             request_data=request_data,
-            buffer_size=buffer_size
+            buffer_size=buffer_size,
         )
 
         # Initialize KnowledgeEntry specific fields
-        self.id = atom_id if atom_id is not None else uuid.uuid4().hex # Use provided ID or generate UUID
+        self.id = (
+            atom_id if atom_id is not None else uuid.uuid4().hex
+        )  # Use provided ID or generate UUID
         self.title = title
         self.content_type = content_type
         self.last_updated = last_updated if last_updated is not None else datetime.now()
         self.metadata = metadata or {}
         self.tags = tags or set()
-        self.references = set() # What is the purpose of 'references' vs 'related_entries'? Clarify.
-        self.embeddings = None # Placeholder
+        self.references = (
+            set()
+        )  # What is the purpose of 'references' vs 'related_entries'? Clarify.
+        self.embeddings = None  # Placeholder
 
         # Store the *parsed* content separately for easier access
         self._parsed_content = self._parse_delimited_content(self._code)
@@ -94,7 +125,6 @@ class AsyncAtom(__Atom__, Generic[T_co, V_co, C_co], ABC):
 
         # Perform initial parsing to populate knowledge fields
         self._extract_knowledge_fields()
-
 
     async def __aenter__(self) -> AsyncAtom[T_co, V_co, C_co]:
         self.inc_ref()
@@ -107,14 +137,14 @@ class AsyncAtom(__Atom__, Generic[T_co, V_co, C_co], ABC):
 
     async def cleanup(self) -> None:
         print(f"Cleaning up atom {id(self)}")
-        for task in list(self._pending_tasks): # Iterate over a copy as set is modified
+        for task in list(self._pending_tasks):  # Iterate over a copy as set is modified
             if not task.done():
                 task.cancel()
                 try:
-                    await task # Await cancellation if needed, handle CancelledError
+                    await task  # Await cancellation if needed, handle CancelledError
                 except asyncio.CancelledError:
                     pass
-        self._pending_tasks.clear() # Ensure set is empty
+        self._pending_tasks.clear()  # Ensure set is empty
         self._buffer = bytearray(0)
         self._local_env.clear()
 
@@ -123,10 +153,10 @@ class AsyncAtom(__Atom__, Generic[T_co, V_co, C_co], ABC):
         async with self._lock:
             # Create a controlled environment
             execution_namespace: Dict[str, Any] = {
-                '__builtins__': __builtins__, # Or a restricted set
+                '__builtins__': __builtins__,  # Or a restricted set
                 'asyncio': asyncio,
-                'time': time, # Example: expose some modules
-                '__atom_self__': self, # Allow access to the atom instance itself
+                'time': time,  # Example: expose some modules
+                '__atom_self__': self,  # Allow access to the atom instance itself
                 # Add other necessary imports/objects here
             }
             # Copy local state into the execution namespace
@@ -161,15 +191,27 @@ class AsyncAtom(__Atom__, Generic[T_co, V_co, C_co], ABC):
                 # Maybe only update keys that were explicitly marked for persistence?
                 # Or update all keys *except* builtins, args, kwargs, etc.
                 # Let's update all keys except the ones we injected for execution context
-                reserved_keys = {'__builtins__', 'asyncio', 'time', '__atom_self__', 'atom_entrypoint', 'args', 'kwargs'} # Add others as needed
+                reserved_keys = {
+                    '__builtins__',
+                    'asyncio',
+                    'time',
+                    '__atom_self__',
+                    'atom_entrypoint',
+                    'args',
+                    'kwargs',
+                }  # Add others as needed
                 for k, v in execution_namespace.items():
                     if k not in reserved_keys:
-                        self._local_env[k] = v # This now allows new variables to persist
+                        self._local_env[k] = (
+                            v  # This now allows new variables to persist
+                        )
 
             return result
         except Exception as e:
-            print(f"Error executing AsyncAtom code: {e}") # Use a proper logger
-            raise RuntimeError(f"Error executing AsyncAtom code: {e}") from e # Chain exception
+            print(f"Error executing AsyncAtom code: {e}")  # Use a proper logger
+            raise RuntimeError(
+                f"Error executing AsyncAtom code: {e}"
+            ) from e  # Chain exception
 
     def _is_async_code(self, code: str) -> bool:
         try:
@@ -197,7 +239,7 @@ class AsyncAtom(__Atom__, Generic[T_co, V_co, C_co], ABC):
             "request_data": self.request_data,
             "runtime_namespace": self.runtime_namespace,
             "security_context": self.security_context,
-            "timestamp": time.time()
+            "timestamp": time.time(),
         }
         try:
             if "operation" in self.request_data:
@@ -207,8 +249,7 @@ class AsyncAtom(__Atom__, Generic[T_co, V_co, C_co], ABC):
                 elif operation == "query_memory":
                     result = await self.query_memory(request_context)
                 else:
-                    result = {"status": "error",
-                              "message": "Unknown operation"}
+                    result = {"status": "error", "message": "Unknown operation"}
             else:
                 result = await self.process_request(request_context)
         except Exception as e:
@@ -248,16 +289,18 @@ class AsyncAtom(__Atom__, Generic[T_co, V_co, C_co], ABC):
     async def preload_buffer(self, data: bytes) -> None:
         async with self._lock:
             if len(data) <= self._buffer_size:
-                self._buffer[:len(data)] = data
+                self._buffer[: len(data)] = data
             else:
                 self._buffer = bytearray(data)
                 self._buffer_size = len(data)
 
-    async def get_buffer(self, offset: int = 0, length: Optional[int] = None) -> memoryview:
+    async def get_buffer(
+        self, offset: int = 0, length: Optional[int] = None
+    ) -> memoryview:
         async with self._lock:
             if length is None:
                 return memoryview(self._buffer)[offset:]
-            return memoryview(self._buffer)[offset:offset+length]
+            return memoryview(self._buffer)[offset : offset + length]
 
     def is_expired(self) -> bool:
         if self._ttl is None:
@@ -290,12 +333,14 @@ class AsyncAtom(__Atom__, Generic[T_co, V_co, C_co], ABC):
         start_index = raw_content.find(self._start_delimiter)
         end_index = raw_content.rfind(self._end_delimiter)
         if start_index == -1 or end_index == -1 or start_index >= end_index:
-            raise ValueError("Invalid content format: delimiters not found or mismatched.")
-        return raw_content[start_index + len(self._start_delimiter):end_index]
+            raise ValueError(
+                "Invalid content format: delimiters not found or mismatched."
+            )
+        return raw_content[start_index + len(self._start_delimiter) : end_index]
 
     def _wrap_content_with_delimiters(self, content: str) -> str:
-         """Wrap content with delimiters."""
-         return self._start_delimiter + content + self._end_delimiter
+        """Wrap content with delimiters."""
+        return self._start_delimiter + content + self._end_delimiter
 
     def update_content(self, new_parsed_content: str) -> None:
         """Update the atom's content and re-parse knowledge fields."""
@@ -320,8 +365,8 @@ class AsyncAtom(__Atom__, Generic[T_co, V_co, C_co], ABC):
 
         # Clear previous extractions before re-populating
         self.related_entries = []
-        self.keywords = [] # Decide if keywords are only from frontmatter or also extracted?
-        self.tags = set() # Decide if tags are only from frontmatter or also extracted?
+        self.keywords = []  # Decide if keywords are only from frontmatter or also extracted?
+        self.tags = set()  # Decide if tags are only from frontmatter or also extracted?
 
         # Extract Frontmatter (using the logic from KnowledgeEntry)
         frontmatter = {}
@@ -344,8 +389,10 @@ class AsyncAtom(__Atom__, Generic[T_co, V_co, C_co], ABC):
                     # Assuming tags are comma-separated string like "tag1, tag2"
                     self.tags = set(t.strip() for t in frontmatter['tags'].split(','))
                 if 'keywords' in frontmatter:
-                     # Assuming keywords are comma-separated string
-                    self.keywords = [k.strip() for k in frontmatter['keywords'].split(',')]
+                    # Assuming keywords are comma-separated string
+                    self.keywords = [
+                        k.strip() for k in frontmatter['keywords'].split(',')
+                    ]
                 if 'link' in frontmatter:
                     self.related_entries.append(frontmatter['link'])
                 if 'linklist' in frontmatter:
@@ -355,17 +402,19 @@ class AsyncAtom(__Atom__, Generic[T_co, V_co, C_co], ABC):
                     self.related_entries.extend(link_matches)
 
             except Exception as e:
-                print(f"Warning: Error parsing frontmatter for atom {self.id}: {e}") # Use proper logging
+                print(
+                    f"Warning: Error parsing frontmatter for atom {self.id}: {e}"
+                )  # Use proper logging
 
         # Extract Wiki-style Links [[Link]] from the *rest* of the content
         # Need to remove frontmatter before searching for links in the body
         content_after_frontmatter = content
         if frontmatter_match:
-             content_after_frontmatter = content[frontmatter_match.end():]
+            content_after_frontmatter = content[frontmatter_match.end() :]
 
         links_in_body = re.findall(r'\[\[(.*?)\]\]', content_after_frontmatter)
         self.related_entries.extend(links_in_body)
-        self.related_entries = list(set(self.related_entries)) # Remove duplicates
+        self.related_entries = list(set(self.related_entries))  # Remove duplicates
 
         # Note: This method populates fields based on content.
         # If you want to *manually* set tags/keywords/related_entries,
@@ -389,13 +438,13 @@ class AsyncAtom(__Atom__, Generic[T_co, V_co, C_co], ABC):
 
             # Create a controlled execution namespace
             execution_namespace: Dict[str, Any] = {
-                '__builtins__': __builtins__, # Or a restricted set like {'print': print, 'len': len, ...}
+                '__builtins__': __builtins__,  # Or a restricted set like {'print': print, 'len': len, ...}
                 'asyncio': asyncio,
                 'time': time,
-                're': re, # Expose modules the code might need
+                're': re,  # Expose modules the code might need
                 'json': json,
                 'math': math,
-                '__atom_self__': self, # Allow access to the atom instance
+                '__atom_self__': self,  # Allow access to the atom instance
                 # Add other necessary imports/objects here
             }
             # Add the atom's persistent local state to the execution namespace
@@ -410,10 +459,12 @@ class AsyncAtom(__Atom__, Generic[T_co, V_co, C_co], ABC):
             main_func = execution_namespace.get('atom_entrypoint')
 
             if not main_func or not asyncio.iscoroutinefunction(main_func):
-                 # If the code didn't define the expected async function,
-                 # maybe try executing it directly if it's not async?
-                 # Or enforce the async function signature. Let's enforce.
-                 raise ValueError(f"Atom {self.id} code must define an async function 'atom_entrypoint'")
+                # If the code didn't define the expected async function,
+                # maybe try executing it directly if it's not async?
+                # Or enforce the async function signature. Let's enforce.
+                raise ValueError(
+                    f"Atom {self.id} code must define an async function 'atom_entrypoint'"
+                )
 
             # Call the function, passing necessary context
             # The executed code can access/modify variables in execution_namespace
@@ -423,15 +474,30 @@ class AsyncAtom(__Atom__, Generic[T_co, V_co, C_co], ABC):
             async with self._lock:
                 # Update the atom's persistent local environment from the execution namespace
                 # Only persist keys that are not part of the execution context setup
-                reserved_keys = {'__builtins__', 'asyncio', 'time', 're', 'json', 'math', '__atom_self__', 'atom_entrypoint', 'args', 'kwargs'} # Add others
+                reserved_keys = {
+                    '__builtins__',
+                    'asyncio',
+                    'time',
+                    're',
+                    'json',
+                    'math',
+                    '__atom_self__',
+                    'atom_entrypoint',
+                    'args',
+                    'kwargs',
+                }  # Add others
                 for k, v in execution_namespace.items():
-                     if k not in reserved_keys:
-                         self._local_env[k] = v # Persist changes made by the executed code
+                    if k not in reserved_keys:
+                        self._local_env[k] = (
+                            v  # Persist changes made by the executed code
+                        )
 
             return result
         except Exception as e:
             # Log the error properly
-            print(f"Error executing AsyncAtom {self.id} code: {e}") # Use a proper logger
+            print(
+                f"Error executing AsyncAtom {self.id} code: {e}"
+            )  # Use a proper logger
             # Decide how execution errors affect the atom's state or return value
             # For now, re-raise
             raise RuntimeError(f"Error executing AsyncAtom {self.id} code: {e}") from e
@@ -453,17 +519,19 @@ class AsyncAtom(__Atom__, Generic[T_co, V_co, C_co], ABC):
             # Include persistent state
             "local_env": self._local_env,
             "ttl": self._ttl,
-            "created_at": self._created_at, # Might need to store/load this
+            "created_at": self._created_at,  # Might need to store/load this
             # Note: buffer, lock, pending_tasks are runtime state, not persisted
         }
 
     async def is_authenticated(self) -> bool:
         # Implement auth logic based on self.request_data, self.session, self.security_context
         print(f"[{self.id}] Checking authentication...")
-        return True # Demo implementation
+        return True  # Demo implementation
 
     async def log_request(self) -> None:
-        print(f"[{self.id}] Request logged at {datetime.now()} with data: {self.request_data}")
+        print(
+            f"[{self.id}] Request logged at {datetime.now()} with data: {self.request_data}"
+        )
 
     async def execute_atom(self, request_context: Dict[str, Any]) -> Dict[str, Any]:
         # This method is called by handle_request if operation is "execute_atom"
@@ -477,11 +545,10 @@ class AsyncAtom(__Atom__, Generic[T_co, V_co, C_co], ABC):
                 "status": "success",
                 "message": "Atom code executed via handle_request",
                 "result": result,
-                "atom_state": self._local_env # Expose some state? Be careful.
+                "atom_state": self._local_env,  # Expose some state? Be careful.
             }
         except Exception as e:
-             return {"status": "error", "message": f"Execution failed: {e}"}
-
+            return {"status": "error", "message": f"Execution failed: {e}"}
 
     async def query_memory(self, request_context: Dict[str, Any]) -> Dict[str, Any]:
         print(f"[{self.id}] Querying memory...")
@@ -490,7 +557,7 @@ class AsyncAtom(__Atom__, Generic[T_co, V_co, C_co], ABC):
             "status": "success",
             "buffer_size": len(self._buffer),
             "local_env_keys": list(self._local_env.keys()),
-            "context": request_context
+            "context": request_context,
         }
 
     async def process_request(self, request_context: Dict[str, Any]) -> Dict[str, Any]:
@@ -503,11 +570,10 @@ class AsyncAtom(__Atom__, Generic[T_co, V_co, C_co], ABC):
                 "status": "success",
                 "message": "Atom processed generic request",
                 "result": result,
-                "atom_state": self._local_env
+                "atom_state": self._local_env,
             }
         except Exception as e:
-             return {"status": "error", "message": f"Processing failed: {e}"}
-
+            return {"status": "error", "message": f"Processing failed: {e}"}
 
     async def save_session(self) -> None:
         print(f"[{self.id}] Saving session: {self.session}")
@@ -531,6 +597,7 @@ class AsyncAtom(__Atom__, Generic[T_co, V_co, C_co], ABC):
 
     # ob_refcnt property is already in the base AsyncAtom
 
+
 class AsyncKnowledgeBase:
     """
     An asynchronous knowledge base system that organizes and manages AsyncAtom objects.
@@ -538,19 +605,25 @@ class AsyncKnowledgeBase:
     """
 
     def __init__(self, base_path: str = None):
-        self.base_path = Path(base_path or os.path.join(os.getcwd(), 'async_knowledge_base'))
+        self.base_path = Path(
+            base_path or os.path.join(os.getcwd(), 'async_knowledge_base')
+        )
         self.base_path.mkdir(parents=True, exist_ok=True)
         # Store atoms in memory. Consider a cache or lazy loading for large bases.
         self.entries: Dict[str, AsyncAtom] = {}
-        self.index: Dict[str, Any] = { # Refine index structure
-            "title": {},      # Index by normalized title: { "normalized title": [id1, id2] }
-            "keywords": defaultdict(list),   # Index by keywords: { "keyword": [id1, id2] }
-            "tags": defaultdict(list),       # Index by tags: { "tag": [id1, id2] }
-            "links": defaultdict(list)       # Index by links: { "link_text": [id1, id2] }
+        self.index: Dict[str, Any] = {  # Refine index structure
+            "title": {},  # Index by normalized title: { "normalized title": [id1, id2] }
+            "keywords": defaultdict(
+                list
+            ),  # Index by keywords: { "keyword": [id1, id2] }
+            "tags": defaultdict(list),  # Index by tags: { "tag": [id1, id2] }
+            "links": defaultdict(list),  # Index by links: { "link_text": [id1, id2] }
         }
         # Need a way to manage atom lifecycle and cleanup based on refcount/TTL
-        self._active_atoms: Dict[str, AsyncAtom] = {} # Atoms currently in use (e.g., in a request)
-        self._cleanup_task: Optional[asyncio.Task] = None # Task for periodic cleanup
+        self._active_atoms: Dict[
+            str, AsyncAtom
+        ] = {}  # Atoms currently in use (e.g., in a request)
+        self._cleanup_task: Optional[asyncio.Task] = None  # Task for periodic cleanup
 
         # Do not load entries here; caller must call async_init explicitly
 
@@ -567,31 +640,36 @@ class AsyncKnowledgeBase:
         print("Knowledge base loaded.")
 
     def _blocking_load_all_entries(self):
-         """Blocking function to load entries from disk."""
-         for dir1 in self.base_path.iterdir():
-             if dir1.is_dir():
-                 for dir2 in dir1.iterdir():
-                     if dir2.is_dir():
-                         # Look for the current version file (e.g., *.json)
-                         for entry_file in dir2.glob("*.json"):
-                             if entry_file.name != "history": # Avoid history directory
-                                 try:
-                                     with open(entry_file, 'r') as f:
-                                         data = json.load(f)
-                                     # Use the from_dict class method
-                                     atom = AsyncAtom.from_dict(data)
-                                     self.entries[atom.id] = atom
-                                     self._update_indices(atom) # Rebuild indices on load
-                                 except Exception as e:
-                                     print(f"Error loading file {entry_file}: {e}") # Use proper logging
-
+        """Blocking function to load entries from disk."""
+        for dir1 in self.base_path.iterdir():
+            if dir1.is_dir():
+                for dir2 in dir1.iterdir():
+                    if dir2.is_dir():
+                        # Look for the current version file (e.g., *.json)
+                        for entry_file in dir2.glob("*.json"):
+                            if entry_file.name != "history":  # Avoid history directory
+                                try:
+                                    with open(entry_file, 'r') as f:
+                                        data = json.load(f)
+                                    # Use the from_dict class method
+                                    atom = AsyncAtom.from_dict(data)
+                                    self.entries[atom.id] = atom
+                                    self._update_indices(
+                                        atom
+                                    )  # Rebuild indices on load
+                                except Exception as e:
+                                    print(
+                                        f"Error loading file {entry_file}: {e}"
+                                    )  # Use proper logging
 
     def _generate_id(self, content: str) -> str:
         """Generate a unique ID for a content entry based on its hash."""
         # Use SHA256 for better collision resistance than MD5
         return hashlib.sha256(content.encode('utf-8')).hexdigest()[:12]
 
-    async def add_entry(self, content: str, title: str = None, content_type: str = "text/markdown") -> str:
+    async def add_entry(
+        self, content: str, title: str = None, content_type: str = "text/markdown"
+    ) -> str:
         """Add a new knowledge entry to the base."""
         # Generate ID based on content hash (content-addressable)
         # Or use UUID? Let's stick to UUID from the atom for now, but hash is an option.
@@ -600,9 +678,9 @@ class AsyncKnowledgeBase:
         # Create async knowledge atom
         # The constructor handles wrapping content and initial parsing
         atom = AsyncAtom(
-            code=content, # Pass the raw content
+            code=content,  # Pass the raw content
             title=title or "Untitled",
-            content_type=content_type
+            content_type=content_type,
             # id=entry_id # If using hash-based ID
         )
 
@@ -624,7 +702,7 @@ class AsyncKnowledgeBase:
 
     async def update_entry(self, entry_id: str, new_content: str) -> Optional[str]:
         """Update an existing entry's content."""
-        atom = self.get_entry(entry_id) # This might load from disk
+        atom = self.get_entry(entry_id)  # This might load from disk
         if not atom:
             print(f"Error: Entry {entry_id} not found for update.")
             return None
@@ -651,15 +729,14 @@ class AsyncKnowledgeBase:
             print(f"An unexpected error occurred updating entry {entry_id}: {e}")
             return None
 
-
     def _update_indices(self, entry: AsyncAtom) -> None:
         """Update all indices with the entry."""
         # Title index (using normalized title for lookup)
         normalized_title = entry.title.lower().strip()
         if normalized_title not in self.index["title"]:
-             self.index["title"][normalized_title] = []
+            self.index["title"][normalized_title] = []
         if entry.id not in self.index["title"][normalized_title]:
-             self.index["title"][normalized_title].append(entry.id)
+            self.index["title"][normalized_title].append(entry.id)
 
         # Keywords index
         for keyword in entry.keywords:
@@ -677,28 +754,34 @@ class AsyncKnowledgeBase:
         # This index should probably map link_text -> list of entry_ids *containing* that link text
         # The current implementation in the second snippet's KB does this. Let's keep it.
         for link_text in entry.related_entries:
-             normalized_link_text = link_text.lower().strip()
-             if entry.id not in self.index["links"][normalized_link_text]:
-                 self.index["links"][normalized_link_text].append(entry.id)
+            normalized_link_text = link_text.lower().strip()
+            if entry.id not in self.index["links"][normalized_link_text]:
+                self.index["links"][normalized_link_text].append(entry.id)
 
     def _remove_from_indices(self, entry_id: str) -> None:
         """Remove an entry's ID from all indices."""
         # This is needed before re-indexing after an update
         entry = self.entries.get(entry_id)
         if not entry:
-            return # Nothing to remove if entry isn't in memory
+            return  # Nothing to remove if entry isn't in memory
 
         # Remove from title index
         normalized_title = entry.title.lower().strip()
-        if normalized_title in self.index["title"] and entry_id in self.index["title"][normalized_title]:
+        if (
+            normalized_title in self.index["title"]
+            and entry_id in self.index["title"][normalized_title]
+        ):
             self.index["title"][normalized_title].remove(entry_id)
             if not self.index["title"][normalized_title]:
-                del self.index["title"][normalized_title] # Clean up empty lists
+                del self.index["title"][normalized_title]  # Clean up empty lists
 
         # Remove from keywords index
         for keyword in entry.keywords:
             normalized_keyword = keyword.lower().strip()
-            if normalized_keyword in self.index["keywords"] and entry_id in self.index["keywords"][normalized_keyword]:
+            if (
+                normalized_keyword in self.index["keywords"]
+                and entry_id in self.index["keywords"][normalized_keyword]
+            ):
                 self.index["keywords"][normalized_keyword].remove(entry_id)
                 if not self.index["keywords"][normalized_keyword]:
                     del self.index["keywords"][normalized_keyword]
@@ -706,7 +789,10 @@ class AsyncKnowledgeBase:
         # Remove from tags index
         for tag in entry.tags:
             normalized_tag = tag.lower().strip()
-            if normalized_tag in self.index["tags"] and entry_id in self.index["tags"][normalized_tag]:
+            if (
+                normalized_tag in self.index["tags"]
+                and entry_id in self.index["tags"][normalized_tag]
+            ):
                 self.index["tags"][normalized_tag].remove(entry_id)
                 if not self.index["tags"][normalized_tag]:
                     del self.index["tags"][normalized_tag]
@@ -714,11 +800,13 @@ class AsyncKnowledgeBase:
         # Remove from links index
         for link_text in entry.related_entries:
             normalized_link_text = link_text.lower().strip()
-            if normalized_link_text in self.index["links"] and entry_id in self.index["links"][normalized_link_text]:
+            if (
+                normalized_link_text in self.index["links"]
+                and entry_id in self.index["links"][normalized_link_text]
+            ):
                 self.index["links"][normalized_link_text].remove(entry_id)
                 if not self.index["links"][normalized_link_text]:
                     del self.index["links"][normalized_link_text]
-
 
     async def _save_entry(self, entry: AsyncAtom) -> None:
         """Save an entry to disk with versioning asynchronously."""
@@ -742,11 +830,12 @@ class AsyncKnowledgeBase:
         history_dir = entry_dir / "history"
         history_dir.mkdir(exist_ok=True)
         # Use a file-system safe timestamp format
-        timestamp_str = entry.last_updated.isoformat().replace(':', '-').replace('.', '-')
+        timestamp_str = (
+            entry.last_updated.isoformat().replace(':', '-').replace('.', '-')
+        )
         history_file = history_dir / f"{entry.id}_{timestamp_str}.json"
         with open(history_file, 'w', encoding='utf-8') as f:
             json.dump(data_to_save, f, indent=2)
-
 
     def get_entry(self, entry_id: str) -> Optional[AsyncAtom]:
         """
@@ -768,26 +857,27 @@ class AsyncKnowledgeBase:
                 # Use the from_dict class method
                 atom = AsyncAtom.from_dict(data)
 
-                self.entries[entry_id] = atom # Add to memory cache
-                self._update_indices(atom) # Ensure it's indexed after loading
+                self.entries[entry_id] = atom  # Add to memory cache
+                self._update_indices(atom)  # Ensure it's indexed after loading
                 return atom
             except Exception as e:
-                print(f"Error loading entry {entry_id} from disk: {e}") # Use proper logging
+                print(
+                    f"Error loading entry {entry_id} from disk: {e}"
+                )  # Use proper logging
                 return None
 
         return None
 
     # Consider making get_entry async if disk access is frequent in async contexts
     async def get_entry_async(self, entry_id: str) -> Optional[AsyncAtom]:
-         """Asynchronously retrieve an entry by ID."""
-         if entry_id in self.entries:
-             return self.entries[entry_id]
+        """Asynchronously retrieve an entry by ID."""
+        if entry_id in self.entries:
+            return self.entries[entry_id]
 
-         loop = asyncio.get_running_loop()
-         # Run the blocking get_entry in a thread pool
-         atom = await loop.run_in_executor(None, self.get_entry, entry_id)
-         return atom
-
+        loop = asyncio.get_running_loop()
+        # Run the blocking get_entry in a thread pool
+        atom = await loop.run_in_executor(None, self.get_entry, entry_id)
+        return atom
 
     def search(self, query: str) -> List[AsyncAtom]:
         """
@@ -813,28 +903,34 @@ class AsyncKnowledgeBase:
 
         # Search by links (substring match on link text)
         for link_text, ids in self.index["links"].items():
-             if query_lower in link_text:
-                 matching_ids.update(ids)
+            if query_lower in link_text:
+                matching_ids.update(ids)
 
         # Fallback/supplementary: Simple text search in content for non-indexed matches
         # This can be slow for large bases
         for entry_id, entry in self.entries.items():
-             if entry_id not in matching_ids: # Avoid re-checking already found entries
-                 if query_lower in entry.title.lower() or query_lower in entry.parsed_content.lower():
-                     matching_ids.add(entry_id)
-
+            if entry_id not in matching_ids:  # Avoid re-checking already found entries
+                if (
+                    query_lower in entry.title.lower()
+                    or query_lower in entry.parsed_content.lower()
+                ):
+                    matching_ids.add(entry_id)
 
         # Retrieve matching entries (use async getter if needed)
         # For now, using the sync getter as search itself is sync
-        return [self.get_entry(entry_id) for entry_id in matching_ids if self.get_entry(entry_id)]
-
+        return [
+            self.get_entry(entry_id)
+            for entry_id in matching_ids
+            if self.get_entry(entry_id)
+        ]
 
     async def search_async(self, query: str) -> List[AsyncAtom]:
-        matching_ids = await asyncio.get_running_loop().run_in_executor(None, self.search, query)
+        matching_ids = await asyncio.get_running_loop().run_in_executor(
+            None, self.search, query
+        )
         # Need to fetch atoms asynchronously based on IDs
         atoms = [await self.get_entry_async(id) for id in matching_ids]
         return [atom for atom in atoms if atom]
-
 
     def get_related(self, entry_id: str) -> List[AsyncAtom]:
         """
@@ -860,13 +956,12 @@ class AsyncKnowledgeBase:
         # This is what the original code did.
         normalized_title = entry.title.lower().strip()
         if normalized_title in self.index["links"]:
-             related_ids.update(self.index["links"][normalized_title])
+            related_ids.update(self.index["links"][normalized_title])
 
         # Also check if other entries link using the ID
         normalized_id = entry_id.lower().strip()
         if normalized_id in self.index["links"]:
-             related_ids.update(self.index["links"][normalized_id])
-
+            related_ids.update(self.index["links"][normalized_id])
 
         # Remove self-reference
         if entry_id in related_ids:
@@ -876,7 +971,6 @@ class AsyncKnowledgeBase:
         return [self.get_entry(rid) for rid in related_ids if self.get_entry(rid)]
 
     # Consider an async get_related method
-
 
     def build_graph(self) -> Dict[str, Any]:
         """
@@ -888,14 +982,16 @@ class AsyncKnowledgeBase:
 
         # Create nodes for each entry
         for entry_id, entry in self.entries.items():
-            nodes.append({
-                "id": entry_id,
-                "label": entry.title,
-                "type": "atom", # Use "atom" or "knowledge_entry"
-                "tags": list(entry.tags),
-                "content_type": entry.content_type,
-                # Add other relevant metadata
-            })
+            nodes.append(
+                {
+                    "id": entry_id,
+                    "label": entry.title,
+                    "type": "atom",  # Use "atom" or "knowledge_entry"
+                    "tags": list(entry.tags),
+                    "content_type": entry.content_type,
+                    # Add other relevant metadata
+                }
+            )
 
             # Create edges for related entries (links *from* this entry)
             for related_text in entry.related_entries:
@@ -909,25 +1005,22 @@ class AsyncKnowledgeBase:
 
                 # Check if the link text is itself an ID
                 if normalized_related_text in self.entries:
-                     target_ids.add(normalized_related_text)
-
+                    target_ids.add(normalized_related_text)
 
                 for target_id in target_ids:
                     if target_id != entry_id:  # Avoid self-loops
-                        edges.append({
-                            "source": entry_id,
-                            "target": target_id,
-                            "label": "links_to", # More descriptive label
-                            "link_text": related_text # Store the original link text
-                        })
+                        edges.append(
+                            {
+                                "source": entry_id,
+                                "target": target_id,
+                                "label": "links_to",  # More descriptive label
+                                "link_text": related_text,  # Store the original link text
+                            }
+                        )
 
-        return {
-            "nodes": nodes,
-            "edges": edges
-        }
+        return {"nodes": nodes, "edges": edges}
 
     # Consider an async build_graph method
-
 
     async def import_markdown_file(self, file_path: str) -> str:
         """Import a markdown file into the knowledge base asynchronously."""
@@ -937,7 +1030,9 @@ class AsyncKnowledgeBase:
 
         # Read file content asynchronously (requires aiofiles or run in executor)
         # Using run_in_executor for simplicity with stdlib Path
-        content = await asyncio.get_running_loop().run_in_executor(None, path.read_text, 'utf-8')
+        content = await asyncio.get_running_loop().run_in_executor(
+            None, path.read_text, 'utf-8'
+        )
         title = path.stem  # Use filename as default title
 
         return await self.add_entry(content, title=title, content_type="text/markdown")
@@ -947,20 +1042,26 @@ class AsyncKnowledgeBase:
         dir_path = Path(directory)
         loop = asyncio.get_running_loop()
 
-        if not await loop.run_in_executor(None, dir_path.exists) or not await loop.run_in_executor(None, dir_path.is_dir):
-            raise ValueError(f"Directory {directory} does not exist or is not a directory")
+        if not await loop.run_in_executor(
+            None, dir_path.exists
+        ) or not await loop.run_in_executor(None, dir_path.is_dir):
+            raise ValueError(
+                f"Directory {directory} does not exist or is not a directory"
+            )
 
         imported_ids = []
         # glob is blocking, run in executor
         file_paths = await loop.run_in_executor(None, list, dir_path.glob(pattern))
 
         # Import files concurrently
-        import_tasks = [self.import_markdown_file(str(file_path)) for file_path in file_paths]
+        import_tasks = [
+            self.import_markdown_file(str(file_path)) for file_path in file_paths
+        ]
         results = await asyncio.gather(*import_tasks, return_exceptions=True)
 
         for file_path, result in zip(file_paths, results):
             if isinstance(result, Exception):
-                print(f"Error importing {file_path}: {result}") # Use proper logging
+                print(f"Error importing {file_path}: {result}")  # Use proper logging
             else:
                 imported_ids.append(result)
                 print(f"Imported {file_path} as {result}")
@@ -979,16 +1080,16 @@ class AsyncKnowledgeBase:
 
     async def get_atom_for_use(self, entry_id: str) -> Optional[AsyncAtom]:
         """Retrieve an atom and increment its reference count for active use."""
-        atom = await self.get_entry_async(entry_id) # Use async getter
+        atom = await self.get_entry_async(entry_id)  # Use async getter
         if atom:
             atom.inc_ref()
-            self._active_atoms[atom.id] = atom # Keep track of actively used atoms
+            self._active_atoms[atom.id] = atom  # Keep track of actively used atoms
             print(f"[{atom.id}] Refcount incremented. New count: {atom.ob_refcnt}")
         return atom
 
     async def release_atom(self, entry_id: str) -> None:
         """Decrement an atom's reference count."""
-        atom = self.entries.get(entry_id) # Get from memory (should be there if active)
+        atom = self.entries.get(entry_id)  # Get from memory (should be there if active)
         if atom:
             atom.dec_ref()
             print(f"[{atom.id}] Refcount decremented. New count: {atom.ob_refcnt}")
@@ -1000,7 +1101,7 @@ class AsyncKnowledgeBase:
                 # If it's removed, subsequent get_entry will load from disk.
                 # del self.entries[atom.id] # Optional: remove from memory cache
                 if atom.id in self._active_atoms:
-                     del self._active_atoms[atom.id] # Remove from active tracking
+                    del self._active_atoms[atom.id]  # Remove from active tracking
 
     # Context manager for easier atom usage
     # async def use_atom(self, entry_id: str):
@@ -1011,7 +1112,6 @@ class AsyncKnowledgeBase:
     #         yield atom
     #     finally:
     #         await self.release_atom(entry_id)
-
 
     # Metaprogramming Hook Idea:
     # The executed code within an atom could call a special function provided
@@ -1064,8 +1164,10 @@ class AsyncKnowledgeBase:
                 # Clean up if expired AND only the KB's cache reference remains (refcount == 1)
                 # Or if somehow refcount dropped below 1 (error state)
                 if atom.is_expired() and atom.ob_refcnt <= 1:
-                     atoms_to_clean.append(atom_id)
-                     print(f"[{atom_id}] Marked for cleanup (expired and refcount <= 1).")
+                    atoms_to_clean.append(atom_id)
+                    print(
+                        f"[{atom_id}] Marked for cleanup (expired and refcount <= 1)."
+                    )
 
             for atom_id in atoms_to_clean:
                 atom = self.entries.get(atom_id)
@@ -1075,15 +1177,21 @@ class AsyncKnowledgeBase:
                         if atom.ob_refcnt <= 1:
                             print(f"[{atom_id}] Cleaning up...")
                             await atom.cleanup()
-                            del self.entries[atom_id] # Remove from KB's memory cache
-                            self._remove_from_indices(atom_id) # Remove from indices
+                            del self.entries[atom_id]  # Remove from KB's memory cache
+                            self._remove_from_indices(atom_id)  # Remove from indices
                             if atom_id in self._active_atoms:
-                                del self._active_atoms[atom_id] # Should not be in active if refcount <= 1, but safety check
+                                del self._active_atoms[
+                                    atom_id
+                                ]  # Should not be in active if refcount <= 1, but safety check
                             print(f"[{atom_id}] Cleanup complete.")
                         else:
-                             print(f"[{atom_id}] Refcount increased before cleanup, skipping for now. Current: {atom.ob_refcnt}")
+                            print(
+                                f"[{atom_id}] Refcount increased before cleanup, skipping for now. Current: {atom.ob_refcnt}"
+                            )
                     except Exception as e:
-                        print(f"Error during cleanup of atom {atom_id}: {e}") # Log cleanup errors
+                        print(
+                            f"Error during cleanup of atom {atom_id}: {e}"
+                        )  # Log cleanup errors
 
     def start_cleanup_loop(self, interval: int = 60):
         """Starts the background cleanup task."""
@@ -1100,7 +1208,6 @@ class AsyncKnowledgeBase:
                 await self._cleanup_task
             except asyncio.CancelledError:
                 print("KB cleanup loop stopped.")
-
 
 
 async def main():
@@ -1189,7 +1296,6 @@ async def atom_entrypoint(__atom_self__, *args, **kwargs):
         print(f"ID: {hilbert_atom.id}")
         print(f"Links extracted: {hilbert_atom.related_entries}")
 
-
     # --- Demonstrate Execution and State ---
 
     print("\n--- Executing Atoms ---")
@@ -1211,19 +1317,21 @@ async def atom_entrypoint(__atom_self__, *args, **kwargs):
     # Pass KB instance so Hilbert atom can find/call Quantum atom
     result3 = await hilbert_atom(kb_instance=kb)
     print(f"Call result 3: {result3}")
-    print(f"Quantum Atom local_env after Hilbert call: {quantum_atom._local_env}") # Check if state persisted
+    print(
+        f"Quantum Atom local_env after Hilbert call: {quantum_atom._local_env}"
+    )  # Check if state persisted
 
     # --- Demonstrate Request Handling ---
     print("\n--- Handling Request ---")
     # Simulate a request for the quantum atom
     request_data = {
         "operation": "execute_atom",
-        "session": {"user": "test_user", "session_id": "abc123"}
+        "session": {"user": "test_user", "session_id": "abc123"},
     }
     # Need to get the atom for handling the request.
     # Use the KB's get_atom_for_use/release_atom or the atom's context manager.
     # Let's use the atom's context manager for simplicity here, assuming handle_request is called within it.
-    async with quantum_atom: # This increments refcount via __aenter__
+    async with quantum_atom:  # This increments refcount via __aenter__
         print(f"\nHandling request for Quantum Atom ({quantum_id})...")
         # Manually set request_data and session for this specific request simulation
         quantum_atom.request_data = request_data
@@ -1235,7 +1343,7 @@ async def atom_entrypoint(__atom_self__, *args, **kwargs):
     # --- Demonstrate Search and Related ---
     print("\n--- Searching and Related ---")
     search_results = kb.search("quantum")
-    print(f"\nSearch results for 'quantum':")
+    print("\nSearch results for 'quantum':")
     for entry in search_results:
         print(f"- {entry.title} ({entry.id})")
 
@@ -1243,7 +1351,7 @@ async def atom_entrypoint(__atom_self__, *args, **kwargs):
         related_entries = kb.get_related(quantum_atom.id)
         print(f"\nEntries linking to '{quantum_atom.title}':")
         for entry in related_entries:
-             print(f"- {entry.title} ({entry.id})") # Hilbert should appear here
+            print(f"- {entry.title} ({entry.id})")  # Hilbert should appear here
 
     # --- Demonstrate Graph Building ---
     print("\n--- Building Graph ---")
@@ -1272,14 +1380,17 @@ async def atom_entrypoint(__atom_self__, *args, **kwargs):
         if updated_atom:
             print(f"Updated title: {updated_atom.title}")
             print(f"Updated tags: {updated_atom.tags}")
-            print(f"Updated local_env (should retain count): {updated_atom._local_env}") # State should persist across update
+            print(
+                f"Updated local_env (should retain count): {updated_atom._local_env}"
+            )  # State should persist across update
 
             # Execute the updated atom
             print(f"\nCalling UPDATED Quantum Atom ({updated_id})...")
             updated_result = await updated_atom()
             print(f"Call result: {updated_result}")
-            print(f"Updated Quantum Atom local_env after call: {updated_atom._local_env}")
-
+            print(
+                f"Updated Quantum Atom local_env after call: {updated_atom._local_env}"
+            )
 
     # --- Cleanup ---
     # The cleanup loop runs in the background.
@@ -1290,7 +1401,6 @@ async def atom_entrypoint(__atom_self__, *args, **kwargs):
     # print(f"\nAdded atom {expired_atom_id} with TTL 5s.")
     # await asyncio.sleep(6) # Wait for it to expire and cleanup loop to run
     # print(f"Checking if expired atom {expired_atom_id} is still in KB: {kb.get_entry(expired_atom_id) is not None}")
-
 
     # Stop the cleanup loop before exiting
     await kb.stop_cleanup_loop()

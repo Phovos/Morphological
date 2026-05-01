@@ -1,4 +1,20 @@
+#!/usr/bin/env -S uv run
 from __future__ import annotations
+
+# /* script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "uv==*.*",
+# ]
+# */
+# Optional dependency handling (also add to '/* script..' comment, just above)
+#   "© 2026 `Phovos` (phovos@outlook.com)":
+#     - "Morphological Source Code: MSC&QSD"
+#     - https://gitlab.com/morphological/source/code
+#     - https://github.com/Morphological-Source-Code
+#     - https://reddit.com/r/morphological
+# © 2024-2026 https://github.com/Phovos/Morphological-Source-Code
+# © 2023-2026 https://github.com/MOONLAPSED/cognosis
 import sys
 import pathlib
 import importlib.util
@@ -12,9 +28,11 @@ import threading
 from concurrent.futures import ThreadPoolExecutor
 from enum import Enum, auto
 import logging
+
 FileRecord = namedtuple("FileRecord", ["filepath", "metadata", "tags"])
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 
@@ -31,6 +49,7 @@ class ContentType(Enum):
 @dataclass
 class ContentMetadata:
     """Metadata for any file in the system"""
+
     path: pathlib.Path
     relative_path: pathlib.Path  # Path relative to root
     file_size: int
@@ -45,11 +64,12 @@ class ContentMetadata:
 @dataclass
 class FileSystem:
     """Manager for the real filesystem content"""
+
     root_dir: pathlib.Path
-    exclude_dirs: Set[str] = field(default_factory=lambda: {
-                                   '.git', '__pycache__', '.venv', 'node_modules'})
-    exclude_files: Set[str] = field(default_factory=lambda: {
-                                    '.DS_Store', 'thumbs.db'})
+    exclude_dirs: Set[str] = field(
+        default_factory=lambda: {'.git', '__pycache__', '.venv', 'node_modules'}
+    )
+    exclude_files: Set[str] = field(default_factory=lambda: {'.DS_Store', 'thumbs.db'})
     max_workers: int = 8
     chunk_size: int = 1024 * 1024  # 1MB for reading large files
     metadata_cache: Dict[str, ContentMetadata] = field(default_factory=dict)
@@ -66,16 +86,14 @@ class FileSystem:
         # Ensure root directory exists
         self.root_dir = pathlib.Path(self.root_dir).resolve()
         if not self.root_dir.exists():
-            raise FileNotFoundError(
-                f"Root directory {self.root_dir} does not exist")
+            raise FileNotFoundError(f"Root directory {self.root_dir} does not exist")
         # Initialize mimetypes
         mimetypes.init()
 
     def scan_directory(self, refresh: bool = False) -> None:
         """Scan the directory tree and build metadata cache"""
         if self.metadata_cache and not refresh:
-            logger.info(
-                f"Using cached metadata for {len(self.metadata_cache)} files")
+            logger.info(f"Using cached metadata for {len(self.metadata_cache)} files")
             return
         logger.info(f"Scanning directory: {self.root_dir}")
         scanned_paths = []
@@ -88,8 +106,9 @@ class FileSystem:
             if file_path.is_file():
                 scanned_paths.append(file_path)
         # Process files in parallel
-        futures = [self._executor.submit(
-            self._process_file, path) for path in scanned_paths]
+        futures = [
+            self._executor.submit(self._process_file, path) for path in scanned_paths
+        ]
         for future in futures:
             metadata = future.result()
             if metadata:
@@ -125,7 +144,7 @@ class FileSystem:
                 mime_type=mime_type,
                 content_type=content_type,
                 extension=file_path.suffix.lower(),
-                is_loadable=is_loadable
+                is_loadable=is_loadable,
             )
         except Exception as e:
             logger.error(f"Error processing {file_path}: {e}")
@@ -173,9 +192,10 @@ class FileSystem:
         # Additional checks could be added here for other loadable formats
         return False
 
-    def load_content(self, rel_path: Union[str, pathlib.Path], force_reload: bool = False) -> Optional[Any]:
-        rel_path_str = str(rel_path) if isinstance(
-            rel_path, pathlib.Path) else rel_path
+    def load_content(
+        self, rel_path: Union[str, pathlib.Path], force_reload: bool = False
+    ) -> Optional[Any]:
+        rel_path_str = str(rel_path) if isinstance(rel_path, pathlib.Path) else rel_path
         # Return from cache if available and not force_reload
         with self._lock:
             if rel_path_str in self.content_cache and not force_reload:
@@ -193,15 +213,27 @@ class FileSystem:
                 # For Python files, load as text but don't execute
                 with open(metadata.path, 'r', encoding='utf-8', errors='replace') as f:
                     content = f.read()
-            elif metadata.content_type in [ContentType.BINARY, ContentType.IMAGE, ContentType.AUDIO, ContentType.VIDEO]:
+            elif metadata.content_type in [
+                ContentType.BINARY,
+                ContentType.IMAGE,
+                ContentType.AUDIO,
+                ContentType.VIDEO,
+            ]:
                 with open(metadata.path, 'rb') as f:
                     content = f.read()
                 # Cache binary content if it's not too large
                 if metadata.file_size < 5 * 1024 * 1024:  # 5MB per file limit
                     with self._lock:
-                        if self.binary_cache_size + metadata.file_size > self.binary_cache_limit:
+                        if (
+                            self.binary_cache_size + metadata.file_size
+                            > self.binary_cache_limit
+                        ):
                             # Check if we need to free some space
-                            keys_to_remove = [k for k, v in self.content_cache.items() if isinstance(v, bytes)]
+                            keys_to_remove = [
+                                k
+                                for k, v in self.content_cache.items()
+                                if isinstance(v, bytes)
+                            ]
                             # Clear selectively while holding the lock
                             for key in keys_to_remove:
                                 del self.content_cache[key]
@@ -222,10 +254,11 @@ class FileSystem:
             logger.error(f"Error loading content for {rel_path_str}: {e}")
             return None
 
-    def load_module(self, rel_path: Union[str, pathlib.Path], force_reload: bool = False) -> Optional[Any]:
+    def load_module(
+        self, rel_path: Union[str, pathlib.Path], force_reload: bool = False
+    ) -> Optional[Any]:
         """Load a Python module from a file"""
-        rel_path_str = str(rel_path) if isinstance(
-            rel_path, pathlib.Path) else rel_path
+        rel_path_str = str(rel_path) if isinstance(rel_path, pathlib.Path) else rel_path
         # Return from cache if available and not force_reload
         if rel_path_str in self.loaded_modules and not force_reload:
             return self.loaded_modules[rel_path_str]
@@ -237,14 +270,15 @@ class FileSystem:
             # Create a valid module name from the relative path
             module_name = f"fs_module_{str(metadata.relative_path).replace('/', '_').replace('.', '_')}"
             # Remove invalid characters
-            module_name = ''.join(c if c.isalnum() or c ==
-                                  '_' else '_' for c in module_name)
+            module_name = ''.join(
+                c if c.isalnum() or c == '_' else '_' for c in module_name
+            )
             # Try to load the module
             spec = importlib.util.spec_from_file_location(
-                module_name, str(metadata.path))
+                module_name, str(metadata.path)
+            )
             if spec is None or spec.loader is None:
-                logger.error(
-                    f"Could not create module spec for {rel_path_str}")
+                logger.error(f"Could not create module spec for {rel_path_str}")
                 return None
             module = importlib.util.module_from_spec(spec)
             sys.modules[module_name] = module  # Add to sys.modules
@@ -260,10 +294,11 @@ class FileSystem:
             logger.error(f"Error loading module {rel_path_str}: {e}")
             return None
 
-    def generate_content_module(self, rel_path: Union[str, pathlib.Path]) -> Optional[str]:
+    def generate_content_module(
+        self, rel_path: Union[str, pathlib.Path]
+    ) -> Optional[str]:
         """Generate a Python module string for non-Python content"""
-        rel_path_str = str(rel_path) if isinstance(
-            rel_path, pathlib.Path) else rel_path
+        rel_path_str = str(rel_path) if isinstance(rel_path, pathlib.Path) else rel_path
         metadata = self.metadata_cache.get(rel_path_str)
         if not metadata:
             logger.warning(f"No metadata found for {rel_path_str}")
@@ -353,9 +388,10 @@ def __quantum_collapse__():
     return True
 '''
 
-    def create_dynamic_module(self, rel_path: Union[str, pathlib.Path]) -> Optional[Any]:
-        rel_path_str = str(rel_path) if isinstance(
-            rel_path, pathlib.Path) else rel_path
+    def create_dynamic_module(
+        self, rel_path: Union[str, pathlib.Path]
+    ) -> Optional[Any]:
+        rel_path_str = str(rel_path) if isinstance(rel_path, pathlib.Path) else rel_path
         # Check if we already have this module
         if rel_path_str in self.loaded_modules:
             return self.loaded_modules[rel_path_str]
@@ -372,8 +408,9 @@ def __quantum_collapse__():
             return None
         # Create module name
         module_name = f"fs_content_{metadata.relative_path.stem}"
-        module_name = ''.join(c if c.isalnum() or c ==
-                              '_' else '_' for c in module_name)
+        module_name = ''.join(
+            c if c.isalnum() or c == '_' else '_' for c in module_name
+        )
         # Create module
         module = type(sys)(module_name)
         module.__file__ = str(metadata.path)
@@ -387,8 +424,7 @@ def __quantum_collapse__():
                 self.loaded_modules[rel_path_str] = module
             return module
         except Exception as e:
-            logger.error(
-                f"Error creating dynamic module for {rel_path_str}: {e}")
+            logger.error(f"Error creating dynamic module for {rel_path_str}: {e}")
             return None
 
     def get_file_listing(self, directory: Optional[str] = None) -> List[Dict[str, Any]]:
@@ -400,24 +436,27 @@ def __quantum_collapse__():
             path = pathlib.Path(rel_path)
             # Check if this path is under the requested directory
             if str(prefix) == "." or str(path).startswith(str(prefix)):
-                if prefix == path.parent or (not directory and path.parent == pathlib.Path("")):
-                    result.append({
-                        "name": path.name,
-                        "path": str(path),
-                        "size": metadata.file_size,
-                        "type": metadata.content_type.name,
-                        "mime_type": metadata.mime_type,
-                        "last_modified": metadata.last_modified,
-                        "is_loadable": metadata.is_loadable
-                    })
+                if prefix == path.parent or (
+                    not directory and path.parent == pathlib.Path("")
+                ):
+                    result.append(
+                        {
+                            "name": path.name,
+                            "path": str(path),
+                            "size": metadata.file_size,
+                            "type": metadata.content_type.name,
+                            "mime_type": metadata.mime_type,
+                            "last_modified": metadata.last_modified,
+                            "is_loadable": metadata.is_loadable,
+                        }
+                    )
         # Sort by name
         result.sort(key=lambda x: x["name"])
         return result
 
     def get_directory_tree(self) -> Dict[str, Any]:
         """Generate a nested tree representation of the filesystem"""
-        root = {"name": self.root_dir.name,
-                "type": "directory", "children": {}}
+        root = {"name": self.root_dir.name, "type": "directory", "children": {}}
         for rel_path, metadata in self.metadata_cache.items():
             current = root
             parts = pathlib.Path(rel_path).parts
@@ -425,7 +464,10 @@ def __quantum_collapse__():
             for i, part in enumerate(parts[:-1]):
                 if part not in current["children"]:
                     current["children"][part] = {
-                        "name": part, "type": "directory", "children": {}}
+                        "name": part,
+                        "type": "directory",
+                        "children": {},
+                    }
                 current = current["children"][part]
             # Add the file
             filename = parts[-1]
@@ -434,40 +476,49 @@ def __quantum_collapse__():
                 "type": "file",
                 "content_type": metadata.content_type.name,
                 "size": metadata.file_size,
-                "is_loadable": metadata.is_loadable
+                "is_loadable": metadata.is_loadable,
             }
         return root
 
-    def search_files(self, query: str, content_search: bool = False) -> List[Dict[str, Any]]:
+    def search_files(
+        self, query: str, content_search: bool = False
+    ) -> List[Dict[str, Any]]:
         """Search for files by name or content"""
         results = []
         query = query.lower()
         for rel_path, metadata in self.metadata_cache.items():
             # Search in filename
             if query in str(metadata.relative_path).lower():
-                results.append({
-                    "path": str(metadata.relative_path),
-                    "match_type": "filename",
-                    "metadata": {
-                        "size": metadata.file_size,
-                        "type": metadata.content_type.name,
-                        "mime_type": metadata.mime_type
-                    }
-                })
-                continue  # Skip content search if filename matches
-            # Optionally search in content for text files
-            if content_search and metadata.content_type in [ContentType.TEXT, ContentType.PYTHON]:
-                content = self.load_content(rel_path)
-                if content and query in content.lower():
-                    results.append({
+                results.append(
+                    {
                         "path": str(metadata.relative_path),
-                        "match_type": "content",
+                        "match_type": "filename",
                         "metadata": {
                             "size": metadata.file_size,
                             "type": metadata.content_type.name,
-                            "mime_type": metadata.mime_type
+                            "mime_type": metadata.mime_type,
+                        },
+                    }
+                )
+                continue  # Skip content search if filename matches
+            # Optionally search in content for text files
+            if content_search and metadata.content_type in [
+                ContentType.TEXT,
+                ContentType.PYTHON,
+            ]:
+                content = self.load_content(rel_path)
+                if content and query in content.lower():
+                    results.append(
+                        {
+                            "path": str(metadata.relative_path),
+                            "match_type": "content",
+                            "metadata": {
+                                "size": metadata.file_size,
+                                "type": metadata.content_type.name,
+                                "mime_type": metadata.mime_type,
+                            },
                         }
-                    })
+                    )
         return results
 
     def close(self):
@@ -487,7 +538,9 @@ def __quantum_collapse__():
         self.close()
 
 
-def create_filesystem(root_dir: Union[str, pathlib.Path], scan: bool = True) -> FileSystem:
+def create_filesystem(
+    root_dir: Union[str, pathlib.Path], scan: bool = True
+) -> FileSystem:
     """Create and initialize a FileSystem"""
     fs = FileSystem(root_dir=pathlib.Path(root_dir))
     if scan:
@@ -497,6 +550,7 @@ def create_filesystem(root_dir: Union[str, pathlib.Path], scan: bool = True) -> 
 
 def get_import_hook(fs: FileSystem):
     """Create an import hook to use the filesystem for imports"""
+
     class FSImportFinder:
         def __init__(self, fs):
             self.fs = fs
@@ -511,19 +565,19 @@ def get_import_hook(fs: FileSystem):
                     if rel_path in self.fs.metadata_cache:
                         return self.fs.create_dynamic_module(rel_path)
             return None
+
     return FSImportFinder(fs)
 
 
 if __name__ == "__main__":
     import argparse
+
     parser = argparse.ArgumentParser(description="FileSystem Manager")
-    parser.add_argument("--root", type=str, default=".",
-                        help="Root directory to scan")
+    parser.add_argument("--root", type=str, default=".", help="Root directory to scan")
     parser.add_argument("--list", action="store_true", help="List files")
     parser.add_argument("--dir", type=str, help="Specific directory to list")
     parser.add_argument("--search", type=str, help="Search query")
-    parser.add_argument("--content", action="store_true",
-                        help="Search in content")
+    parser.add_argument("--content", action="store_true", help="Search in content")
     args = parser.parse_args()
     fs = create_filesystem(args.root)
     if args.list:

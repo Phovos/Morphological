@@ -1,40 +1,53 @@
+#!/usr/bin/env -S uv run
 from __future__ import annotations
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# LICENSE © 2025: CC BY 4.0: PHOVOS:https://github.com/Phovos/Morphological
-# ------------------------------------------------------------------------------
-# Standard Library Imports - 3.13 std libs **ONLY**
-# ------------------------------------------------------------------------------
-"""
-Toroidal Morphological Phase Transitions with Landau Theory
-Standard library implementation of T/V/C ontology on toroidal fields
-"""
+
+# /* script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "uv==*.*",
+# ]
+# */
+# Optional dependency handling (also add to '/* script..' comment, just above)
+#   "© 2026 `Phovos` (phovos@outlook.com)":
+#     - "Morphological Source Code: MSC&QSD"
+#     - https://gitlab.com/morphological/source/code
+#     - https://github.com/Morphological-Source-Code
+#     - https://reddit.com/r/morphological
+# © 2024-2026 https://github.com/Phovos/Morphological-Source-Code
+# © 2023-2026 https://github.com/MOONLAPSED/cognosis
 
 import math
 import random
-from typing import List, Tuple, Dict, Optional, Callable
+from typing import List, Tuple, Dict
 from dataclasses import dataclass
 from enum import Enum
 import hashlib
 import struct
 
+"""
+Toroidal Morphological Phase Transitions with Landau Theory
+Standard library implementation of T/V/C ontology on toroidal fields
+"""
+
 
 class MorphologicalPhase(Enum):
     """Phase states in T/V/C morphological field"""
-    DISORDERED = 0      # High entropy, no correlation
-    QUIESCENT = 1       # Local order, partial correlation
-    COHERENT = 2        # Global order, full correlation
-    QUINIC = 3          # Perfect self-reproduction (ψ = ψ_child)
+
+    DISORDERED = 0  # High entropy, no correlation
+    QUIESCENT = 1  # Local order, partial correlation
+    COHERENT = 2  # Global order, full correlation
+    QUINIC = 3  # Perfect self-reproduction (ψ = ψ_child)
 
 
 @dataclass
 class LandauParameters:
     """Landau theory parameters for morphological phase transitions"""
+
     temperature: float  # Computational temperature (entropy rate)
-    coupling: float     # Inter-ByteWord coupling strength
-    field: float        # External morphological field
+    coupling: float  # Inter-ByteWord coupling strength
+    field: float  # External morphological field
     alpha: float = 2.0  # Second-order term coefficient
-    beta: float = 4.0   # Fourth-order term coefficient
+    beta: float = 4.0  # Fourth-order term coefficient
 
 
 class ToroidalByteWord:
@@ -47,14 +60,14 @@ class ToroidalByteWord:
         self.raw_value = value
 
         # T/V/C tripartite decomposition (3+3+2 bits)
-        self.type_bits = (value & 0b11100000) >> 5      # 3 bits: Type
-        self.value_bits = (value & 0b00011100) >> 2     # 3 bits: Value
-        self.compute_bits = value & 0b00000011          # 2 bits: Compute
+        self.type_bits = (value & 0b11100000) >> 5  # 3 bits: Type
+        self.value_bits = (value & 0b00011100) >> 2  # 3 bits: Value
+        self.compute_bits = value & 0b00000011  # 2 bits: Compute
 
         # Toroidal coordinates
-        self._theta = self.type_bits * (2 * math.pi / 8)    # Major angle
-        self._phi = self.value_bits * (2 * math.pi / 8)     # Minor angle
-        self._r = 1.0 + (self.compute_bits / 4.0)           # Radial distance
+        self._theta = self.type_bits * (2 * math.pi / 8)  # Major angle
+        self._phi = self.value_bits * (2 * math.pi / 8)  # Minor angle
+        self._r = 1.0 + (self.compute_bits / 4.0)  # Radial distance
 
         # Morphological state
         self.phase = MorphologicalPhase.DISORDERED
@@ -81,10 +94,13 @@ class ToroidalByteWord:
     def morphological_distance(self, other: 'ToroidalByteWord') -> float:
         """Calculate morphological distance on torus surface"""
         # Toroidal distance accounting for wrapping
-        theta_diff = min(abs(self._theta - other._theta),
-                         2*math.pi - abs(self._theta - other._theta))
-        phi_diff = min(abs(self._phi - other._phi),
-                       2*math.pi - abs(self._phi - other._phi))
+        theta_diff = min(
+            abs(self._theta - other._theta),
+            2 * math.pi - abs(self._theta - other._theta),
+        )
+        phi_diff = min(
+            abs(self._phi - other._phi), 2 * math.pi - abs(self._phi - other._phi)
+        )
         r_diff = abs(self._r - other._r)
 
         return math.sqrt(theta_diff**2 + phi_diff**2 + r_diff**2)
@@ -130,7 +146,7 @@ class ToroidalByteWord:
                 d_phi += 2 * math.pi
 
             # Church numeral: count significant angular changes
-            if abs(d_theta) > math.pi/4 or abs(d_phi) > math.pi/4:
+            if abs(d_theta) > math.pi / 4 or abs(d_phi) > math.pi / 4:
                 total_winding += 1
 
         return total_winding
@@ -153,10 +169,15 @@ class MorphologicalField:
             word = ToroidalByteWord(random.randint(0, 255))
             self.words.append(word)
 
-    def compute_local_order_parameter(self, word: ToroidalByteWord, radius: float = 1.0) -> float:
+    def compute_local_order_parameter(
+        self, word: ToroidalByteWord, radius: float = 1.0
+    ) -> float:
         """Compute local order parameter using T/V/C correlations"""
-        neighbors = [w for w in self.words
-                     if w != word and word.morphological_distance(w) < radius]
+        neighbors = [
+            w
+            for w in self.words
+            if w != word and word.morphological_distance(w) < radius
+        ]
 
         if not neighbors:
             return 0.0
@@ -218,8 +239,11 @@ class MorphologicalField:
 
         # Check if parent and child have same morphological signature
         parent_signature = (word.type_bits, word.value_bits, word.compute_bits)
-        child_signature = (child_word.type_bits,
-                           child_word.value_bits, child_word.compute_bits)
+        child_signature = (
+            child_word.type_bits,
+            child_word.value_bits,
+            child_word.compute_bits,
+        )
 
         # Perfect quine: ψ(t) == ψ(runtime) == ψ(child)
         return parent_signature == child_signature
@@ -252,15 +276,17 @@ class MorphologicalField:
         for i, word in enumerate(self.words):
             # Find nearest neighbors on torus
             neighbors = sorted(
-                [(j, w, word.morphological_distance(w))
-                 for j, w in enumerate(self.words) if j != i],
-                key=lambda x: x[2]
+                [
+                    (j, w, word.morphological_distance(w))
+                    for j, w in enumerate(self.words)
+                    if j != i
+                ],
+                key=lambda x: x[2],
             )[:3]  # Top 3 nearest neighbors
 
             if len(neighbors) >= 2:
                 # Create orbital path around torus
-                path = [word] + [n[1]
-                                 for n in neighbors] + [word]  # Close the loop
+                path = [word] + [n[1] for n in neighbors] + [word]  # Close the loop
 
                 # Compute winding number using Church encoding
                 winding = word.church_encode_winding(path)
@@ -269,18 +295,15 @@ class MorphologicalField:
                 # Non-associative composition based on winding
                 if winding > 2:  # High winding = phase transition trigger
                     # Modify word through toroidal transformation
-                    new_theta = (word._theta + 0.1 *
-                                 math.sin(winding)) % (2 * math.pi)
-                    new_phi = (word._phi + 0.1 *
-                               math.cos(winding)) % (2 * math.pi)
+                    new_theta = (word._theta + 0.1 * math.sin(winding)) % (2 * math.pi)
+                    new_phi = (word._phi + 0.1 * math.cos(winding)) % (2 * math.pi)
 
                     # Map back to T/V/C bits
                     new_type = int((new_theta / (2 * math.pi)) * 8) % 8
                     new_value = int((new_phi / (2 * math.pi)) * 8) % 8
 
                     # Reconstruct ByteWord
-                    new_raw = (new_type << 5) | (
-                        new_value << 2) | word.compute_bits
+                    new_raw = (new_type << 5) | (new_value << 2) | word.compute_bits
                     self.words[i] = ToroidalByteWord(new_raw)
 
     def adjust_temperature(self):
@@ -322,8 +345,10 @@ class MorphologicalField:
             'avg_order_parameter': total_order / total_words,
             'temperature': self.landau.temperature,
             'quinic_fraction': quinic_count / total_words,
-            'phase_fractions': {name: count/total_words for name, count in phase_counts.items()},
-            'time_step': self.time_step
+            'phase_fractions': {
+                name: count / total_words for name, count in phase_counts.items()
+            },
+            'time_step': self.time_step,
         }
 
     def __repr__(self) -> str:
@@ -337,9 +362,9 @@ def demonstrate_phase_transitions():
 
     # Initialize field with Landau parameters
     landau_params = LandauParameters(
-        temperature=1.5,    # Start above critical temperature
-        coupling=0.8,       # Strong coupling
-        field=0.1           # Weak external field
+        temperature=1.5,  # Start above critical temperature
+        coupling=0.8,  # Strong coupling
+        field=0.1,  # Weak external field
     )
 
     field = MorphologicalField(size=50, landau_params=landau_params)
@@ -355,21 +380,21 @@ def demonstrate_phase_transitions():
 
         if step % 5 == 0:
             stats = field.get_phase_statistics()
-            print(f"Step {step:2d}: T={stats['temperature']:.3f}, "
-                  f"Order={stats['avg_order_parameter']:.3f}, "
-                  f"Quinic={stats['quinic_fraction']:.3f}")
+            print(
+                f"Step {step:2d}: T={stats['temperature']:.3f}, "
+                f"Order={stats['avg_order_parameter']:.3f}, "
+                f"Quinic={stats['quinic_fraction']:.3f}"
+            )
 
     print(f"\nFinal field: {field}")
 
     # Analyze quinic words
-    quinic_words = [w for w in field.words if w.phase ==
-                    MorphologicalPhase.QUINIC]
-    print(
-        f"\nFound {len(quinic_words)} quinic words (perfect self-reproduction):")
+    quinic_words = [w for w in field.words if w.phase == MorphologicalPhase.QUINIC]
+    print(f"\nFound {len(quinic_words)} quinic words (perfect self-reproduction):")
     for i, word in enumerate(quinic_words[:3]):  # Show first 3
         child_value = field.reproduce_word(word)
         child = ToroidalByteWord(child_value)
-        print(f"  {i+1}. Parent: {word}")
+        print(f"  {i + 1}. Parent: {word}")
         print(f"     Child:  {child}")
         print(f"     Match:  {word.raw_value == child.raw_value}")
 
@@ -393,7 +418,8 @@ if __name__ == "__main__":
 
     if final_stats['quinic_fraction'] > 0:
         print(
-            f"\n🎉 SUCCESS: Achieved {final_stats['quinic_fraction']:.1%} quinic stability!")
+            f"\n🎉 SUCCESS: Achieved {final_stats['quinic_fraction']:.1%} quinic stability!"
+        )
         print("Perfect quines demonstrated: ψ(t) == ψ(runtime) == ψ(child)")
     else:
         print("\n🔄 System still evolving toward quinic stability...")

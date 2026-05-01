@@ -1,8 +1,24 @@
+#!/usr/bin/env -S uv run
+from __future__ import annotations
+
+# /* script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "uv==*.*",
+# ]
+# */
+# Optional dependency handling (also add to '/* script..' comment, just above)
+#   "© 2026 `Phovos` (phovos@outlook.com)":
+#     - "Morphological Source Code: MSC&QSD"
+#     - https://gitlab.com/morphological/source/code
+#     - https://github.com/Morphological-Source-Code
+#     - https://reddit.com/r/morphological
+# © 2024-2026 https://github.com/Phovos/Morphological-Source-Code
+# © 2023-2026 https://github.com/MOONLAPSED/cognosis
 from dataclasses import dataclass
-from typing import List, Dict, Tuple, Set, Optional, Callable
+from typing import List, Dict, Optional, Callable
 import random
 import math
-import numpy as np
 from collections import deque
 
 
@@ -14,6 +30,7 @@ class ByteWord:
     The top nibble (CVVV) forms the "bra" part - representing compute and value spaces
     The bottom nibble (TTTT) forms the "ket" part - representing type structures
     """
+
     _value: int  # The raw byte value
 
     def __init__(self, value: int = 0):
@@ -81,16 +98,15 @@ class ByteWord:
                 new_types = (current.types ^ current.values) & 0x0F
 
             # Rule: Values evolve based on current types
-            new_values = (current.values +
-                          self._type_entropy(current.types)) & 0x07
+            new_values = (current.values + self._type_entropy(current.types)) & 0x07
 
             # Rule: Compute bit flips based on type-value interaction
             new_compute = current.compute ^ (
-                1 if self._has_fixed_point(current.types, new_values) else 0)
+                1 if self._has_fixed_point(current.types, new_values) else 0
+            )
 
             # Construct new state
-            new_word = ByteWord((new_compute << 7) | (
-                new_values << 4) | new_types)
+            new_word = ByteWord((new_compute << 7) | (new_values << 4) | new_types)
             states.append(new_word)
             current = new_word
 
@@ -147,10 +163,12 @@ class ThermodynamicQuine:
     capable of non-Markovian behavior and encoding its own history.
     """
 
-    def __init__(self,
-                 code_sequence: List[ByteWord] = None,
-                 memory_capacity: int = 8,
-                 noise_level: float = 0.1):
+    def __init__(
+        self,
+        code_sequence: List[ByteWord] = None,
+        memory_capacity: int = 8,
+        noise_level: float = 0.1,
+    ):
         """
         Initialize a ThermodynamicQuine.
 
@@ -161,8 +179,7 @@ class ThermodynamicQuine:
         """
         # Generate random code sequence if none provided
         if code_sequence is None:
-            code_sequence = [ByteWord(random.randint(0, 255))
-                             for _ in range(8)]
+            code_sequence = [ByteWord(random.randint(0, 255)) for _ in range(8)]
 
         self.code = code_sequence
         self.memory = deque(maxlen=memory_capacity)
@@ -214,7 +231,7 @@ class ThermodynamicQuine:
         coherence = 0
         for i in range(1, len(self.code)):
             # Check similarity with previous ByteWord
-            prev = self.code[i-1]._value
+            prev = self.code[i - 1]._value
             curr = self.code[i]._value
             # XOR distance (lower means more similar)
             distance = bin(prev ^ curr).count('1')
@@ -249,10 +266,11 @@ class ThermodynamicQuine:
             evolved = word.propagate(1)[-1]
 
             # Apply non-Markovian effects based on history
-            if history_context and random.random() < 0.3:  # 30% chance of non-Markovian action
+            if (
+                history_context and random.random() < 0.3
+            ):  # 30% chance of non-Markovian action
                 # Find a similar past state to influence the current one
-                past_influence = self._find_past_influence(
-                    word, history_context)
+                past_influence = self._find_past_influence(word, history_context)
                 if past_influence:
                     # Compose with the past influence
                     evolved = evolved.compose(past_influence)
@@ -260,8 +278,7 @@ class ThermodynamicQuine:
             # Apply noise/thermodynamic fluctuations
             if random.random() < self.noise_level:
                 # Random mutation
-                evolved = ByteWord(evolved._value ^ (
-                    1 << random.randint(0, 7)))
+                evolved = ByteWord(evolved._value ^ (1 << random.randint(0, 7)))
 
             new_code.append(evolved)
 
@@ -287,7 +304,9 @@ class ThermodynamicQuine:
         # Simple approach: return the most recent past state
         return self.memory[-2]
 
-    def _find_past_influence(self, word: ByteWord, context: List[ByteWord]) -> Optional[ByteWord]:
+    def _find_past_influence(
+        self, word: ByteWord, context: List[ByteWord]
+    ) -> Optional[ByteWord]:
         """Find a past ByteWord that could influence the current one"""
         if not context:
             return None
@@ -299,8 +318,9 @@ class ThermodynamicQuine:
 
         for past_word in context:
             # Score based on complementary types and values
-            score = bin(word.types & past_word.values).count('1') + \
-                bin(word.values & past_word.types).count('1')
+            score = bin(word.types & past_word.values).count('1') + bin(
+                word.values & past_word.types
+            ).count('1')
 
             if score > best_score:
                 best_score = score
@@ -340,7 +360,7 @@ class ThermodynamicQuine:
         offspring = ThermodynamicQuine(
             code_sequence=new_code,
             memory_capacity=self.memory.maxlen,
-            noise_level=self.noise_level
+            noise_level=self.noise_level,
         )
 
         # Establish lineage connection
@@ -393,12 +413,13 @@ class ThermodynamicQuine:
         offspring = ThermodynamicQuine(
             code_sequence=new_code,
             memory_capacity=max(self.memory.maxlen, other.memory.maxlen),
-            noise_level=(self.noise_level + other.noise_level) / 2
+            noise_level=(self.noise_level + other.noise_level) / 2,
         )
 
         # Establish lineage connection with both parents
-        offspring.lineage = self.lineage.union(
-            other.lineage).union({id(self), id(other)})
+        offspring.lineage = self.lineage.union(other.lineage).union(
+            {id(self), id(other)}
+        )
 
         # Create entanglement links with both parents
         # Strong link to first parent
@@ -425,10 +446,12 @@ class ThermodynamicQuine:
         """String representation of the quine"""
         order = self.get_computational_order_parameter()
         behavior = "Markovian" if self.is_markovian() else "Non-Markovian"
-        return (f"ThermodynamicQuine(len={len(self.code)}, "
-                f"age={self.age}, entropy={self.entropy:.2f}, "
-                f"coherence={self.coherence:.2f}, Φ={order:.2f}, "
-                f"behavior={behavior})")
+        return (
+            f"ThermodynamicQuine(len={len(self.code)}, "
+            f"age={self.age}, entropy={self.entropy:.2f}, "
+            f"coherence={self.coherence:.2f}, Φ={order:.2f}, "
+            f"behavior={behavior})"
+        )
 
 
 class ThermoQuineEcosystem:
@@ -437,11 +460,13 @@ class ThermoQuineEcosystem:
     simulating digital epigenetics.
     """
 
-    def __init__(self,
-                 initial_population_size: int = 20,
-                 max_population_size: int = 100,
-                 base_mutation_rate: float = 0.1,
-                 selection_pressure: float = 0.7):
+    def __init__(
+        self,
+        initial_population_size: int = 20,
+        max_population_size: int = 100,
+        base_mutation_rate: float = 0.1,
+        selection_pressure: float = 0.7,
+    ):
         """
         Initialize the ecosystem.
 
@@ -484,7 +509,9 @@ class ThermoQuineEcosystem:
             else:
                 self.species_map[species_key] = [quine]
 
-    def evaluate_fitness(self, fitness_function: Callable[[ThermodynamicQuine], float] = None):
+    def evaluate_fitness(
+        self, fitness_function: Callable[[ThermodynamicQuine], float] = None
+    ):
         """
         Evaluate fitness of all quines in the population.
 
@@ -493,22 +520,26 @@ class ThermoQuineEcosystem:
         """
         if fitness_function is None:
             # Default fitness function: reward non-Markovian behavior and higher coherence
-            def fitness_function(q): return (
-                # Reward non-Markovian (0 or 3)
-                (1.0 - float(q.is_markovian())) * 3.0 +
-                # Reward coherence (0-2)
-                q.coherence * 2.0 +
-                # Moderate entropy (0-1)
-                min(q.entropy, 1.0) * 1.0
-            )
+            def fitness_function(q):
+                return (
+                    # Reward non-Markovian (0 or 3)
+                    (1.0 - float(q.is_markovian())) * 3.0
+                    +
+                    # Reward coherence (0-2)
+                    q.coherence * 2.0
+                    +
+                    # Moderate entropy (0-1)
+                    min(q.entropy, 1.0) * 1.0
+                )
 
         # Calculate fitness for each quine
         for quine in self.population:
             quine.fitness_score = fitness_function(quine)
 
         # Keep track of average fitness
-        avg_fitness = sum(
-            q.fitness_score for q in self.population) / len(self.population)
+        avg_fitness = sum(q.fitness_score for q in self.population) / len(
+            self.population
+        )
         self.fitness_history.append(avg_fitness)
 
     def select_parents(self, n: int = 2) -> List[ThermodynamicQuine]:
@@ -554,7 +585,8 @@ class ThermoQuineEcosystem:
         # Keep some of the best quines (elitism)
         elitism_count = max(1, int(len(self.population) * 0.1))
         elites = sorted(self.population, key=lambda q: q.fitness_score, reverse=True)[
-            :elitism_count]
+            :elitism_count
+        ]
         new_population.extend(elites)
 
         # Fill the rest with offspring
@@ -591,13 +623,15 @@ class ThermoQuineEcosystem:
         if len(self.population) < 2:
             return self.base_mutation_rate
 
-        order_parameters = [q.get_computational_order_parameter()
-                            for q in self.population]
+        order_parameters = [
+            q.get_computational_order_parameter() for q in self.population
+        ]
 
         # Calculate variance
         mean_order = sum(order_parameters) / len(order_parameters)
-        variance = sum((x - mean_order) **
-                       2 for x in order_parameters) / len(order_parameters)
+        variance = sum((x - mean_order) ** 2 for x in order_parameters) / len(
+            order_parameters
+        )
 
         # Normalize to a reasonable range
         diversity = min(1.0, math.sqrt(variance) * 2)
@@ -626,7 +660,9 @@ class ThermoQuineEcosystem:
         # Step 3: Reproduce
         self.reproduce()
 
-    def run_simulation(self, generations: int, fitness_function: Callable = None) -> Dict:
+    def run_simulation(
+        self, generations: int, fitness_function: Callable = None
+    ) -> Dict:
         """
         Run simulation for specified number of generations.
 
@@ -642,7 +678,7 @@ class ThermoQuineEcosystem:
             "avg_fitness": [],
             "max_fitness": [],
             "species_count": [],
-            "markovian_ratio": []
+            "markovian_ratio": [],
         }
 
         for _ in range(generations):
@@ -651,16 +687,13 @@ class ThermoQuineEcosystem:
             # Record metrics
             results["generations"].append(self.generation)
             results["avg_fitness"].append(
-                sum(q.fitness_score for q in self.population) /
-                len(self.population)
+                sum(q.fitness_score for q in self.population) / len(self.population)
             )
-            results["max_fitness"].append(
-                max(q.fitness_score for q in self.population)
-            )
+            results["max_fitness"].append(max(q.fitness_score for q in self.population))
             results["species_count"].append(len(self.species_map))
             results["markovian_ratio"].append(
-                sum(1 for q in self.population if q.is_markovian()) /
-                len(self.population)
+                sum(1 for q in self.population if q.is_markovian())
+                / len(self.population)
             )
 
         return results
@@ -677,19 +710,26 @@ class ThermoQuineEcosystem:
             "species_count": len(self.species_map),
             "species_sizes": {k: len(v) for k, v in self.species_map.items()},
             "markovian_count": sum(1 for q in self.population if q.is_markovian()),
-            "non_markovian_count": sum(1 for q in self.population if not q.is_markovian())
+            "non_markovian_count": sum(
+                1 for q in self.population if not q.is_markovian()
+            ),
         }
         return stats
 
     def __repr__(self) -> str:
         """String representation of the ecosystem"""
         species_count = len(self.species_map)
-        avg_fitness = (sum(q.fitness_score for q in self.population) / len(self.population)
-                       if self.population else 0)
+        avg_fitness = (
+            sum(q.fitness_score for q in self.population) / len(self.population)
+            if self.population
+            else 0
+        )
 
-        return (f"ThermoQuineEcosystem(population={len(self.population)}, "
-                f"generation={self.generation}, species={species_count}, "
-                f"avg_fitness={avg_fitness:.2f})")
+        return (
+            f"ThermoQuineEcosystem(population={len(self.population)}, "
+            f"generation={self.generation}, species={species_count}, "
+            f"avg_fitness={avg_fitness:.2f})"
+        )
 
 
 # Example usage
@@ -700,7 +740,7 @@ def run_thermo_quine_experiment():
         initial_population_size=20,
         max_population_size=50,
         base_mutation_rate=0.15,
-        selection_pressure=0.8
+        selection_pressure=0.8,
     )
 
     print("Running simulation for 50 generations...")
@@ -712,17 +752,20 @@ def run_thermo_quine_experiment():
     best_quine = ecosystem.get_best_quine()
     print(f"Best quine found: {best_quine}")
     print(
-        f"Best quine order parameter: {best_quine.get_computational_order_parameter():.3f}")
+        f"Best quine order parameter: {best_quine.get_computational_order_parameter():.3f}"
+    )
     print(f"Is best quine Markovian? {best_quine.is_markovian()}")
 
     # Print evolution of key metrics
     print("\nEvolution of key metrics:")
-    print(f"Generation\tAvg Fitness\tMax Fitness\tSpecies Count\tMarkovian Ratio")
+    print("Generation\tAvg Fitness\tMax Fitness\tSpecies Count\tMarkovian Ratio")
     # Print every 5th generation
     for i in range(0, len(results["generations"]), 5):
-        print(f"{results['generations'][i]}\t\t{results['avg_fitness'][i]:.2f}\t\t"
-              f"{results['max_fitness'][i]:.2f}\t\t{results['species_count'][i]}\t\t"
-              f"{results['markovian_ratio'][i]:.2f}")
+        print(
+            f"{results['generations'][i]}\t\t{results['avg_fitness'][i]:.2f}\t\t"
+            f"{results['max_fitness'][i]:.2f}\t\t{results['species_count'][i]}\t\t"
+            f"{results['markovian_ratio'][i]:.2f}"
+        )
 
     return ecosystem, results
 

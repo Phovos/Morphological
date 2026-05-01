@@ -3,7 +3,7 @@ name = "Morphological-Source-Code"
 description = "Morphological Source Code"
 authors = [{ name = "Phovos", email = "phovos@outlook.com" }]
 requires-python = ">=3.14"
-version = "0.4.28"
+version = "0.6.91"
 
 [project.readme]
 file = "README.md"
@@ -31,7 +31,6 @@ extend-ignore = [
     "E501",  # line too long
     "W291",  # trailing whitespace
     "W293",  # blank line contains whitespace
-    "W391",  # blank line at end of file
     "D206",  # docstring whitespace errors
     "D300",  # triple double quotes on one line
 ]

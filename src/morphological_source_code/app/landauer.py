@@ -1,21 +1,40 @@
+#!/usr/bin/env -S uv run
+from __future__ import annotations
+
+# /* script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "uv==*.*",
+# ]
+# */
+# Optional dependency handling (also add to '/* script..' comment, just above)
+#   "© 2026 `Phovos` (phovos@outlook.com)":
+#     - "Morphological Source Code: MSC&QSD"
+#     - https://gitlab.com/morphological/source/code
+#     - https://github.com/Morphological-Source-Code
+#     - https://reddit.com/r/morphological
+# © 2024-2026 https://github.com/Phovos/Morphological-Source-Code
+# © 2023-2026 https://github.com/MOONLAPSED/cognosis
 import math
 import random
-from typing import List, Tuple, Dict, Optional
+from typing import Tuple, Dict
 from dataclasses import dataclass
 from enum import Enum
 
 
 class MorphologicalPhase(Enum):
     """Phase states in the T/V/C morphological field"""
-    DISORDERED = "disordered"    # High entropy, no quine stability
-    CRITICAL = "critical"        # Phase boundary, maximum susceptibility
-    ORDERED = "ordered"          # Low entropy, stable quines
-    SUPERFLUID = "superfluid"    # Zero entropy, perfect quines
+
+    DISORDERED = "disordered"  # High entropy, no quine stability
+    CRITICAL = "critical"  # Phase boundary, maximum susceptibility
+    ORDERED = "ordered"  # Low entropy, stable quines
+    SUPERFLUID = "superfluid"  # Zero entropy, perfect quines
 
 
 @dataclass
 class OrderParameter:
     """Landau order parameter for morphological phase transitions"""
+
     magnitude: float
     phase: float
 
@@ -33,22 +52,24 @@ class ToroidalByteWord:
 
         self.raw_value = value
         # T/V/C decomposition
-        self.type_bits = (value & 0b11100000) >> 5     # 3 bits
-        self.value_bits = (value & 0b00011100) >> 2    # 3 bits
-        self.compute_bits = value & 0b00000011          # 2 bits
+        self.type_bits = (value & 0b11100000) >> 5  # 3 bits
+        self.value_bits = (value & 0b00011100) >> 2  # 3 bits
+        self.compute_bits = value & 0b00000011  # 2 bits
 
         # Toroidal coordinates
-        self.theta = self.type_bits * (2 * math.pi / 8)      # Major angle
-        self.phi = self.value_bits * (2 * math.pi / 8)       # Minor angle
-        self.r = 1 + (self.compute_bits / 4)                 # Radial distance
+        self.theta = self.type_bits * (2 * math.pi / 8)  # Major angle
+        self.phi = self.value_bits * (2 * math.pi / 8)  # Minor angle
+        self.r = 1 + (self.compute_bits / 4)  # Radial distance
 
     def toroidal_distance(self, other: 'ToroidalByteWord') -> float:
         """Distance on torus surface with proper wrapping"""
         # Angular distances with wrapping
-        theta_diff = min(abs(self.theta - other.theta),
-                         2*math.pi - abs(self.theta - other.theta))
-        phi_diff = min(abs(self.phi - other.phi),
-                       2*math.pi - abs(self.phi - other.phi))
+        theta_diff = min(
+            abs(self.theta - other.theta), 2 * math.pi - abs(self.theta - other.theta)
+        )
+        phi_diff = min(
+            abs(self.phi - other.phi), 2 * math.pi - abs(self.phi - other.phi)
+        )
         r_diff = abs(self.r - other.r)
 
         return math.sqrt(theta_diff**2 + phi_diff**2 + r_diff**2)
@@ -69,8 +90,9 @@ class MorphologicalFieldSystem:
     """System of interacting morphological byte-words on torus"""
 
     def __init__(self, num_words: int = 64, temperature: float = 1.0):
-        self.words = [ToroidalByteWord(random.randint(0, 255))
-                      for _ in range(num_words)]
+        self.words = [
+            ToroidalByteWord(random.randint(0, 255)) for _ in range(num_words)
+        ]
         self.temperature = temperature
         self.coupling_strength = 1.0
         self.external_field = 0.0
@@ -88,8 +110,7 @@ class MorphologicalFieldSystem:
 
         for word in self.words:
             # Order parameter contribution from each word
-            local_mag = (word.type_bits + word.value_bits +
-                         word.compute_bits) / 24.0
+            local_mag = (word.type_bits + word.value_bits + word.compute_bits) / 24.0
             local_phase = word.theta + word.phi  # Phase from torus position
 
             total_magnitude += local_mag
@@ -98,21 +119,21 @@ class MorphologicalFieldSystem:
         avg_magnitude = total_magnitude / len(self.words)
         avg_phase = total_phase / len(self.words)
 
-        return OrderParameter(avg_magnitude, avg_phase % (2*math.pi))
+        return OrderParameter(avg_magnitude, avg_phase % (2 * math.pi))
 
     def landau_free_energy(self, order_param: OrderParameter) -> float:
         """Landau free energy F = a|ψ|² + b|ψ|⁴ - h|ψ| + J∑ψᵢψⱼ"""
         psi_mag = order_param.magnitude
 
         # Standard Landau terms
-        free_energy = (self.a * psi_mag**2 +
-                       self.b * psi_mag**4 -
-                       self.external_field * psi_mag)
+        free_energy = (
+            self.a * psi_mag**2 + self.b * psi_mag**4 - self.external_field * psi_mag
+        )
 
         # Interaction terms between words
         interaction_energy = 0.0
         for i, word1 in enumerate(self.words):
-            for j, word2 in enumerate(self.words[i+1:], i+1):
+            for j, word2 in enumerate(self.words[i + 1 :], i + 1):
                 coupling = word1.morphological_coupling(word2)
                 # Local order parameters
                 psi1 = (word1.type_bits + word1.value_bits) / 16.0
@@ -167,8 +188,7 @@ class MorphologicalFieldSystem:
         runtime_order = self.compute_order_parameter()
 
         # Create "child" system with same parameters
-        child_system = MorphologicalFieldSystem(
-            len(self.words), self.temperature)
+        child_system = MorphologicalFieldSystem(len(self.words), self.temperature)
         child_order = child_system.compute_order_parameter()
 
         # Reset temperature
@@ -176,10 +196,12 @@ class MorphologicalFieldSystem:
 
         # Check if order parameters are approximately equal
         tolerance = 0.05
-        initial_stable = abs(initial_order.magnitude -
-                             runtime_order.magnitude) < tolerance
-        runtime_stable = abs(runtime_order.magnitude -
-                             child_order.magnitude) < tolerance
+        initial_stable = (
+            abs(initial_order.magnitude - runtime_order.magnitude) < tolerance
+        )
+        runtime_stable = (
+            abs(runtime_order.magnitude - child_order.magnitude) < tolerance
+        )
 
         return initial_stable and runtime_stable
 
@@ -193,7 +215,7 @@ class MorphologicalFieldSystem:
             'free_energy': self.landau_free_energy(self.compute_order_parameter()),
             'susceptibility': self.susceptibility(),
             'phase': phase.value,
-            'quine_stable': self.quine_stability_test()
+            'quine_stable': self.quine_stability_test(),
         }
 
 
@@ -213,15 +235,17 @@ def demonstrate_phase_transitions():
         system.temperature = T
         point = system.phase_diagram_point()
 
-        print(f"{T:.2f}\t{point['order_parameter']:.3f}\t"
-              f"{point['phase']:<12}\t{point['susceptibility']:.1f}\t"
-              f"{point['quine_stable']}\t{point['free_energy']:.2f}")
+        print(
+            f"{T:.2f}\t{point['order_parameter']:.3f}\t"
+            f"{point['phase']:<12}\t{point['susceptibility']:.1f}\t"
+            f"{point['quine_stable']}\t{point['free_energy']:.2f}"
+        )
 
     print("\n=== Critical Phenomena Analysis ===")
 
     # Find critical temperature by susceptibility peak
     critical_temps = []
-    for T in [i/100 for i in range(50, 150, 5)]:  # Fine scan around T~1
+    for T in [i / 100 for i in range(50, 150, 5)]:  # Fine scan around T~1
         system.temperature = T
         chi = system.susceptibility()
         if chi > 5.0:  # High susceptibility indicates criticality
@@ -258,25 +282,24 @@ def demonstrate_phase_transitions():
 
         # Handle wrapping
         if dtheta > math.pi:
-            dtheta -= 2*math.pi
+            dtheta -= 2 * math.pi
         elif dtheta < -math.pi:
-            dtheta += 2*math.pi
+            dtheta += 2 * math.pi
 
         if dphi > math.pi:
-            dphi -= 2*math.pi
+            dphi -= 2 * math.pi
         elif dphi < -math.pi:
-            dphi += 2*math.pi
+            dphi += 2 * math.pi
 
         winding_theta += dtheta
         winding_phi += dphi
 
-    winding_theta /= (2 * math.pi)
-    winding_phi /= (2 * math.pi)
+    winding_theta /= 2 * math.pi
+    winding_phi /= 2 * math.pi
 
     print(f"Winding number (θ): {winding_theta:.2f}")
     print(f"Winding number (φ): {winding_phi:.2f}")
-    print(
-        f"Total topological charge: {abs(winding_theta) + abs(winding_phi):.2f}")
+    print(f"Total topological charge: {abs(winding_theta) + abs(winding_phi):.2f}")
 
 
 if __name__ == "__main__":

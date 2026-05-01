@@ -1,4 +1,29 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run
+from __future__ import annotations
+
+# /* script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "uv==*.*",
+# ]
+# */
+# Optional dependency handling (also add to '/* script..' comment, just above)
+#   "© 2026 `Phovos` (phovos@outlook.com)":
+#     - "Morphological Source Code: MSC&QSD"
+#     - https://gitlab.com/morphological/source/code
+#     - https://github.com/Morphological-Source-Code
+#     - https://reddit.com/r/morphological
+# © 2024-2026 https://github.com/Phovos/Morphological-Source-Code
+# © 2023-2026 https://github.com/MOONLAPSED/cognosis
+
+import math
+import cmath
+import weakref
+from typing import List, Optional, Callable, Set
+from dataclasses import dataclass
+from enum import IntEnum
+import struct
+import sys
 """
 Morphological Quantum Computing: The Complete Theory (FIXED)
 A self-contained implementation of quantum-morphological ByteWords
@@ -12,15 +37,6 @@ FIXES APPLIED:
 - Fixed float conversion edge cases
 - Added validation for morphological operations
 """
-
-import math
-import cmath
-import weakref
-from typing import List, Optional, Callable, Set
-from dataclasses import dataclass
-from enum import IntEnum
-import struct
-import sys
 
 # ============================================================================
 # Hilbert Space of Code Morphologies 𝓗

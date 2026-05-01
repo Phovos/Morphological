@@ -1,71 +1,38 @@
+#!/usr/bin/env -S uv run
 from __future__ import annotations
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# ------------------------------------------------------------------------------
-# 3.13 std libs **ONLY** | Platform(s): Win11 (production), Ubuntu-22.04 (dev, staging);
-# master branch is for immutable releases, only;
-# ------------------------------------------------------------------------------
-# PLATFORM, INIT, MONOLITHIC NUTS & BOLTS + IMPORTS;
-# ------------------------------------------------------------------------------
-import re
+
+# /* script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "uv==*.*",
+# ]
+# */
+# Optional dependency handling (also add to '/* script..' comment, just above)
+#   "© 2026 `Phovos` (phovos@outlook.com)":
+#     - "Morphological Source Code: MSC&QSD"
+#     - https://gitlab.com/morphological/source/code
+#     - https://github.com/Morphological-Source-Code
+#     - https://reddit.com/r/morphological
+# © 2024-2026 https://github.com/Phovos/Morphological-Source-Code
+# © 2023-2026 https://github.com/MOONLAPSED/cognosis
 import os
-import io
-import abc
-import dis
-import sys
-import ast
 import time
-import json
-import math
-import uuid
-import enum
-import heapq
-import array
-import shlex
-import types
-import struct
-import shutil
-import pickle
-import socket
-import select
 import ctypes
-import random
 import logging
-import weakref
-import tomllib
-import pathlib
-import asyncio
-import inspect
-import hashlib
-import platform
-import importlib
-import functools
-import linecache
-import traceback
-import mimetypes
-import threading
-import subprocess
-import contextvars
-import collections
-import tracemalloc
-from inspect import getsource, isfunction, signature
-from types import FunctionType, ModuleType
-from textwrap import dedent
-from pathlib import Path
-from enum import Enum, auto, StrEnum, IntFlag, IntEnum
-from queue import Queue, Empty
-from datetime import datetime, timezone
-from abc import ABC, abstractmethod
-from contextlib import contextmanager
-from functools import wraps, lru_cache
-from dataclasses import dataclass, field
-from concurrent.futures import ThreadPoolExecutor
-from importlib.util import spec_from_file_location, module_from_spec
-from types import SimpleNamespace, MethodType, MethodWrapperType, LambdaType, coroutine, CodeType
+from enum import Enum, auto
+from dataclasses import dataclass
 from typing import (
-    Any, Dict, List, Optional, Union, Callable, TypeVar, Tuple, Generic, Set,
-    Coroutine, Type, NamedTuple, ClassVar, Protocol, runtime_checkable, AsyncContextManager,
-    AsyncGenerator, AsyncIterator, cast, overload, Generator, Awaitable, Hashable, Iterator
+    Any,
+    Dict,
+    List,
+    Optional,
+    Union,
+    Callable,
+    TypeVar,
+    Tuple,
+    Generic,
+    cast,
+    Hashable,
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -76,6 +43,7 @@ IS_POSIX = os.name == 'posix'
 
 class PlatformFactory:
     """Factory class to create platform-specific instances."""
+
     @staticmethod
     def get_platform() -> str:
         """Detect and return the current platform as a string."""
@@ -140,65 +108,178 @@ class LinuxPlatform(PlatformInterface):
 
 # Static Markovian-Noetherian Holographic-types (Binary and guaranteed unitary - the basis in Hilbert space where suprise (or [[Free Energy Principle]] maxima/minima) is minimized/optimized and symetries-conserved.) These Noetherian-ivariant static types are the basis for the [[Holographic duality]]. They are (largley) irrational or complex, wholly non-integer, and associated with [[C*-Algebra]] and [[Algebraic Topology]], and related-pedagogy like Categories, Lagrangians, etc.
 # T for TypeVar, V for ValueVar. Homoicons are T+V.
-T = TypeVar('T', bound=Union[int, float, str, bool, list, dict, tuple,
-            set, object, Callable, type], covariant=False, contravariant=False)
-V = TypeVar('V', bound=Union[int, float, str, bool, list, dict, tuple,
-            set, object, Callable, type], covariant=False, contravariant=False)
-C = TypeVar('C', bound=Union[int, float, str, bool, list, dict, tuple, set, object, Callable,
-            # Homoiconic control bit(s)/byte(s)
-                             type], covariant=False, contravariant=False)
+T = TypeVar(
+    'T',
+    bound=Union[int, float, str, bool, list, dict, tuple, set, object, Callable, type],
+    covariant=False,
+    contravariant=False,
+)
+V = TypeVar(
+    'V',
+    bound=Union[int, float, str, bool, list, dict, tuple, set, object, Callable, type],
+    covariant=False,
+    contravariant=False,
+)
+C = TypeVar(
+    'C',
+    bound=Union[
+        int,
+        float,
+        str,
+        bool,
+        list,
+        dict,
+        tuple,
+        set,
+        object,
+        Callable,
+        # Homoiconic control bit(s)/byte(s)
+        type,
+    ],
+    covariant=False,
+    contravariant=False,
+)
 # C = TypeVar(f"{'C'}+{V}+{T}+{'C_anti'}", bound=Callable[..., Union[int, float, str, bool, list, dict, tuple, set, object, Callable, type]], covariant=False, contravariant=False) # 'superposition' of callable 'T'/'V' first class function interface -
 # it acts like a holographic observer—capturing unknown states and folding them into the system; motility, agency, or quine-like behavior including FFI
 # T/V’s holographic recursion (internal states) and C’s unbounded projection (external interactions) form the 'incomplete' set of observables that correspond to the next, indeed complete, set of parameters and scalars/matrixes etc.
 # T/V's retain causality and coherence while C encodes/reflects/is-the-morphism-of[the category of the object, and the object-prime, as it were]
-T_co = TypeVar('T_co', bound=Union[int, float, str, bool, list, dict, tuple, set, object,
-               # Type structure (static) with covariance (Markovian)
-                                   Callable, type], covariant=True)
-V_co = TypeVar('V_co', bound=Union[int, float, str, bool, list, dict, tuple, set, object,
-               # Value space (dynamic) with covariance (Markovian)
-                                   Callable, type], covariant=True)
-C_co = TypeVar('C_co', bound=Callable[..., Union[int, float, str, bool, list, dict, tuple, set,
-               # Control space (dynamic) with covariance (Markovian)
-                                                 object, Callable, type]], covariant=True)
+T_co = TypeVar(
+    'T_co',
+    bound=Union[
+        int,
+        float,
+        str,
+        bool,
+        list,
+        dict,
+        tuple,
+        set,
+        object,
+        # Type structure (static) with covariance (Markovian)
+        Callable,
+        type,
+    ],
+    covariant=True,
+)
+V_co = TypeVar(
+    'V_co',
+    bound=Union[
+        int,
+        float,
+        str,
+        bool,
+        list,
+        dict,
+        tuple,
+        set,
+        object,
+        # Value space (dynamic) with covariance (Markovian)
+        Callable,
+        type,
+    ],
+    covariant=True,
+)
+C_co = TypeVar(
+    'C_co',
+    bound=Callable[
+        ...,
+        Union[
+            int,
+            float,
+            str,
+            bool,
+            list,
+            dict,
+            tuple,
+            set,
+            # Control space (dynamic) with covariance (Markovian)
+            object,
+            Callable,
+            type,
+        ],
+    ],
+    covariant=True,
+)
 # C_co = TypeVar(f"{'|C_anti|'}+{'|C|'}", bound=Callable[..., Union[int, float, str, bool, list, dict, tuple, set, object, Callable, type]], covariant=True) # Computation space with covariance (Non-Markovian)
-T_anti = TypeVar('T_anti', bound=Union[int, float, str, bool, list,
-                 dict, tuple, set, object, Callable, type], contravariant=True)
-V_anti = TypeVar('V_anti', bound=Union[int, float, str, bool, list,
-                 dict, tuple, set, object, Callable, type], contravariant=True)
-C_anti = TypeVar('C_anti', bound=Callable[..., Union[int, float, str, bool, list, dict, tuple,
-                 # Computation space with contravariance
-                                                     set, object, Callable, type]], contravariant=True)
+T_anti = TypeVar(
+    'T_anti',
+    bound=Union[int, float, str, bool, list, dict, tuple, set, object, Callable, type],
+    contravariant=True,
+)
+V_anti = TypeVar(
+    'V_anti',
+    bound=Union[int, float, str, bool, list, dict, tuple, set, object, Callable, type],
+    contravariant=True,
+)
+C_anti = TypeVar(
+    'C_anti',
+    bound=Callable[
+        ...,
+        Union[
+            int,
+            float,
+            str,
+            bool,
+            list,
+            dict,
+            tuple,
+            # Computation space with contravariance
+            set,
+            object,
+            Callable,
+            type,
+        ],
+    ],
+    contravariant=True,
+)
 # C_anti = TypeVar(f"{T}or{V}or{C}", bound=Callable[..., Union[int, float, str, bool, list, dict, tuple, set, object, Callable, type]], contravariant=True)
 # By defining C_anti as a "superposition" of T, V, and C (in the f"{T}or{V}or{C}" format), this type represents all possible states (or branches of computation) that could arise from the interaction between those three spaces, but with the constraint that C_anti has contravariance. This is a way to represent the "anti-holographic" or 'Morphic' aspect of the system, where the computation space is not just a passive observer, but an active participant
 # Forward references - shadow pattern due to Monolithic format; should be modularized
 # Morphic V-bit which replaes the most-significant V bit when present.
 _C_ = TypeVar('Dunder_C', covariant=True)
 
+
 # Forward references and stubs
 class BYTE:
     pass
+
+
 class QuantumState:
     pass
+
+
 class HilbertSpace:
     pass
+
+
 class MorphicComplex:
     pass
+
+
 BYTE = TypeVar("BYTE", bound="BYTE_WORD")
 StateHash = Union[str, bytes, int, dict, Tuple, Hashable]
 _lsu_cache: Dict[Tuple[StateHash, int], Any] = {}
 MaxCache = 10_000
+
+
 class Symmetry(Enum):
     TRANSLATION = auto()
     ROTATION = auto()
     REFLECTION = auto()
+
+
 class Conservation(Enum):
     ENERGY = auto()
     MOMENTUM = auto()
     INFORMATION = auto()
+
+
 @dataclass
 class OrderParameter:
     value: float = 0.0
     phase: float = 0.0
+
+
 @dataclass
 class State:
     type_space: T
@@ -208,6 +289,8 @@ class State:
     symmetry: Symmetry
     conservation: Conservation
     order_parameter: Optional[OrderParameter] = None
+
+
 def hash_state(state: Any) -> int:
     """
     Creates a hashable representation of any state object.
@@ -228,43 +311,60 @@ def hash_state(state: Any) -> int:
             return hash(state)
         except TypeError:
             return hash(str(state))
+
+
 class Category(Generic[T_co, V_co, C_co]):
     """
     Represents a mathematical category with objects and morphisms.
     """
+
     def __init__(self, name: str):
         self.name = name
         self.objects: List[T_co] = []
         self.morphisms: Dict[Tuple[T_co, T_co], List[C_co]] = {}
         self.lifted_functions: Dict[str, Callable] = {}
+
     def add_object(self, obj: T_co) -> None:
         if obj not in self.objects:
             self.objects.append(obj)
+
     def add_morphism(self, src: T_co, tgt: T_co, morph: C_co) -> None:
         self.add_object(src)
         self.add_object(tgt)
         self.morphisms.setdefault((src, tgt), []).append(morph)
+
     def compose(self, f: C_co, g: C_co) -> C_co:
         """
         Compose two morphisms.
         For morphisms f: A → B and g: B → C, returns g ∘ f: A → C
         """
+
         def composed(x):
             return g(f(x))
+
         return cast(C_co, composed)
+
     def find_morphisms(self, source: T_co, target: T_co) -> List[C_co]:
         """Find all morphisms between two objects."""
         return self.morphisms.get((source, target), [])
+
+
 class Morphism(Generic[T_co, T_anti]):
     """Abstract morphism between type structures"""
+
     pass
-def lift_function(func: Callable, category: Category, name_prefix: str = "lift") -> Callable:
+
+
+def lift_function(
+    func: Callable, category: Category, name_prefix: str = "lift"
+) -> Callable:
     """
     Lift a function into the category, creating a morphism.
     """
     # Create a unique name for the lifted function
     original_name = getattr(func, '__name__', 'anonymous')
     lifted_name = f"{name_prefix}_{original_name}_{abs(hash(str(func))) & 0xFFFF:x}"
+
     # Create the lifted function with enhanced metadata
     def lifted_wrapper(*args, **kwargs):
         result = func(*args, **kwargs)
@@ -272,6 +372,7 @@ def lift_function(func: Callable, category: Category, name_prefix: str = "lift")
         if hasattr(lifted_wrapper, '_category_metadata'):
             lifted_wrapper._category_metadata['call_count'] += 1
         return result
+
     # Set metadata
     lifted_wrapper.__name__ = lifted_name
     lifted_wrapper.__qualname__ = lifted_name
@@ -279,7 +380,7 @@ def lift_function(func: Callable, category: Category, name_prefix: str = "lift")
     lifted_wrapper._category_metadata = {
         'lifted_at': time.time(),
         'original_name': original_name,
-        'call_count': 0
+        'call_count': 0,
     }
     # Add to category
     category.lifted_functions[lifted_name] = lifted_wrapper
@@ -287,6 +388,7 @@ def lift_function(func: Callable, category: Category, name_prefix: str = "lift")
     category.add_object(lifted_wrapper)
     category.add_morphism(func, lifted_wrapper, lifted_wrapper)
     return lifted_wrapper
+
 
 def demonstrate_lifting():
     """
@@ -346,8 +448,7 @@ def demonstrate_lifting():
     result_composed = composed_morph(test_value)
 
     print(f"Direct composition: mult(add({test_value})) = {result_direct}")
-    print(
-        f"Category composition: compose(add, mult)({test_value}) = {result_composed}")
+    print(f"Category composition: compose(add, mult)({test_value}) = {result_composed}")
     print(f"Results match: {result_direct == result_composed}")
 
     # Show metadata
@@ -367,7 +468,9 @@ def demonstrate_lifting():
     print("-" * 30)
 
     # Lambda lifting
-    def lambda_func(x): return x ** 2
+    def lambda_func(x):
+        return x**2
+
     lifted_lambda = lift_function(lambda_func, cat, "lambda_lift")
     print(f"Lambda function lifted as: {lifted_lambda.__name__}")
     print(f"lambda({test_value}) = {lifted_lambda(test_value)}")
@@ -392,10 +495,10 @@ def demonstrate_lifting():
         SecurityContext=None,
         symmetry=Symmetry.TRANSLATION,
         conservation=Conservation.ENERGY,
-        order_parameter=OrderParameter(value=1.0, phase=0.0)
+        order_parameter=OrderParameter(value=1.0, phase=0.0),
     )
 
-    print(f"Created state with:")
+    print("Created state with:")
     print(f"  Type space: {example_state.type_space}")
     print(f"  Value space: {example_state.value_space}")
     print(f"  Computation space: {example_state.computation_space.__name__}")
@@ -424,7 +527,7 @@ def demonstrate_lifting():
     print("Category contents:")
     for i, obj in enumerate(cat.objects[:10]):  # Show first 10
         obj_name = getattr(obj, '__name__', str(type(obj).__name__))
-        print(f"  {i+1}. {obj_name}")
+        print(f"  {i + 1}. {obj_name}")
     if len(cat.objects) > 10:
         print(f"  ... and {len(cat.objects) - 10} more objects")
 
@@ -438,6 +541,7 @@ def main():
     except Exception as e:
         print(f"Error during demonstration: {e}")
         import traceback
+
         traceback.print_exc()
 
 

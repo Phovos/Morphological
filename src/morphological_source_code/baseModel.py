@@ -1,14 +1,20 @@
+#!/usr/bin/env -S uv run
 from __future__ import annotations
 
-#!/usr/bin/env -S uv run
 # /* script
 # requires-python = ">=3.12"
 # dependencies = [
 #     "uv==*.*",
-#     "numpy==*.*",
 # ]
 # */
-# https://github.com/Moonlapsed/Morphological © 2023 by MOONLAPSED:MOONLAPSED@gmail.com BSD-3 & CC ND
+# Optional dependency handling (also add to '/* script..' comment, just above)
+#   "© 2026 `Phovos` (phovos@outlook.com)":
+#     - "Morphological Source Code: MSC&QSD"
+#     - https://gitlab.com/morphological/source/code
+#     - https://github.com/Morphological-Source-Code
+#     - https://reddit.com/r/morphological
+# © 2024-2026 https://github.com/Phovos/Morphological-Source-Code
+# © 2023-2026 https://github.com/MOONLAPSED/cognosis
 # ------------------------------------------------------------------------------
 # Standard Library Imports - 3.13 std libs **ONLY**
 # ------------------------------------------------------------------------------
@@ -76,7 +82,9 @@ if IS_WINDOWS:
     def set_process_priority(priority: int):
         windll.kernel32.SetPriorityClass(wintypes.HANDLE(-1), priority)
 
-    WINDOWS_SANDBOX_DEFAULT_DESKTOP = Path(PureWindowsPath(r"C:\Users\WDAGUtilityAccount\Desktop"))
+    WINDOWS_SANDBOX_DEFAULT_DESKTOP = Path(
+        PureWindowsPath(r"C:\Users\WDAGUtilityAccount\Desktop")
+    )
 
     @dataclass
     class SandboxConfig:
@@ -89,7 +97,9 @@ if IS_WINDOWS:
             """Generate Windows Sandbox configuration"""
             config = {
                 "MappedFolders": [mapping.to_wsb_config() for mapping in self.mappings],
-                "LogonCommand": {"Command": self.logon_command} if self.logon_command else None,
+                "LogonCommand": {"Command": self.logon_command}
+                if self.logon_command
+                else None,
                 "Networking": self.networking,
                 "vGPU": self.virtual_gpu,
             }
@@ -161,11 +171,17 @@ if IS_WINDOWS:
 
         def _get_sandbox_server_path(self) -> Path:
             """Get the server address path as it appears in the sandbox"""
-            return WINDOWS_SANDBOX_DEFAULT_DESKTOP / self.shared_directory.name / "server_address"
+            return (
+                WINDOWS_SANDBOX_DEFAULT_DESKTOP
+                / self.shared_directory.name
+                / "server_address"
+            )
 
         def configure_sandbox(self):
             """Configure sandbox for network communication"""
-            self.sandbox.config.mappings.append(FolderMapping(self.shared_directory, read_only=False))
+            self.sandbox.config.mappings.append(
+                FolderMapping(self.shared_directory, read_only=False)
+            )
             self._setup_logon_script()
 
         def _setup_logon_script(self):
@@ -174,13 +190,17 @@ if IS_WINDOWS:
 
             # Setup Python environment
             python_path = sys.executable
-            sandbox_python_path = WINDOWS_SANDBOX_DEFAULT_DESKTOP / "Python" / "python.exe"
+            sandbox_python_path = (
+                WINDOWS_SANDBOX_DEFAULT_DESKTOP / "Python" / "python.exe"
+            )
             commands.append(f'copy "{python_path}" "{sandbox_python_path}"')
 
             # Start server
             commands.append(f"{sandbox_python_path} -m http.server 8000")
 
-            self.sandbox.config.logon_command = 'cmd.exe /c "{}"'.format(" && ".join(commands))
+            self.sandbox.config.logon_command = 'cmd.exe /c "{}"'.format(
+                " && ".join(commands)
+            )
 
         def connect(self, timeout: int = 60) -> Tuple[str, int]:
             """Establish connection to sandbox"""
@@ -205,7 +225,7 @@ if IS_WINDOWS:
             try:
                 with socket.create_connection((address, port), timeout=3):
                     return True
-            except (socket.error, socket.timeout):
+            except socket.error, socket.timeout:
                 return False
 
     class SandboxEnvironment:
@@ -220,7 +240,9 @@ if IS_WINDOWS:
                 self._session.configure_sandbox()
                 self._connection = self._session.connect()
 
-        def run_executable(self, executable_args: List[str], **kwargs) -> subprocess.Popen:
+        def run_executable(
+            self, executable_args: List[str], **kwargs
+        ) -> subprocess.Popen:
             """Run an executable in the sandbox"""
             kwargs.setdefault("stdout", subprocess.PIPE)
             kwargs.setdefault("stderr", subprocess.PIPE)
@@ -269,7 +291,9 @@ if IS_WINDOWS:
             server_info_path.write_text(json.dumps(server_info))
 
             # Run server in background
-            await asyncio.get_event_loop().run_in_executor(None, self.server.serve_forever)
+            await asyncio.get_event_loop().run_in_executor(
+                None, self.server.serve_forever
+            )
 
         def stop(self):
             """Stop the communication server"""
@@ -302,7 +326,9 @@ if IS_WINDOWS:
 
             # Launch sandbox
             self._process = subprocess.Popen(
-                ["WindowsSandbox.exe", str(wsb_path)], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                ["WindowsSandbox.exe", str(wsb_path)],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
             )
 
         async def _cleanup(self):
@@ -326,7 +352,9 @@ elif IS_POSIX:
         try:
             os.nice(priority)
         except PermissionError:
-            print("Warning: Unable to set process priority. Running with default priority.")
+            print(
+                "Warning: Unable to set process priority. Running with default priority."
+            )
 
 
 # ------------------------------------------------------------------------------
@@ -344,7 +372,9 @@ class BaseModel:
         for field_name, expected_type in self.__annotations__.items():
             actual_value = getattr(self, field_name)
             if not isinstance(actual_value, expected_type):
-                raise TypeError(f"Expected {expected_type} for {field_name}, got {type(actual_value)}")
+                raise TypeError(
+                    f"Expected {expected_type} for {field_name}, got {type(actual_value)}"
+                )
             validator = getattr(self.__class__, f"validate_{field_name}", None)
             if validator:
                 validator(self, actual_value)
@@ -357,7 +387,9 @@ class BaseModel:
         return {name: getattr(self, name) for name in self.__annotations__}
 
     def __repr__(self):
-        attrs = ", ".join(f"{name}={getattr(self, name)!r}" for name in self.__annotations__)
+        attrs = ", ".join(
+            f"{name}={getattr(self, name)!r}" for name in self.__annotations__
+        )
         return f"{self.__class__.__name__}({attrs})"
 
     def __str__(self):
@@ -433,7 +465,9 @@ def create_model_from_file(file_path: pathlib.Path):
         return None, None
 
 
-def load_files_as_models(root_dir: pathlib.Path, file_extensions: List[str]) -> Dict[str, BaseModel]:
+def load_files_as_models(
+    root_dir: pathlib.Path, file_extensions: List[str]
+) -> Dict[str, BaseModel]:
     models = {}
     for file_path in root_dir.rglob("*"):
         if file_path.is_file() and file_path.suffix in file_extensions:
@@ -503,7 +537,9 @@ class CustomFormatter(logging.Formatter):
         "green": "\x1b[32;20m",
         "reset": "\x1b[0m",
     }
-    FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s (%(filename)s:%(lineno)d)"
+    FORMAT = (
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s (%(filename)s:%(lineno)d)"
+    )
     FORMATS = {
         logging.DEBUG: COLORS["grey"] + FORMAT + COLORS["reset"],
         logging.INFO: COLORS["green"] + FORMAT + COLORS["reset"],
@@ -609,7 +645,9 @@ class SecurityValidator(ast.NodeVisitor):
 
     def visit_Call(self, node):
         if isinstance(node.func, ast.Name):
-            if not self.security_context.access_policy.can_access(node.func.id, "execute"):
+            if not self.security_context.access_policy.can_access(
+                node.func.id, "execute"
+            ):
                 raise PermissionError(f"Access denied to function: {node.func.id}")
         self.generic_visit(node)
 
@@ -648,7 +686,9 @@ class RuntimeState:
         try:
             self.allowed_root = os.path.dirname(os.path.realpath(__file__))
             if not any(os.listdir(self.allowed_root)):
-                raise FileNotFoundError(f"Allowed root directory empty: {self.allowed_root}")
+                raise FileNotFoundError(
+                    f"Allowed root directory empty: {self.allowed_root}"
+                )
             logging.info(f"Allowed root directory found: {self.allowed_root}")
         except Exception as e:
             logging.error(f"Error initializing RuntimeState: {e}")
@@ -669,15 +709,22 @@ class RuntimeState:
             logging.warning(f"Failed to initialize runtime state: {e}")
             return None
 
-    async def run_command_async(self, command: str, shell: bool = False, timeout: int = 120):
+    async def run_command_async(
+        self, command: str, shell: bool = False, timeout: int = 120
+    ):
         """Run a system command asynchronously with timeout."""
         logging.info(f"Running command: {command}")
         split_command = shlex.split(command, posix=IS_POSIX)
         try:
             process = await asyncio.create_subprocess_exec(
-                *split_command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, shell=shell
+                *split_command,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+                shell=shell,
             )
-            stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=timeout)
+            stdout, stderr = await asyncio.wait_for(
+                process.communicate(), timeout=timeout
+            )
             return {
                 "return_code": process.returncode,
                 "output": stdout.decode() if stdout else "",
@@ -774,12 +821,23 @@ What's conserved across these transformations:
     Computational potential"""
 # Atom()(s) are a wrapper that can represent any Python object, including values, methods, functions, and classes.
 T = TypeVar("T", bound=any)  # T for TypeVar, V for ValueVar. Homoicons are T+V.
-V = TypeVar("V", bound=Union[int, float, str, bool, list, dict, tuple, set, object, Callable, type])
-C = TypeVar("C", bound=Callable[..., Any])  # callable 'T'/'V' first class function interface
-DataType = StrEnum("DataType", "INTEGER FLOAT STRING BOOLEAN NONE LIST TUPLE")  # 'T' vars (stdlib)
-AtomType = StrEnum("AtomType", "FUNCTION CLASS MODULE OBJECT")  # 'C' vars (homoiconic methods or classes)
+V = TypeVar(
+    "V",
+    bound=Union[int, float, str, bool, list, dict, tuple, set, object, Callable, type],
+)
+C = TypeVar(
+    "C", bound=Callable[..., Any]
+)  # callable 'T'/'V' first class function interface
+DataType = StrEnum(
+    "DataType", "INTEGER FLOAT STRING BOOLEAN NONE LIST TUPLE"
+)  # 'T' vars (stdlib)
+AtomType = StrEnum(
+    "AtomType", "FUNCTION CLASS MODULE OBJECT"
+)  # 'C' vars (homoiconic methods or classes)
 AccessLevel = StrEnum("AccessLevel", "READ WRITE EXECUTE ADMIN USER")
-QuantumState = StrEnum("QuantumState", ["SUPERPOSITION", "ENTANGLED", "COLLAPSED", "DECOHERENT"])
+QuantumState = StrEnum(
+    "QuantumState", ["SUPERPOSITION", "ENTANGLED", "COLLAPSED", "DECOHERENT"]
+)
 """py objects are implemented as C structures.
 typedef struct _object {
     Py_ssize_t ob_refcnt;
@@ -840,7 +898,9 @@ def __atom__(cls: Type[{T, V, C}]) -> Type[{T, V, C}]:
     def new_init(self, *args, **kwargs):
         original_init(self, *args, **kwargs)
         if not hasattr(self, "id"):
-            self.id = hashlib.sha256(self.__class__.__name__.encode("utf-8")).hexdigest()
+            self.id = hashlib.sha256(
+                self.__class__.__name__.encode("utf-8")
+            ).hexdigest()
 
     cls.__init__ = new_init
     return cls
@@ -958,10 +1018,14 @@ class Atom(Generic[T, V, C]):
 
     reflexivity: Callable[[T], bool] = lambda x: x == x
     symmetry: Callable[[T, T], bool] = lambda x, y: x == y
-    transitivity: Callable[[T, T, T], bool] = lambda x, y, z: (x == y and y == z)
-    transparency: Callable[[Callable[..., T], T, T], T] = lambda f, x, y: f(True, x, y) if x == y else None
+    transitivity: Callable[[T, T, T], bool] = lambda x, y, z: x == y and y == z
+    transparency: Callable[[Callable[..., T], T, T], T] = lambda f, x, y: (
+        f(True, x, y) if x == y else None
+    )
 
-    def process_attributes(self, mapping_description: Dict[str, Any], input_data: Dict[str, Any]) -> None:
+    def process_attributes(
+        self, mapping_description: Dict[str, Any], input_data: Dict[str, Any]
+    ) -> None:
         """
         Use the `mapper` function to process input data and map it to attributes.
 
@@ -1044,7 +1108,9 @@ class Atom(Generic[T, V, C]):
             await sub.receive_message(message, ttl - 1)
 
     async def receive_message(self, message: Any, ttl: int) -> None:
-        logging.info(f"Atom {self.id} processing received message: {message} with TTL {ttl}")
+        logging.info(
+            f"Atom {self.id} processing received message: {message} with TTL {ttl}"
+        )
         await self.send_message(message, ttl)
 
     def subscribe(self, atom: "Atom") -> None:
@@ -1174,7 +1240,9 @@ class QuantumRuntime(QuantumAtom[Any, Any, Any]):
         self.logger = logging.getLogger(__name__)
         self._establish_coherence()
 
-    async def create_quantum_atom(self, value: Any, atom_type: Union[DataType, AtomType]) -> QuantumAtom:
+    async def create_quantum_atom(
+        self, value: Any, atom_type: Union[DataType, AtomType]
+    ) -> QuantumAtom:
         """Create a new quantum atom in the runtime"""
         atom = QuantumAtom(value, atom_type)
         # Register atom with runtime
@@ -1189,7 +1257,9 @@ class QuantumRuntime(QuantumAtom[Any, Any, Any]):
             raise ValueError("Can only entangle atoms within the same runtime")
         await atom1.entangle(atom2)
 
-    async def execute_quantum_operation(self, atom: QuantumAtom, operation: Callable[[Any], Any]) -> Any:
+    async def execute_quantum_operation(
+        self, atom: QuantumAtom, operation: Callable[[Any], Any]
+    ) -> Any:
         """Execute quantum operation on an atom"""
         if atom not in self.children:
             raise ValueError("Can only execute operations on atoms in this runtime")
@@ -1221,7 +1291,9 @@ def main():
     security_context = SecurityContext(
         user_id=str(uuid.uuid4()),
         access_policy=AccessPolicy(
-            level=AccessLevel.READ, namespace_patterns=["*"], allowed_operations=["read"]
+            level=AccessLevel.READ,
+            namespace_patterns=["*"],
+            allowed_operations=["read"],
         ),
     )
 

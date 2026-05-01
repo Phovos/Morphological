@@ -1,3 +1,24 @@
+#!/usr/bin/env -S uv run
+from __future__ import annotations
+
+# /* script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "uv==*.*",
+# ]
+# */
+# Optional dependency handling (also add to '/* script..' comment, just above)
+#   "© 2026 `Phovos` (phovos@outlook.com)":
+#     - "Morphological Source Code: MSC&QSD"
+#     - https://gitlab.com/morphological/source/code
+#     - https://github.com/Morphological-Source-Code
+#     - https://reddit.com/r/morphological
+# © 2024-2026 https://github.com/Phovos/Morphological-Source-Code
+# © 2023-2026 https://github.com/MOONLAPSED/cognosis
+
+from typing import Dict, List, Optional, Callable, Set, Tuple, Sequence
+from enum import Enum
+import random
 """
 Holographic ByteWord Ontology Library (Revised)
 
@@ -10,10 +31,6 @@ Structure of an 8-bit ByteWord:
 - V: 3 bits (morphism selector)   - Part of low nibble (bits 3-1)
 - C: 1 bit (control/activity)    - LSB (bit 0)
 """
-
-from typing import Dict, List, Optional, Callable, Set, Tuple, Sequence
-from enum import Enum
-import random
 
 # --- Enums and Core Classes ---
 

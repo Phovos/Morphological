@@ -1,6 +1,29 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run
+from __future__ import annotations
+
+# /* script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "uv==*.*",
+# ]
+# */
+# Optional dependency handling (also add to '/* script..' comment, just above)
+#   "© 2026 `Phovos` (phovos@outlook.com)":
+#     - "Morphological Source Code: MSC&QSD"
+#     - https://gitlab.com/morphological/source/code
+#     - https://github.com/Morphological-Source-Code
+#     - https://reddit.com/r/morphological
 # © 2024-2026 https://github.com/Phovos/Morphological-Source-Code
 # © 2023-2026 https://github.com/MOONLAPSED/cognosis
+import hashlib
+import math
+import random
+from collections import deque
+from typing import Any, Callable, Generic, List, Optional, Protocol, Union, Dict
+from dataclasses import dataclass, field, asdict
+from collections.abc import Hashable
+import ast
+
 """
 Quantum Morphological Information Processing System
 
@@ -16,31 +39,8 @@ Key Concepts:
 - Merkle-like data structures
 """
 
-import hashlib
-import math
-import random
-from collections import deque
-from typing import (
-    Any,
-    Callable,
-    Generic,
-    List,
-    Optional,
-    Protocol,
-    TypeVar,
-    Union,
-    Dict,
-)
-from functools import wraps
-from dataclasses import dataclass, field, asdict
-from collections.abc import Hashable
-import ast
-
-
 
 # === Core Data Classes ===
-
-
 @dataclass(frozen=True, slots=True)
 class AtomicModel:
     """A base immutable model with slots for runtime efficiency."""

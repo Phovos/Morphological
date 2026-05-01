@@ -1,8 +1,24 @@
+#!/usr/bin/env -S uv run
+from __future__ import annotations
+
+# /* script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "uv==*.*",
+# ]
+# */
+# Optional dependency handling (also add to '/* script..' comment, just above)
+#   "© 2026 `Phovos` (phovos@outlook.com)":
+#     - "Morphological Source Code: MSC&QSD"
+#     - https://gitlab.com/morphological/source/code
+#     - https://github.com/Morphological-Source-Code
+#     - https://reddit.com/r/morphological
+# © 2024-2026 https://github.com/Phovos/Morphological-Source-Code
+# © 2023-2026 https://github.com/MOONLAPSED/cognosis
 from typing import Optional, Tuple
 from enum import Enum
 
 
-# © 2024-2025 Phovos https://github.com/Phovos/Morphological-Source-Code | CC ND && BSD-3 | SEE LICENSE
 class OrbitalLevel(Enum):
     S = 0  # 2 bits - inner shell
     P = 1  # 2 bits - middle shell
