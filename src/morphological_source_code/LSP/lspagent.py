@@ -30,9 +30,8 @@ Markdown Agent - Bridge between LSP actions and ontological computing
 Usage: md_agent.py {extract|inline|quantum_state|morphic_transform} [args...]
 """
 
-# Import your ontology classes (assuming they're available)
 try:
-    from your_ontology import (
+    from md_agent import (
         BYTE,
         QuantumState,
         HilbertSpace,

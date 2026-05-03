@@ -38,15 +38,23 @@ trigger = "inline"
 command = "python3 /path/to/md_agent.py inline"
 """
 
-# Import morphic classes
-from ...LSP import (
-    BYTE,
-    QuantumState,
-    HilbertSpace,
-    MorphicComplex,
-    least_significant_unit,
-    WordSize,
-)
+try:
+    from .md_agent import (
+        BYTE,
+        QuantumState,
+        HilbertSpace,
+        MorphicComplex,
+        least_significant_unit,
+        WordSize,
+    )
+
+    ONTOLOGY_AVAILABLE = True
+except ImportError:
+    ONTOLOGY_AVAILABLE = False
+    print(
+        "Warning: Ontology classes not available, running in basic mode",
+        file=sys.stderr,
+    )
 
 
 @dataclass
