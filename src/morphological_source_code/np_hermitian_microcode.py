@@ -9,6 +9,10 @@ from __future__ import annotations
 # ]
 # */
 # https://github.com/Moonlapsed/Morphological © 2023 by MOONLAPSED:MOONLAPSED@gmail.com BSD-3 & CC ND
+from dataclasses import dataclass, field
+from .baseModel import QuantumAtom
+import numpy as np
+
 """
 4-bit Hermitian micro-code for consumer ISAs
 """
@@ -21,7 +25,7 @@ try:
     from numpy.core._simd import simd
 
     _vec = simd["avx2"] if "avx2" in simd else simd["sse2"]
-except (ImportError, AttributeError):
+except ImportError, AttributeError:
     _vec = None
 
 
@@ -60,8 +64,6 @@ def born_rule(a: int, b: int) -> int:
 # ------------------------------------------------------------------
 # Quantum-aware Atom subclass
 # ------------------------------------------------------------------
-from dataclasses import dataclass, field
-from morphological_source_code.baseModel import QuantumAtom
 
 
 @dataclass
