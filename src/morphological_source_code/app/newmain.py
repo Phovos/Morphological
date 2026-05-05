@@ -875,6 +875,10 @@ class OrderParameter:
             self.broken_symmetries.remove(sym)
             self.preserved_symmetries.add(sym)
 
+# ============================================================================
+# QUANTUM OPERATOR ALGEBRA
+# ============================================================================
+
 
 class OperatorType(Enum):
     """Fundamental operation types in our computational 'universe', referring explicitly to the universal-set [], and given the null set (a 00000000 ByteWord) as 'glue' (insofar as sheafification, groups, topos etc). The 'universe' of runtime, the applied set, is strictly-bounded and inertia-local, no relativistic effects outside of the 'relativistic effects' of morphological derivation (or time-like integration)* with respect to the cross-product of two cartesian coordinates in super position; a 'Born Rule'-type ontological scaffolding."""
@@ -885,6 +889,58 @@ class OperatorType(Enum):
     OUTER = auto()  # Outer product (|ψ⟩⟨φ|)
     ADJOINT = auto()  # Hermitian adjoint (†)
     MEASUREMENT = auto()  # Quantum measurement (⟨M|ψ⟩)
+
+    SYMBOL_MAP: ClassVar[Dict['OperatorType', str]] = {
+        COMPOSITION: '>>',
+        TENSOR: '⊗',
+        DIRECT_SUM: '⊕',
+        OUTER: '|⟩⟨|',
+        ADJOINT: '†',
+        MEASUREMENT: 'M',
+    }
+
+    @property
+    def symbol(self) -> str:
+        return self.SYMBOL_MAP.get(self, str(self.value))
+
+    def as_tstring(self) -> str:
+        return f"{self.name} = {self.symbol}"
+
+class QuineOperator:
+    """Mapping from ByteWord states to themselves (linearized in C^256)"""
+
+    def __init__(self, mapping: Dict[int, int]):
+        self.mapping = mapping
+        self.N = 256
+
+    def build_matrix(self) -> list[list[complex]]:
+        """Column-major sparse representation (256x256)"""
+        M = [[0.0 + 0.0j] * self.N for _ in range(self.N)]
+        for i in range(self.N):
+            j = self.mapping.get(i, i)
+            M[j][i] = 1.0
+        return M
+
+    @staticmethod
+    def is_unitary(M: list[list[complex]], tol=1e-9) -> bool:
+        N = len(M)
+        for i in range(N):
+            for j in range(N):
+                s = sum(M[k][i].conjugate() * M[k][j] for k in range(N))
+                if i == j and abs(s - 1.0) > tol:
+                    return False
+                elif i != j and abs(s) > tol:
+                    return False
+        return True
+
+    @staticmethod
+    def is_hermitian(M: list[list[complex]], tol=1e-9) -> bool:
+        N = len(M)
+        for i in range(N):
+            for j in range(N):
+                if abs(M[i][j] - M[j][i].conjugate()) > tol:
+                    return False
+        return True
 
 # Pi with high precision
 PI = Decimal('3.1415926535897932384626433832795028841971693993751058209749445923')
@@ -1473,6 +1529,30 @@ class State:
     conservation: Conservation
     order_parameter: Optional[OrderParameter] = None  # Track symmetry breaking
 
+@dataclass
+class MemoryModel:
+    """Maps linear-virtual address space per the OS to Frames+Lifetimes+Arenas (linear allocator).."""
+
+    ptr_size: int = ctypes.sizeof(ctypes.c_void_p)
+    word_size: int = ctypes.sizeof(ctypes.c_size_t)
+    cache_line_size: int = 64
+    page_size: int = 4096
+
+    @classmethod
+    def get_system_info(cls) -> 'MemoryModel':
+        try:
+            with open(
+                '/sys/devices/system/cpu/cpu0/cache/index0/coherency_line_size'
+            ) as f:
+                cache_line_size = int(f.read().strip())
+        except (FileNotFoundError, ValueError):
+            cache_line_size = 64
+        return cls(
+            ptr_size=ctypes.sizeof(ctypes.c_void_p),
+            word_size=ctypes.sizeof(ctypes.c_size_t),
+            cache_line_size=cache_line_size,
+            page_size=cls.page_size,
+        )
 
 class MemoryState(StrEnum):
     QUANTUM = auto()  # Superposition state, uncommitted changes
@@ -1494,6 +1574,61 @@ class QuantumCell:  # complex embedding cell; 'measure theoretic' and so; analag
     commit_hash: Optional[str] = None
     data: Optional[array.array] = None
     metadata: Optional[Dict] = None
+class EmbeddingConfig:
+    def __init__(self,
+                 dimensions: int = 768,
+                 precision: str = 'float32',
+                 cache_path: str = 'runtime_cache.json'):
+        self.dimensions = dimensions
+        self.precision = precision
+        self.cache_path = cache_path
+
+    def get_format_char(self) -> str:
+        return {'float32': 'f', 'float64': 'd', 'int32': 'i'}.get(self.precision, 'f')
+
+
+@dataclass
+class Document:
+    content: str
+    embedding: Optional[List[float]] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    uuid: str = None
+
+    def __post_init__(self):
+        if self.uuid is None:
+            self.uuid = str(uuid.uuid4())
+
+
+class MerkleNode:
+    def __init__(self, data: Any, children: Optional[List['MerkleNode']] = None):
+        self.data = data
+        self.children: List[MerkleNode] = children or []
+        self.timestamp = datetime.now(timezone.utc).isoformat()
+        self.uuid = str(uuid.uuid4())
+        self.hash = self._calculate_hash()
+
+    def _calculate_hash(self) -> str:
+        hasher = hashlib.sha256()
+        hasher.update(json.dumps(self.data, sort_keys=True).encode())
+        for child in sorted(self.children, key=lambda c: c.hash):
+            hasher.update(child.hash.encode())
+        return hasher.hexdigest()
+
+    def add_child(self, child: 'MerkleNode'):
+        self.children.append(child)
+        self.hash = self._calculate_hash()
+
+    def __hash__(self):
+        return hash(self.hash)
+
+    def __eq__(self, other):
+        return isinstance(other, MerkleNode) and self.hash == other.hash
+
+
+class RuntimeState:
+    def __init__(self):
+        self.merkle_root: Optional[MerkleNode] = None
+        self.state_history: List[str] = []
 
 
 @dataclass
@@ -4547,3 +4682,419 @@ class QCell:
     commit_hash: Optional[str] = None
     data: Optional[array.array] = None
     metadata: Optional[Dict] = None
+
+class MorphicComplex:
+    """Represents a complex number with morphic properties.
+    Derivations/alternatives (irrational-attractor, state::logic bisector, the bifurcation basis?):
+    # self.mophology = morphism.morphology(strenum)
+    # NON_MARKOVIAN = math.log(2).as_integer_ratio()  # Information-theoretic entropy baseline
+    # MARKOVIAN = 1 / (math.exp(-1))  # Fermi-Dirac 'occupation probability'
+    # NON_MARKOVIAN = 1 / (1 - math.exp(-1))  # Bose-Einstein 'bosonic correlation'
+    # MARKOVIAN = (1 - 5 ** 0.5) / 2  # Inverse golden ratio (entropy-dominant)
+    # NON_MARKOVIAN = (1 + 5 ** 0.5) / 2  # Phi as self-organizing structure
+    # MARKOVIAN = 1 / (1 + math.exp(-1))  # Logistic
+    # MARKOVIAN triggers a lossless (bijective) mapping.
+    # NON_MARKOVIAN triggers a lossy (entropic) mapping with a "feedback term."
+    def evolve(state: int, morphic: Morphology) -> int:
+        if morphic == Morphology.MARKOVIAN:
+            return state ^ 0b1111  # XNOR-like forward evolution
+        elif morphic == Morphology.NON_MARKOVIAN:
+            return int(state * math.e % 256)  # Feedback-dominated evolution
+        return state"""
+    def __init__(self, real: float, imag: float):
+        self.real = real
+        self.imag = imag
+    def conjugate(self) -> 'MorphicComplex':
+        """Return the complex conjugate."""
+        return MorphicComplex(self.real, -self.imag)
+    def __add__(self, other: 'MorphicComplex') -> 'MorphicComplex':
+        return MorphicComplex(self.real + other.real, self.imag + other.imag)
+    def __sub__(self, other: 'MorphicComplex') -> 'MorphicComplex':
+        return MorphicComplex(self.real - other.real, self.imag - other.imag)
+    def __mul__(self, other: Union['MorphicComplex', float, int]) -> 'MorphicComplex':
+        if isinstance(other, (int, float)):
+            return MorphicComplex(self.real * other, self.imag * other)
+        return MorphicComplex(
+            self.real * other.real - self.imag * other.imag,
+            self.real * other.imag + self.imag * other.real
+        )
+    def __rmul__(self, other: Union[float, int]) -> 'MorphicComplex':
+        return self.__mul__(other)
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, MorphicComplex):
+            return False
+        return (abs(self.real - other.real) < 1e-10 and 
+                abs(self.imag - other.imag) < 1e-10)
+    def __hash__(self) -> int:
+        return hash((self.real, self.imag))
+    def __repr__(self) -> str:
+        if self.imag >= 0:
+            return f"{self.real} + {self.imag}i"
+        return f"{self.real} - {abs(self.imag)}i"
+class Matrix:
+    """Simple matrix implementation using standard Python"""
+    def __init__(self, data: List[List[Any]]):
+        if not data:
+            raise ValueError("Matrix data cannot be empty")
+        # Verify all rows have the same length
+        cols = len(data[0])
+        if any(len(row) != cols for row in data):
+            raise ValueError("All rows must have the same length")
+        self.data = data
+        self.rows = len(data)
+        self.cols = cols
+
+    def __getitem__(self, idx: Tuple[int, int]) -> Any:
+        i, j = idx
+        if not (0 <= i < self.rows and 0 <= j < self.cols):
+            raise IndexError(f"Matrix indices {i},{j} out of range")
+        return self.data[i][j]
+    def __setitem__(self, idx: Tuple[int, int], value: Any) -> None:
+        i, j = idx
+        if not (0 <= i < self.rows and 0 <= j < self.cols):
+            raise IndexError(f"Matrix indices {i},{j} out of range")
+        self.data[i][j] = value
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, Matrix):
+            return False
+        if self.rows != other.rows or self.cols != other.cols:
+            return False
+        return all(self.data[i][j] == other.data[i][j] 
+                  for i in range(self.rows) 
+                  for j in range(self.cols))
+    def __matmul__(self, other: Union['Matrix', List[Any]]) -> Union['Matrix', List[Any]]:
+        """Matrix multiplication operator @"""
+        if isinstance(other, list):
+            # Matrix @ vector
+            if len(other) != self.cols:
+                raise ValueError(f"Dimensions don't match for matrix-vector multiplication: "
+                                f"matrix cols={self.cols}, vector length={len(other)}")
+            return [sum(self.data[i][j] * other[j] for j in range(self.cols)) 
+                    for i in range(self.rows)]
+        else:
+            # Matrix @ Matrix
+            if self.cols != other.rows:
+                raise ValueError(f"Dimensions don't match for matrix multiplication: "
+                                f"first matrix cols={self.cols}, second matrix rows={other.rows}")
+            result = [[sum(self.data[i][k] * other.data[k][j] 
+                          for k in range(self.cols))
+                      for j in range(other.cols)]
+                      for i in range(self.rows)]
+            return Matrix(result)
+    def trace(self) -> Any:
+        """Calculate the trace of the matrix"""
+        if self.rows != self.cols:
+            raise ValueError("Trace is only defined for square matrices")
+        return sum(self.data[i][i] for i in range(self.rows))
+    def transpose(self) -> 'Matrix':
+        """Return the transpose of this matrix"""
+        return Matrix([[self.data[j][i] for j in range(self.rows)] 
+                      for i in range(self.cols)])
+    @staticmethod
+    def zeros(rows: int, cols: int) -> 'Matrix':
+        """Create a matrix of zeros"""
+        if rows <= 0 or cols <= 0:
+            raise ValueError("Matrix dimensions must be positive")
+        return Matrix([[0 for _ in range(cols)] for _ in range(rows)])
+    @staticmethod
+    def identity(n: int) -> 'Matrix':
+        """Create an n×n identity matrix"""
+        if n <= 0:
+            raise ValueError("Matrix dimension must be positive")
+        return Matrix([[1 if i == j else 0 for j in range(n)] for i in range(n)])
+    def __repr__(self) -> str:
+        return "\n".join([str(row) for row in self.data])
+class HilbertSpace:
+    """
+    Represents a Hilbert space that uses MorphicComplex numbers for coordinates.
+    """
+    def __init__(self, dimension: int = 3):
+        if dimension <= 0:
+            raise ValueError("Hilbert space dimension must be positive")
+        self.dimension = dimension
+        self.basis_vectors = [self._create_basis_vector(i) for i in range(dimension)]
+    def _create_basis_vector(self, index: int) -> List[MorphicComplex]:
+        """Create a basis vector with a 1 at the specified index."""
+        vector = [MorphicComplex(0, 0) for _ in range(self.dimension)]
+        vector[index] = MorphicComplex(1, 0)
+        return vector
+    def inner_product(self, vec1: List[MorphicComplex], vec2: List[MorphicComplex]) -> MorphicComplex:
+        """
+        Compute the inner product of two vectors in the Hilbert space.
+        <u, v> = ∑ᵢ (u*ᵢ × vᵢ) where u*ᵢ is the complex conjugate
+        """
+        if len(vec1) != len(vec2) or len(vec1) != self.dimension:
+            raise ValueError("Vectors must have the same dimension as the space")
+        result = MorphicComplex(0, 0)
+        for i in range(self.dimension):
+            # For each component, compute u*ᵢ × vᵢ
+            conj_u = vec1[i].conjugate()
+            result = result + (conj_u * vec2[i])
+        return result
+    def norm(self, vector: List[MorphicComplex]) -> float:
+        """Compute the norm (magnitude) of a vector."""
+        inner = self.inner_product(vector, vector)
+        return math.sqrt(inner.real)  # Inner product with self should be real
+    def normalize(self, vector: List[MorphicComplex]) -> List[MorphicComplex]:
+        """Return a normalized copy of the vector."""
+        norm_val = self.norm(vector)
+        if abs(norm_val) < 1e-10:
+            raise ValueError("Cannot normalize zero vector")
+        return [MorphicComplex(c.real/norm_val, c.imag/norm_val) for c in vector]
+    def is_orthogonal(self, vec1: List[MorphicComplex], vec2: List[MorphicComplex]) -> bool:
+        """Check if two vectors are orthogonal."""
+        inner = self.inner_product(vec1, vec2)
+        return abs(inner.real) < 1e-10 and abs(inner.imag) < 1e-10
+    def project(self, vector: List[MorphicComplex], subspace_basis: List[List[MorphicComplex]]) -> List[MorphicComplex]:
+        """Project a vector onto a subspace defined by a basis."""
+        projection = [MorphicComplex(0, 0) for _ in range(self.dimension)]
+        for basis_vec in subspace_basis:
+            # Compute <v, basis> / <basis, basis>
+            inner_v_basis = self.inner_product(vector, basis_vec)
+            inner_basis_basis = self.inner_product(basis_vec, basis_vec).real
+            if abs(inner_basis_basis) < 1e-10:
+                raise ValueError("Basis vector must not be zero")
+            # Compute the coefficient
+            coeff = MorphicComplex(inner_v_basis.real / inner_basis_basis, 
+                                  inner_v_basis.imag / inner_basis_basis)
+            # Add the contribution of this basis vector to the projection
+            for i in range(self.dimension):
+                projection[i] = projection[i] + (basis_vec[i] * coeff)
+        return projection
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, HilbertSpace):
+            return False
+        return self.dimension == other.dimension
+
+# ============================================================================
+# MEMORY VECTOR (Lattice Coordinates)
+# ============================================================================
+
+
+@dataclass
+class MemoryVector:
+    """Lattice coordinate for ByteWords in Hilbert space"""
+
+    coords: List[int]
+    weights: Optional[List[float]] = None
+
+    def copy(self) -> 'MemoryVector':
+        return MemoryVector(
+            self.coords.copy(), None if self.weights is None else self.weights.copy()
+        )
+
+    def as_ket(self) -> str:
+        """Dirac notation"""
+        hex_coords = ','.join(f"0x{c:02x}" for c in self.coords)
+        if self.weights:
+            w_str = ','.join(f"{w:.3f}" for w in self.weights)
+            return f"|ψ⟩ = [{hex_coords}] @ [{w_str}]"
+        return f"|ψ⟩ = [{hex_coords}]"
+
+    def to_bitvector(self, width=8) -> List[int]:
+        out = []
+        for b in self.coords:
+            for i in range(width):
+                out.append((b >> i) & 1)
+        return out
+
+    def as_integer(self) -> int:
+        val = 0
+        for i, b in enumerate(self.coords):
+            val |= (b & 0xFF) << (8 * i)
+        return val
+
+    @classmethod
+    def from_integer(cls, v: int, nbytes: int):
+        coords = [(v >> (8 * i)) & 0xFF for i in range(nbytes)]
+        return cls(coords)
+
+    def parity(self) -> int:
+        """Conserved quantity"""
+        return sum(b.bit_count() for b in self.coords) % 2
+
+    def to_bytewords(self) -> List[ByteWord]:
+        """Convert memory vector to ByteWords"""
+        return [ByteWord(c) for c in self.coords]
+
+
+# ============================================================================
+# HERMITIAN OPERATORS
+# ============================================================================
+
+
+class OperatorBase(Protocol[O_co]):
+    """Protocol for hermitian operators"""
+
+    symbol: str
+
+    def action_signature(self) -> str:
+        return f"{self.symbol}: MemoryVector -> MemoryVector"
+
+    def apply(self, state: MemoryVector) -> MemoryVector: ...
+    def conserved_quantity(self) -> Optional[str]: ...
+
+
+class XORMask:
+    """Involutory hermitian operator (X² = I)"""
+
+    symbol = 'XOR'
+
+    def __init__(self, mask: Sequence[int]):
+        self.mask = list(mask)
+
+    def transformation(self) -> str:
+        mask_hex = ','.join(f"0x{m:02x}" for m in self.mask)
+        return f"XOR[{mask_hex}]: |ψ⟩ → |ψ ⊕ mask⟩"
+
+    def apply(self, state: MemoryVector) -> MemoryVector:
+        mask = self.mask
+        coords = state.coords
+        if len(mask) != len(coords):
+            mask = (list(mask) * ((len(coords) + len(mask) - 1) // len(mask)))[
+                : len(coords)
+            ]
+        return MemoryVector([x ^ y for x, y in zip(coords, mask)])
+
+    def is_involutory(self) -> bool:
+        return True
+
+    def conserved_quantity(self) -> Optional[str]:
+        total_pop = sum(m.bit_count() for m in self.mask)
+        return 'parity' if total_pop % 2 == 0 else None
+
+
+class Measurement:
+    """Projective measurement operator"""
+
+    symbol = 'MEASURE'
+
+    def __init__(self, projector_mask: Sequence[int]):
+        self.pmask = list(projector_mask)
+
+    def projection(self) -> str:
+        mask_hex = ','.join(f"0x{m:02x}" for m in self.pmask)
+        return f"M[{mask_hex}]: |ψ⟩ → P|ψ⟩ with probability |⟨ψ|P|ψ⟩|²"
+
+    def apply(self, state: MemoryVector) -> MemoryVector:
+        coords = state.coords.copy()
+        if len(self.pmask) < len(coords):
+            pm = (
+                self.pmask * ((len(coords) + len(self.pmask) - 1) // len(self.pmask))
+            )[: len(coords)]
+        else:
+            pm = self.pmask[: len(coords)]
+        coords = [c & m for c, m in zip(coords, pm)]
+        bits_total = sum(b.bit_count() for b in state.coords)
+        bits_kept = sum(b.bit_count() for b in coords)
+        prob = bits_kept / bits_total if bits_total > 0 else 0.0
+        return MemoryVector(coords, weights=[prob])
+
+
+# ============================================================================
+# CANTOR ALLOCATOR (Rational Path Measure)
+# ============================================================================
+
+
+@dataclass
+class CantorNode:
+    """Node in measure-preserving binary tree"""
+
+    path_bits: int
+    depth: int
+    measure: Fraction
+    parent: Optional[CantorNode] = None
+
+    def fork(self) -> Tuple[CantorNode, CantorNode]:
+        depth = self.depth + 1
+        left_bits = (self.path_bits << 1) | 0
+        right_bits = (self.path_bits << 1) | 1
+        m = self.measure / 2
+        left = CantorNode(left_bits, depth, m, parent=self)
+        right = CantorNode(right_bits, depth, m, parent=self)
+        return left, right
+
+    def to_binary_index(self) -> int:
+        return self.path_bits
+
+    def as_tstring(self) -> str:
+        return f"Node(depth={self.depth}, idx=0x{self.path_bits:x}, μ={self.measure})"
+
+    def __repr__(self) -> str:
+        return self.as_tstring()
+
+
+# ============================================================================
+# SQL SPINOR BOUNDARY (Persistence)
+# ============================================================================
+
+
+def init_sqlite(conn: sqlite3.Connection):
+    """Initialize spinor boundary database schema"""
+    conn.execute("""
+    CREATE TABLE IF NOT EXISTS byteword_artifact (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        cantor_path TEXT NOT NULL,
+        raw INTEGER NOT NULL,
+        C INTEGER NOT NULL,
+        V INTEGER NOT NULL,
+        T INTEGER NOT NULL,
+        w1 INTEGER NOT NULL,
+        w2 INTEGER NOT NULL,
+        measure_num INTEGER NOT NULL,
+        measure_den INTEGER NOT NULL,
+        value_blob BLOB,
+        ref_addr TEXT,
+        code_hash TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    """)
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_path ON byteword_artifact(cantor_path);"
+    )
+    conn.commit()
+
+
+def persist_byteword(
+    conn: sqlite3.Connection,
+    node: CantorNode,
+    bw: ByteWord,
+    value_blob: Optional[bytes] = None,
+    ref_addr: Optional[str] = None,
+    code_hash: Optional[str] = None,
+):
+    """Persist ByteWord + Cantor measure into SQL"""
+    cur = conn.cursor()
+    cur.execute(
+        """
+        INSERT INTO byteword_artifact
+        (cantor_path, raw, C, V, T, w1, w2, measure_num, measure_den, value_blob, ref_addr, code_hash)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            f"{node.depth}:{node.path_bits:x}",
+            bw.raw,
+            bw.C,
+            bw.V,
+            bw.T,
+            bw.w1,
+            bw.w2,
+            node.measure.numerator,
+            node.measure.denominator,
+            value_blob,
+            ref_addr,
+            code_hash,
+        ),
+    )
+    conn.commit()
+
+
+def rehydrate_row(row: sqlite3.Row) -> Tuple[CantorNode, ByteWord]:
+    """Reconstruct CantorNode and ByteWord from SQL row"""
+    parts = row['cantor_path'].split(':')
+    depth = int(parts[0])
+    bits = int(parts[1], 16)
+    mu = Fraction(row['measure_num'], row['measure_den'])
+    node = CantorNode(bits, depth, mu)
+    bw = ByteWord(row['raw'])
+    return node, bw
