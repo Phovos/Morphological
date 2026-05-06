@@ -60,35 +60,6 @@ logger = logging.getLogger(__name__)
 IS_WINDOWS = os.name == 'nt'
 IS_POSIX = os.name == 'posix'
 
-_F_ = TypeVar(
-    "F", bound=any
-)  # equiv to the function/combinator f (that is being computed); not VOID, identity; idempotent wrt 'a runtime'
-
-
-class PlatformFactory:
-    """Factory class to create platform-specific instances."""
-
-    @staticmethod
-    def get_platform() -> str:
-        """Detect and return the current platform as a string."""
-        if IS_WINDOWS:
-            return "windows"
-        elif IS_POSIX:
-            return "posix"
-        else:
-            raise NotImplementedError("Unsupported platform")
-
-    @staticmethod
-    def create_platform_instance() -> 'PlatformInterface':
-        """Create and return a platform-specific instance."""
-        platform = PlatformFactory.get_platform()
-        if platform == "windows":
-            return WindowsPlatform()
-        elif platform == "posix":
-            return LinuxPlatform()
-        else:
-            raise NotImplementedError(f"Unsupported platform: {platform}")
-
 
 # Platform-specific file-lock helpers for header protection when no semaphores are shared.
 if os.name == "posix":
@@ -112,440 +83,13 @@ else:  # windows
             pass
 
 
-class PlatformInterface:
-    """Abstract base class for platform-specific implementations."""
-
-    def load_c_library(self) -> Optional[ctypes.CDLL]:
-        """Load and return the platform-specific C library."""
-        raise NotImplementedError("Subclasses must implement this method")
-
-    def get_c_library_symbol(self, symbol_name: str) -> Optional[ctypes.CFUNCTYPE]:
-        """Get and return the platform-specific C library symbol."""
-        raise NotImplementedError("Subclasses must implement this method")
-
-
-class WindowsPlatform(PlatformInterface):
-    """Windows-specific platform implementation."""
-
-    def load_c_library(self) -> Optional[ctypes.CDLL]:
-        """Load the Windows C runtime library."""
-        try:
-            libc = ctypes.CDLL("msvcrt.dll")
-            libc.printf(b"Hello from C library on Windows\n")
-            return libc
-        except OSError as e:
-            print("Error loading C library on Windows:", e)
-            return None
-
-
-class LinuxPlatform(PlatformInterface):
-    """Linux-specific platform implementation."""
-
-    def load_c_library(self) -> Optional[ctypes.CDLL]:
-        """Load the Linux C library."""
-        try:
-            libc = ctypes.CDLL("libc.so.6")
-            libc.printf(b"Hello from C library on POSIX\n")
-            return libc
-        except OSError as e:
-            print("Error loading C library on Linux:", e)
-            return None
-
-
-class SocketWrapper:
-    def __init__(self, sock):
-        if not sock:
-            raise ValueError("Socket cannot be None")
-        self.sock = sock
-
-    def fileno(self):
-        return self.sock.fileno()
-
-    def send(self, data):
-        return self.sock.send(data)
-
-    def recv(self, size):
-        return self.sock.recv(size)
-
-    def accept(self):
-        client, addr = self.sock.accept()
-        return SocketWrapper(client), addr
-
-
-def nonblocking_read(sock, chunk_size=8192):
-    if not isinstance(sock, SocketWrapper):
-        sock = SocketWrapper(sock)
-    while True:
-        try:
-            ready = select.select([sock], [], [], 0.1)[0]
-            if ready:
-                data = sock.recv(chunk_size)
-                if not data:
-                    raise ConnectionLost()
-                return data
-            yield None
-        except socket.error:
-            raise ConnectionLost()
-
-
-def nonblocking_write(sock, data):
-    if not isinstance(sock, SocketWrapper):
-        sock = SocketWrapper(sock)
-    while data:
-        try:
-            ready = select.select([], [sock], [], 0.1)[1]
-            if ready:
-                sent = sock.send(data)
-                data = data[sent:]
-            yield None
-        except socket.error:
-            raise ConnectionLost()
-
-
-def nonblocking_accept(sock):
-    if not isinstance(sock, SocketWrapper):
-        sock = SocketWrapper(sock)
-    while True:
-        try:
-            ready = select.select([sock], [], [], 0.1)[0]
-            if ready:
-                client_sock, addr = sock.accept()
-                yield client_sock
-                return  # Properly terminate the generator
-            yield None
-        except socket.error:
-            raise ConnectionLost()
-
-
-def listening_socket(host, port):
-    # Create dual-stack socket that works for both IPv4 and IPv6
-    sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
-    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    # Enable dual-stack socket
-    sock.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
-    sock.bind((host, port, 0, 0))  # The zeros are for flow info and scope id
-    sock.listen(5)
-    sock.setblocking(False)
-    return SocketWrapper(sock)
-
-
-class ConnectionLost(Exception):
-    pass
-
-
-class Trampoline:
-    """Manage communications between coroutines"""
-
-    running = False
-
-    def __init__(self):
-        self.queue = collections.deque()
-
-    def add(self, coroutine):
-        """Request that a coroutine be executed"""
-        self.schedule(coroutine)
-
-    def run(self):
-        result = None
-        self.running = True
-        try:
-            while self.running:  # Remove the 'and self.queue' condition
-                if self.queue:
-                    func = self.queue.popleft()
-                    result = func()
-                else:
-                    # Small sleep to prevent CPU spinning
-                    time.sleep(0.01)
-            return result
-        finally:
-            self.running = False
-
-    def stop(self):
-        self.running = False
-
-    def schedule(self, coroutine, stack=(), val=None, *exc):
-        def resume():
-            value = val
-            try:
-                if exc:
-                    value = coroutine.throw(value, *exc)
-                else:
-                    value = coroutine.send(value)
-            except:
-                if stack:
-                    # send the error back to the "caller"
-                    self.schedule(stack[0], stack[1], *sys.exc_info())
-                else:
-                    # Nothing left in this pseudothread to
-                    # handle it, let it propagate to the
-                    # run loop
-                    raise
-
-            if isinstance(value, types.GeneratorType):
-                # Yielded to a specific coroutine, push the
-                # current one on the stack, and call the new
-                # one with no args
-                self.schedule(value, (coroutine, stack))
-
-            elif stack:
-                # Yielded a result, pop the stack and send the
-                # value to the caller
-                self.schedule(stack[0], stack[1], value)
-
-            # else: this pseudothread has ended
-
-        self.queue.append(resume)
-
-
-def echo_handler(sock):
-    # Ensure socket is valid before starting
-    if sock is None:
-        raise ValueError("Socket must be initialized")
-    wrapped_sock = SocketWrapper(sock)
-
-    while True:
-        try:
-            data = yield nonblocking_read(wrapped_sock)
-            yield nonblocking_write(wrapped_sock, data)
-        except ConnectionLost:
-            break
-
-
-def listen_on(trampoline, sock, handler):
-    if sock is None:
-        raise ValueError("Listening socket must be initialized")
-    wrapped_sock = SocketWrapper(sock)
-
-    while True:
-        try:
-            client_sock = yield from nonblocking_accept(wrapped_sock)
-            if client_sock:
-                handler_coro = handler(client_sock)
-                trampoline.add(handler_coro)
-        except ConnectionLost:
-            break
-
-
-def is_port_available(port: int) -> bool:
-    """Check if a given port is available."""
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-        result = sock.connect_ex(('127.0.0.1', port))
-        return result != 0  # non-zero means the port is available
-
-
-def find_available_port(start_port: int) -> int:
-    """Find an available port starting from {{start_port}}."""
-    port = start_port
-    while not is_port_available(port):
-        logger.info(f"Port {port} is occupied. Trying next port.")
-        port += 1
-    logger.info(f"Found available port: {port}")
-    return port
-
-
-@(lambda f: f())
-def FireFirst() -> None:
-    """Function that fires on import.
-    Checks for an available port starting at 8420 and logs the result.
-    """
-    PORT = 8420
-    try:
-        # Create a scheduler to manage all our coroutines
-        t = Trampoline()
-
-        # Initialize server socket with explicit validation
-        server_socket = listening_socket("localhost", 8888)
-        if not server_socket:
-            raise ValueError("Failed to create server socket")
-
-        # Create server coroutine with validated socket
-        server = listen_on(t, server_socket, echo_handler)
-
-        # Add the coroutine to the scheduler
-        t.add(server)
-
-        # Run the event loop
-        t.run()
-    except KeyboardInterrupt:
-        print("\nShutting down server...")
-    except Exception as e:
-        print(f"Error: {e}")
-    finally:
-        if 'server_socket' in locals():
-            server_socket.sock.close()
-
-        try:
-            available_port = find_available_port(PORT)
-            logger.info(f"Using port: {available_port}")
-            plat = PlatformFactory.create_platform_instance()
-            if plat is not None:
-                logger.info(f"Platform: {plat.__class__.__name__}")
-                libc = plat.load_c_library()
-                if libc is not None:
-                    logger.info("C library loaded successfully.")
-                    libc.printf(
-                        b"Hello from C library on %s\n"
-                        % plat.__class__.__name__.encode()
-                    )
-                else:
-                    logger.info("Failed to load C library.")
-            print("FireFirst executed!")
-        except Exception as e:
-            logger.error(f"An error occurred in FireFirst: {e}")
-        finally:
-            pass
-
-
-def hash_state(state: Any) -> int:
-    """
-    Creates a hashable representation of any state object.
-
-    Args:
-        state: Any object to be hashed
-
-    Returns:
-        An integer hash value
-    """
-    if isinstance(state, (int, float, bool, str, bytes)):
-        return hash(state)
-    elif isinstance(state, dict):
-        # Sort keys for consistent hashing
-        items = sorted(state.items(), key=lambda x: str(x[0]))
-        return hash(tuple((str(k), hash_state(v)) for k, v in items))
-    elif isinstance(state, (list, tuple, set)):
-        return hash(tuple(hash_state(item) for item in state))
-    else:
-        # Fallback for custom objects
-        try:
-            return hash(state)
-        except TypeError:
-            # If object is unhashable, use its string representation
-            return hash(str(state))
-
-
-# TODO: memo+hash same class?
-StateHash = Union[str, bytes, int, dict, Tuple, Hashable]
-# LRU cache with size limit to prevent memory issues
-_lsu_cache: Dict[Tuple[StateHash, int], Any] = {}  # type: ignore
-MaxCache = 10_000  # Hard-cap for now
-
-
-class Axis(Enum):
-    X = 'x'
-    Y = 'y'
-    Z = 'z'
-
-
-def memoize(func: Callable) -> Callable:
-    """
-    Caching decorator using LRU cache with unlimited size.
-    """
-    return lru_cache(maxsize=None)(func)
-
-
-def displayTop(snapshot, key_type: str = 'lineno', limit: int = 3):
-    """
-    Display top memory-consuming lines.
-    """
-    tracefilter = (
-        "<frozen importlib._bootstrap>",
-        "<frozen importlib._bootstrap_external>",
-    )
-    filters = [tracemalloc.Filter(False, item) for item in tracefilter]
-    filtered_snapshot = snapshot.filter_traces(filters)
-    topStats = filtered_snapshot.statistics(key_type)
-    result = [f"Top {limit} lines:"]
-    for index, stat in enumerate(topStats[:limit], 1):
-        frame = stat.traceback[0]
-        result.append(
-            f"#{index}: {frame.filename}:{frame.lineno}: {stat.size / 1024:.1f} KiB"
-        )
-        line = linecache.getline(frame.filename, frame.lineno).strip()
-        if line:
-            result.append(f"    {line}")
-    # Show the total size and count of other items
-    other = topStats[limit:]
-    if other:
-        size = sum(stat.size for stat in other)
-        result.append(f"{len(other)} other: {size / 1024:.1f} KiB")
-    total = sum(stat.size for stat in topStats)
-    result.append(f"Total allocated size: {total / 1024:.1f} KiB")
-    logger.info("\n".join(result))
-
-
-@contextmanager
-def memoryProfiling(active: bool = True):
-    """
-    Context manager for memory profiling using tracemalloc.
-    Captures allocations made within the context block.
-    """
-    if active:
-        tracemalloc.start()
-        try:
-            yield
-        finally:
-            snapshot = tracemalloc.take_snapshot()
-            tracemalloc.stop()
-            displayTop(snapshot)
-    else:
-        yield None
-
-
-def timeFunc(func: Callable) -> Callable:
-    """
-    Time execution of a function.
-    """
-
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        start_time = time.time()
-        result = func(*args, **kwargs)
-        end_time = time.time()
-        elapsed_time = end_time - start_time
-        logger.info(
-            f"Function {func.__name__} took {elapsed_time:.4f} seconds to execute."
-        )
-        return result
-
-    return wrapper
-
-
-def log(level=logging.INFO):
-    def decorator(func: Callable):
-        @wraps(func)
-        async def async_wrapper(*args, **kwargs):
-            logger.log(
-                level, f"Executing {func.__name__} with args: {args}, kwargs: {kwargs}"
-            )
-            try:
-                result = await func(*args, **kwargs)
-                logger.log(level, f"Completed {func.__name__} with result: {result}")
-                return result
-            except Exception as e:
-                logger.exception(f"Error in {func.__name__}: {str(e)}")
-                raise
-
-        @wraps(func)
-        def sync_wrapper(*args, **kwargs):
-            logger.log(
-                level, f"Executing {func.__name__} with args: {args}, kwargs: {kwargs}"
-            )
-            try:
-                result = func(*args, **kwargs)
-                logger.log(level, f"Completed {func.__name__} with result: {result}")
-                return result
-            except Exception as e:
-                logger.exception(f"Error in {func.__name__}: {str(e)}")
-                raise
-
-        return async_wrapper if asyncio.iscoroutinefunction(func) else sync_wrapper
-
-    return decorator
-
-
 # =================
 # CORE MSC TYPES
 # =================
+_F_ = TypeVar(
+    "F", bound=any
+)  # equiv to the function/combinator f (that is being computed); not VOID, identity; idempotent wrt 'a runtime'
+
 class ExecutionMode(IntEnum):
     """Runtime architecture selection"""
 
@@ -765,27 +309,6 @@ class Morphology(enum.Enum):
         _lsu_cache[cache_key] = result
         return result
 
-class MorphicRule:
-    """
-    Rules that map structural transformations in code morphologies.
-    """
-
-    def __init__(self, symmetry: str, conservation: str, lhs: Any, rhs: List[Any]):
-        self.symmetry = symmetry  # e.g., "Translation", "Rotation", "Phase"
-        self.conservation = (
-            conservation  # e.g., "Information", "Coherence", "Behavioral"
-        )
-        self.lhs = lhs  # Left-hand side element (morphological pattern)
-        self.rhs = rhs  # Right-hand side after transformation
-
-    def apply(self, input_seq: List[Any]) -> List[Any]:
-        """
-        Applies the morphological transformation to an input sequence.
-        """
-        if self.lhs in input_seq:
-            idx = input_seq.index(self.lhs)
-            return input_seq[:idx] + [elem for elem in self.rhs] + input_seq[idx + 1 :]
-        return input_seq
 
 
 """Core Operators:
@@ -853,6 +376,25 @@ class Symmetry(Protocol[T, V, C]):
     def preserve_behavior(self, computation: C) -> C:
         """Computation-level behavior preservation"""
         ...
+def quantum_extract(state, word_size, extraction_strategy="entropy"):
+    """
+    Extract bits with cognitive awareness of extraction method
+    Args:
+        state: Input state (str, int, bytes)
+        word_size: Desired word size
+        extraction_strategy: 'entropy', 'locality', 'coherence'
+    """
+    strategies = {
+        "entropy": lambda s: hashlib.sha256(str(s).encode()).digest()[-1],
+        "locality": lambda s: (hash(s) & 0xFF) ^ word_size,
+        "coherence": lambda s: sum(bin(ord(c)).count("1") for c in str(s)) % 256,
+    }
+    if word_size >= 3:
+        # Use cryptographic hash for larger word sizes
+        if isinstance(state, (str, bytes)):
+            return hashlib.sha256(state.encode() if isinstance(state, str) else state).digest()[-1]
+        return hash(state) & 0xFF  # Fallback hash strategy
+    return strategies.get(extraction_strategy, strategies["entropy"])(state)
 
 
 @dataclass
@@ -1438,6 +980,227 @@ class OrnamentStack:
         for ornament in self._ornaments:
             combined[ornament.name] = ornament.metadata
         return combined
+"""
+===============================================================================
+BYTEWORD MICROCANONICAL ENSEMBLE: A Morphological Source Code Artifact
+===============================================================================
+ARCHITECTURAL PRELUDE
+===============================================================================
+
+Quinic Statistical Dynamics Type System
+
+The framework establishes a tripartite quantum field theoretical type system that 
+enables recursive thermodynamic computing:
+
+1. Type Structure (T) - Field Theoretic Layer:
+   - Runtime field operators as type constructors
+   - Fock space representations of type constraints
+   - Creation/annihilation operators for type transitions
+   Properties:
+   - Intensive: Runtime coherence length, type density
+   - Extensive: Total type space, aggregate type relationships
+
+2. Value Space (V) - Statistical Ensemble Layer:
+   - Quantum statistical distributions of runtime states
+   - Entanglement preservation of value relationships
+   - Coherent domains of value clusters
+   Properties:
+   - Intensive: Information density, state entropy density
+   - Extensive: Total information content, system-wide entropy
+
+3. Computation Space (C) - Dynamic Process Layer:
+   - Quinic propagation operations
+   - Thermodynamic coupling mechanisms
+   - Distributed state resolution
+   Properties:
+   - Intensive: Computational temperature
+   - Extensive: Net computational work
+
+Relationships:
+- T → V: Field operators collapse to statistical ensembles
+- V → C: Statistical states enable quinic operations
+- C → T: Dynamic processes modify field structure
+
+This system enables:
+1. Micro Level: Individual runtime quantum operations
+2. Meso Level: Coherent domains of entangled runtimes
+3. Macro Level: Emergent computational thermodynamics
+
+The Atom() wrapper serves as a quinic runtime instance, capable of:
+- Self-observation through type reflection
+- State superposition in value space
+- Thermodynamic interactions via computation space
+
+Noetherian Symmetries in Second-Quantized QSD
+
+The second quantization of runtime configuration space establishes fundamental 
+symmetries that correspond to conserved computational quantities:
+
+1. Translation Symmetry in Type Space (T):
+   - Conserves computational momentum
+   - Maintains type identity across runtime translations
+   - Preserves boundary conditions during quinic operations
+   
+2. Rotation Symmetry in Value Space (V):
+   - Conserves computational angular momentum
+   - Preserves value relationships during state evolution
+   - Maintains statistical ensemble invariants
+   
+3. Phase Symmetry in Computation Space (C):
+   - Conserves computational charge
+   - Preserves behavioral consistency during transformations
+   - Maintains coherence in distributed operations
+
+Each symmetry manifests in the QSD field as:
+- Local symmetries: Within individual runtime instances
+- Global symmetries: Across the entire computational ensemble
+- Gauge symmetries: In the interaction between runtimes
+Conservation Laws:
+1. Information Conservation: From translational symmetry
+2. Coherence Conservation: From rotational symmetry
+3. Behavioral Conservation: From phase symmetry
+
+These Noetherian invariants ensure that:
+- Quinic operations preserve essential runtime properties
+- Statistical ensembles maintain their collective behavior
+- Thermodynamic interactions respect conservation principles
+
+### The Shape of Information
+
+Information, it seems, is not just a string of 0s and 1s. It's a morphological substrate that evolves within the constraints of time, space, and energy. In the same way that language molds our cognition, information molds our universe. It's the invisible hand shaping the foundations of reality, computation, and emergence. A continuous process of becoming, where each transition is not deterministic but probabilistic, tied to the very nature of quantum reality itself.
+
+### Probabalistic statistical mechanics, and the thermodynamics of information
+
+#### Quantum Informatic Foundations
+
+    Information is not just an abstraction; it is a fundamental physical phenomenon intertwined with the fabric of reality itself. It shapes the emergence of complexity, language, and cognition.
+
+In the grand landscape of quantum mechanics and computation, the N/P junction serves as a quantum binary ontology. It's not just a computational model; it represents the observable aspect of quantum informatics, where Planck-scale phenomena create perturbative states in Hilbert Space. Observing these phenomena is akin to negotiating quantum states via self-adjoint operators.
+Morphology of Information
+
+    Information and inertia form an intricate "shape" within the cosmos, an encoded structure existing beyond our 3+1D spacetime.
+
+The "singularity" isn't merely a technological concept; it represents the continuous process of state transformation, where observation isn't just the result of an event, but part of a dynamic, ongoing negotiation of physical states.
+
+#### Agentic Motility
+
+    The ability of a system to "move" across states, evolve, and learn, mirrors the quantum concept of entanglement and state collapse.
+
+Imagine a system that can learn to evolve, not through external forces but by agentic motility—its capacity to independently negotiate between deterministic structure and emergent complexity. This is the essence of cognitive plasticity at the computational level.
+
+#### String theory, and the holographic icon; the holoicon
+
+The nature of agentic motility—where a language model builds a robot, writes code, and the robot impacts the world—feels akin to spooky action at a distance. It's like entanglement; the process of wave function collapse is no longer just a digital phenomenon. This brings us closer to a fundamental idea: information as shape.
+
+Consider the shape of information: scale-invariant, multilateral, and complex. It’s akin to a Bayesian topology or a quantum field theory—a fundamental, stochastic process. We observe how this information evolves, collapses, and interacts with its surroundings, branching out into new possibilities.
+
+This isn't just abstract: it's encoded in the zeros and ones that form the morphology of computation. From inertia to complexity, from math to language—the very foundation of the cosmos exists encoded within binary form. The infinite set of reals between 0 and 1, encoded in binary code, represents all possible complexity within our universe. Yet, we can only see glimpses of this structure, its shape transcending dimensions.
+
+When Maxwell’s Demon observes and collapses a system's state, we witness the quantum collapse—the very morphology of computation (temprature, canonically) forming in the thermodynamic process.
+
+## Degrees of Freedom (DoF)
+
+1. DoF as State/Logic Containers:
+
+    Each DoF encapsulates both:
+        State: Observable properties of the system (e.g., spin, phase, and degrees of freedom in the QuantumState).
+        Logic: Transformative behaviors (e.g., compose, interact, entanglement logic).
+    A DoF runtime becomes a self-contained microcosm of both declarative (state) and imperative (logic) programming, enabling homoiconic behaviors.
+
+2. Quantum Time Slices and Homoiconism:
+
+    Each QuantumState represents a slice of time/phase evolution, where:
+        State: The intrinsic properties (spin, phase).
+        Logic: The mechanisms governing state transitions (Hamiltonian dynamics, Pauli transformations).
+    This builds a fractal-like architecture where every runtime and sub-runtime is both code and data.
+
+3. Universal DoF Runtime:
+
+    If every runtime is a DoF, it unifies:
+        The elemental level (individual methods/behaviors as DoFs).
+        The systemic level (entire runtime containers as DoFs).
+        This fractal homoiconic structure mirrors the self-similar, hierarchical nature of cognition.
+
+### DoF as the Morphological Bedrock
+
+Morphological Source Code thrives on the interplay of state, logic, and structure. Here’s how DoF completes this triad:
+
+1. Morphological Symmetry:
+
+    A DoF embodies symmetry across:
+        State: Static properties of a runtime.
+        Logic: Dynamic behaviors or transformations.
+    Morphological symmetry ensures that state and logic evolve consistently within and across runtimes.
+
+2. Evolutionary Homoiconism:
+
+    Every DoF is self-describing and self-transforming:
+        A method DoF may encode its transformations as data, enabling introspection and modification.
+        A runtime DoF is a meta-container, defining how its contained DoFs interact and evolve.
+    This recursive relationship enables the quine-like behavior foundational to Morphological Source Code.
+
+3. Multi-Axis Evolution:
+
+    DoFs as independent axes enable multi-dimensional state evolution:
+        For example, spin evolution could represent angular state changes, while phase evolution reflects temporal shifts.
+        Together, they define a multi-faceted evolutionary trajectory.
+
+---------------------
+The ByteWord System IS Microcanonical. No bath. No reservoir. Just bits
+and their ghosts. This is not canonical (NVT) statistical mechanics where
+temperature is imposed by an external bath. This is microcanonical (NVE):
+Number of states fixed, Volume of morphospace fixed, Energy budget fixed.
+Temperature emerges from the degeneracy structure of the ghost ensemble.
+
+In a ByteWord 'bulk':
+    N = 256 ByteWords (or however many you allocate)
+    V = morphospace (discrete, finite, no continuous volume)
+    E = initial energy (Landauer budget, fixed at start)
+
+The system evolves:
+    • Deterministically (bit operations, no randomness required)
+    • Isoenergetically (energy conserved until Landauer payment)
+    • Isolated (no exchange with external bath—the Python/SQL boundary
+      is a measurement surface, not a thermal reservoir)
+
+The ghosts aren't "coupled to a bath." They're intensive degrees of freedom
+that haven't yet manifested extensively. They're still part of the system.
+Not outside it.
+
+WHAT "TEMPERATURE" EVEN MEANS HERE
+-----------------------------------
+In canonical (NVT), temperature is fixed by the bath. The system's energy
+fluctuates to match. In microcanonical (NVE), temperature is derived:
+
+    T = ∂S/∂E  (how entropy changes with energy)
+
+For ByteWord(s), this becomes:
+
+    T_morphic = ∂(# of ghost configurations) / ∂(# of active commanders)
+
+"Temperature" is the degeneracy of the ghost ensemble. How many ways can
+you arrange the bulk for a given number of active C-bits?
+
+    • Low temp: Few ghosts, mostly observables, low entropy
+    • High temp: Many ghosts, few observables, high entropy
+
+But this T is internal. It's not imposed. It's emergent from the dynamics.
+
+THE BYTEWORD ATOM
+-----------------
+PHYSICAL ATOM: ByteWord (8-bit minimal morphological unit)
+Big-endian gauge topology: [C V V V | T T T T]
+    C = Captain bit (thermodynamic phase boundary)
+    V = Value field (3 bits, deputizable)
+    T = Type field (4 bits: winding + arity)
+
+This maps to three aspects of nominative invariance:
+    Identity preservation:  T = Type structure (static)
+    Content preservation:   V = Value space (dynamic)
+    Behavioral preservation: C = Computation space (transformative)
+
+1========10========20========30========40========50========60========70========80=====88
+"""
 
 @runtime_checkable
 @dataclass
@@ -2347,10 +2110,641 @@ class Morphism(Generic[T_co, T_anti]):
 
         return ComposedMorphism()
 
+@dataclass
+class GrammarRule:
+    """
+    Represents a single grammar rule in a context-free grammar.
 
-# ------------------------------------------------------------------------------
-# INTERPRETER-FIRST EXECUTION ENGINE + stdlib CFFI
-# ------------------------------------------------------------------------------
+    Attributes:
+        lhs (str): Left-hand side of the rule.
+        rhs (List[Union[str, 'GrammarRule']]): Right-hand side of the rule, which can be terminals or other rules.
+    """
+    lhs: str
+    rhs: List[Union[str, 'GrammarRule']]
+
+    def __repr__(self):
+        """
+        Provide a string representation of the grammar rule.
+
+        Returns:
+            str: The string representation.
+        """
+        rhs_str = ' '.join([str(elem) for elem in self.rhs])
+        return f"{self.lhs} -> {rhs_str}"
+class MorphicRule(GrammarRule, Protocol[T, V]):
+    """
+    Rules that map structural transformations in code morphologies.
+    """
+
+    def __init__(self, symmetry: str, conservation: str, lhs: Any, rhs: List[Any]):
+        self.symmetry = symmetry  # e.g., "Translation", "Rotation", "Phase"
+        self.conservation = (
+            conservation  # e.g., "Information", "Coherence", "Behavioral"
+        )
+        self.lhs = lhs  # Left-hand side element (morphological pattern)
+        self.rhs = rhs  # Right-hand side after transformation
+
+    def apply(self, input_seq: List[Any]) -> List[Any]:
+        """
+        Applies the morphological transformation to an input sequence.
+        """
+        if self.lhs in input_seq:
+            idx = input_seq.index(self.lhs)
+            return input_seq[:idx] + [elem for elem in self.rhs] + input_seq[idx + 1 :]
+        return input_seq
+
+#------------------------------------------------------------------------------
+@runtime_checkable
+class AtomProtocol(Protocol[T, V]):
+    """
+    Minimal interface for atomic entities.
+    Supports multiple representations and quantum-like state transitions.
+    """
+    id: str
+    state: QuantumState
+    flavor: ByteWordFlavor
+    
+    def encode(self) -> bytes:
+        """Serialize to bytes"""
+        ...
+    
+    @classmethod
+    def decode(cls, data: bytes) -> 'AtomProtocol':
+        """Deserialize from bytes"""
+        ...
+    
+    def collapse(self) -> V:
+        """Force state resolution (measurement)"""
+        ...
+    
+    def entangle_with(self, other: 'AtomProtocol') -> None:
+        """Create quantum entanglement"""
+        ...
+
+#------------------------------------------------------------------------------
+# POLYMORPHIC BASE ATOM - Mutable/Immutable Toggle
+#------------------------------------------------------------------------------
+class BaseAtom(ABC, Generic[T, V]):
+    """
+    Abstract base for all atoms with polymorphic identity.
+    Toggles between mutable dataclass and immutable struct modes.
+    """
+    __slots__ = ('_id', '_state', '_flavor', '_value', '_metadata', '_birth_time')
+    
+    def __init__(
+        self, 
+        value: V,
+        flavor: ByteWordFlavor = ByteWordFlavor.MUTABLE,
+        state: QuantumState = QuantumState.SUPERPOSITION
+    ):
+        self._id = str(uuid.uuid4())
+        self._state = state
+        self._flavor = flavor
+        self._value = value
+        self._metadata: Dict[str, Any] = {}
+        self._birth_time = time.time()
+        
+        # Apply flavor-specific initialization
+        self._configure_flavor()
+    
+    def _configure_flavor(self) -> None:
+        """Apply flavor-specific configuration"""
+        if self._flavor == ByteWordFlavor.IMMUTABLE:
+            self._freeze()
+        elif self._flavor == ByteWordFlavor.HOMOICONIC:
+            self._enable_introspection()
+        elif self._flavor == ByteWordFlavor.POLYMORPHIC:
+            self._enable_dynamic_typing()
+    
+    def _freeze(self) -> None:
+        """Make atom immutable (struct-like)"""
+        original_setattr = self.__setattr__
+        
+        def frozen_setattr(name: str, value: Any) -> None:
+            if name.startswith('_') and hasattr(self, name):
+                raise AttributeError(f"Cannot modify frozen attribute: {name}")
+            original_setattr(name, value)
+        
+        self.__setattr__ = frozen_setattr.__get__(self, type(self))
+    
+    def _enable_introspection(self) -> None:
+        """Enable code-as-data reflection"""
+        self._metadata['source'] = inspect.getsource(type(self))
+        self._metadata['ast'] = ast.dump(ast.parse(self._metadata['source']))
+    
+    def _enable_dynamic_typing(self) -> None:
+        """Enable runtime type identity changes"""
+        self._metadata['type_history'] = [type(self._value).__name__]
+    
+    @property
+    def id(self) -> str:
+        return self._id
+    
+    @property
+    def state(self) -> QuantumState:
+        return self._state
+    
+    @property
+    def flavor(self) -> ByteWordFlavor:
+        return self._flavor
+    
+    @property
+    def value(self) -> V:
+        """Get value, potentially collapsing superposition"""
+        if self._state == QuantumState.SUPERPOSITION:
+            self._collapse_superposition()
+        return self._value
+    
+    @value.setter
+    def value(self, new_value: V) -> None:
+        """Set value with flavor-specific checks"""
+        if self._flavor == ByteWordFlavor.IMMUTABLE:
+            raise AttributeError("Cannot modify immutable atom")
+        
+        if self._flavor == ByteWordFlavor.POLYMORPHIC:
+            self._metadata['type_history'].append(type(new_value).__name__)
+        
+        self._value = new_value
+    
+    def _collapse_superposition(self) -> None:
+        """Collapse quantum state to definite value"""
+        if self._state == QuantumState.SUPERPOSITION:
+            self._state = QuantumState.COLLAPSED
+            logger.debug(f"Atom {self.id} collapsed to state: {self._value}")
+    
+    def collapse(self) -> V:
+        """Force measurement/observation"""
+        self._collapse_superposition()
+        return self._value
+    
+    def entangle_with(self, other: 'BaseAtom') -> None:
+        """Create entanglement relationship"""
+        if not hasattr(self, '_entangled'):
+            self._entangled: List[weakref.ref] = []
+        
+        self._entangled.append(weakref.ref(other))
+        if not hasattr(other, '_entangled'):
+            other._entangled = []
+        other._entangled.append(weakref.ref(self))
+        
+        self._state = QuantumState.ENTANGLED
+        other._state = QuantumState.ENTANGLED
+        logger.debug(f"Entangled atoms: {self.id} <-> {other.id}")
+    
+    @abstractmethod
+    def encode(self) -> bytes:
+        """Serialize to bytes - subclass must implement"""
+        pass
+    
+    @classmethod
+    @abstractmethod
+    def decode(cls, data: bytes) -> 'BaseAtom':
+        """Deserialize from bytes - subclass must implement"""
+        pass
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Export to dictionary representation"""
+        return {
+            'id': self.id,
+            'state': self.state.name,
+            'flavor': self.flavor.name,
+            'value': self._value,
+            'metadata': self._metadata,
+            'birth_time': self._birth_time
+        }
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'BaseAtom':
+        """Reconstruct from dictionary"""
+        atom = cls(
+            value=data['value'],
+            flavor=ByteWordFlavor[data['flavor']],
+            state=QuantumState[data['state']]
+        )
+        atom._metadata = data.get('metadata', {})
+        atom._birth_time = data.get('birth_time', time.time())
+        return atom
+    
+    def __repr__(self) -> str:
+        return (f"{self.__class__.__name__}("
+                f"id={self.id[:8]}..., "
+                f"state={self.state.name}, "
+                f"flavor={self.flavor.name}, "
+                f"value={self._value!r})")
+class Atom(Generic[T, V, C]):
+    """
+    Abstract Base Class for all Atom types.
+
+    Atoms are the smallest units of data or executable code, and this interface
+    defines common operations such as encoding, decoding, execution, and conversion
+    to data classes.
+
+    Attributes:
+        grammar_rules (List[GrammarRule]): List of grammar rules defining the syntax of the Atom.
+    """
+
+    __slots__ = (
+        "_id",
+        "_value",
+        "_type",
+        "_metadata",
+        "_children",
+        "_parent",
+        "hash",
+        "tag",
+        "children",
+        "metadata",
+    )
+    type: Union[str, str]
+    value: Union[T, V, C] = field(default=None)
+    grammar_rules: List[GrammarRule] = field(default_factory=list)
+    id: str = field(init=False)
+    case_base: Dict[str, Callable[..., bool]] = field(default_factory=dict)
+
+    # use __slots__ & list comprehension for (meta) 'atomic init', instead of:
+    # tag: str = ''
+    # children: List['Atom'] = field(default_factory=list)
+    # metadata: Dict[str, Any] = field(default_factory=dict)
+    # hash: str = field(init=False)
+    def __init__(self, value: Union[T, V, C], type: Union[DataType, AtomType]):
+        self._value = value
+        self._type = type
+        self._metadata = {}
+        self._children = []
+        self._parent = None
+        self.hash = hashlib.sha256(repr(self._value).encode()).hexdigest()
+        self.tag = ""
+        self.children = []
+        self.metadata = {}
+
+    # relational atomistic logic (inherent when num atoms > 1)
+    def __post_init__(self):
+        self.case_base = {
+            "⊤": lambda x, _: x,
+            "⊥": lambda _, y: y,
+            "¬": lambda a: not a,
+            "∧": lambda a, b: a and b,
+            "∨": lambda a, b: a or b,
+            "→": lambda a, b: (not a) or b,
+            "↔": lambda a, b: (a and b) or (not a and not b),
+        }
+
+    reflexivity: Callable[[T], bool] = lambda x: x == x
+    symmetry: Callable[[T, T], bool] = lambda x, y: x == y
+    transitivity: Callable[[T, T, T], bool] = lambda x, y, z: x == y and y == z
+    transparency: Callable[[Callable[..., T], T, T], T] = lambda f, x, y: (
+        f(True, x, y) if x == y else None
+    )
+
+    def process_attributes(
+        self, mapping_description: Dict[str, Any], input_data: Dict[str, Any]
+    ) -> None:
+        """
+        Use the `mapper` function to process input data and map it to attributes.
+
+        Args:
+            mapping_description (Dict[str, Any]): The mapping description for transformation.
+            input_data (Dict[str, Any]): Data to be processed and mapped.
+        """
+        mapped_data = mapper(mapping_description, input_data)
+        for key, value in mapped_data.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+        # Log or process additional logic if required
+
+    def encode(self) -> bytes:
+        return json.dumps({"id": self.id, "attributes": self.attributes}).encode()
+
+    @classmethod
+    def decode(cls, data: bytes) -> "Atom":
+        decoded_data = json.loads(data.decode())
+        return cls(id=decoded_data["id"], **decoded_data["attributes"])
+
+    def introspect(self) -> str:
+        """
+        Reflect on its own code structure via AST.
+        """
+        source = inspect.getsource(self.__class__)
+        return ast.dump(ast.parse(source))
+
+    def __repr__(self):
+        return f"{self.value} : {self.type}"
+
+    def __str__(self):
+        return str(self.value)
+
+    def __eq__(self, other: Any) -> bool:
+        return isinstance(other, Atom) and self.hash == other.hash
+
+    def __hash__(self) -> int:
+        return int(self.hash, 16)
+
+    def __getitem__(self, key):
+        return self.value[key]
+
+    def __setitem__(self, key, value):
+        self.value[key] = value
+
+    def __delitem__(self, key):
+        del self.value[key]
+
+    def __len__(self):
+        return len(self.value)
+
+    def __iter__(self):
+        return iter(self.value)
+
+    def __contains__(self, item):
+        return item in self.value
+
+    def __call__(self, *args, **kwargs):
+        return self.value(*args, **kwargs)
+
+    def __bytes__(self) -> bytes:
+        return bytes(self.value)
+
+    @property
+    def memory_view(self) -> memoryview:
+        if isinstance(self.value, (bytes, bytearray)):
+            return memoryview(self.value)
+        raise TypeError("Unsupported type for memoryview")
+
+    def __buffer__(self, flags: int) -> memoryview:  # Buffer protocol
+        return memoryview(self.value)
+
+    async def send_message(self, message: Any, ttl: int = 3) -> None:
+        if ttl <= 0:
+            logging.info(f"Message {message} dropped due to TTL")
+            return
+        logging.info(f"Atom {self.id} received message: {message}")
+        for sub in self.subscribers:
+            await sub.receive_message(message, ttl - 1)
+
+    async def receive_message(self, message: Any, ttl: int) -> None:
+        logging.info(
+            f"Atom {self.id} processing received message: {message} with TTL {ttl}"
+        )
+        await self.send_message(message, ttl)
+
+    def subscribe(self, atom: "Atom") -> None:
+        self.subscribers.add(atom)
+        logging.info(f"Atom {self.id} subscribed to {atom.id}")
+
+    def unsubscribe(self, atom: "Atom") -> None:
+        self.subscribers.discard(atom)
+        logging.info(f"Atom {self.id} unsubscribed from {atom.id}")
+
+    __getitem__ = lambda self, key: self.value[key]
+    __setitem__ = lambda self, key, value: setattr(self.value, key, value)
+    __delitem__ = lambda self, key: delattr(self.value, key)
+    __len__ = lambda self: len(self.value)
+    __iter__ = lambda self: iter(self.value)
+    __contains__ = lambda self, item: item in self.value
+    __call__ = lambda self, *args, **kwargs: self.value(*args, **kwargs)
+    __add__ = lambda self, other: self.value + other
+    __sub__ = lambda self, other: self.value - other
+    __mul__ = lambda self, other: self.value * other
+    __truediv__ = lambda self, other: self.value / other
+    __floordiv__ = lambda self, other: self.value // other
+
+    @staticmethod
+    def serialize_data(data: Any) -> bytes:
+        return msgpack.packb(data, use_bin_type=True)
+        pass
+
+    @staticmethod
+    def deserialize_data(data: bytes) -> Any:
+        return msgpack.unpackb(data, raw=False)
+        pass
+
+#------------------------------------------------------------------------------
+# CONCRETE ATOM IMPLEMENTATIONS
+#------------------------------------------------------------------------------
+@dataclass
+class DataAtom(BaseAtom[type, Any]):
+    """Concrete atom for data storage with validation"""
+    
+    def __init__(
+        self, 
+        value: Any,
+        expected_type: Optional[Type] = None,
+        flavor: ByteWordFlavor = ByteWordFlavor.MUTABLE,
+        state: QuantumState = QuantumState.COLLAPSED
+    ):
+        super().__init__(value, flavor, state)
+        self._expected_type = expected_type or type(value)
+        self._validate()
+    
+    def _validate(self) -> None:
+        """Type validation"""
+        if not isinstance(self._value, self._expected_type):
+            raise TypeError(
+                f"Value {self._value!r} does not match expected type {self._expected_type}"
+            )
+    
+    def encode(self) -> bytes:
+        """JSON encoding for data atoms"""
+        return json.dumps(self.to_dict()).encode('utf-8')
+    
+    @classmethod
+    def decode(cls, data: bytes) -> 'DataAtom':
+        """JSON decoding"""
+        dict_data = json.loads(data.decode('utf-8'))
+        return cls.from_dict(dict_data)
+
+@dataclass
+class CodeAtom(BaseAtom[Callable, Callable]):
+    """Atom representing executable code (homoiconic)"""
+    
+    def __init__(
+        self,
+        value: Callable,
+        flavor: ByteWordFlavor = ByteWordFlavor.HOMOICONIC,
+        state: QuantumState = QuantumState.SUPERPOSITION
+    ):
+        if not callable(value):
+            raise TypeError("CodeAtom requires callable value")
+        super().__init__(value, flavor, state)
+    
+    def execute(self, *args, **kwargs) -> Any:
+        """Execute the contained code"""
+        self.collapse()  # Force resolution
+        return self._value(*args, **kwargs)
+    
+    def encode(self) -> bytes:
+        """Encode as source code"""
+        try:
+            source = inspect.getsource(self._value)
+            return source.encode('utf-8')
+        except (OSError, TypeError):
+            # Fallback for lambdas or built-ins
+            return repr(self._value).encode('utf-8')
+    
+    @classmethod
+    def decode(cls, data: bytes) -> 'CodeAtom':
+        """Reconstruct from source"""
+        source = data.decode('utf-8')
+        code_obj = compile(source, '<atom>', 'exec')
+        namespace = {}
+        exec(code_obj, namespace)
+        # Extract first callable
+        func = next((v for v in namespace.values() if callable(v)), None)
+        if func is None:
+            raise ValueError("No callable found in decoded source")
+        return cls(func)
+
+#------------------------------------------------------------------------------
+# INTERPRETER-FIRST EXECUTION ENGINE
+#------------------------------------------------------------------------------
+@dataclass
+class InterpreterConfig:
+    """Configuration for sub-interpreter execution"""
+    mode: ExecutionMode = ExecutionMode.INTERPRETER
+    shared_memory_size: int = 8192
+    timeout: float = 10.0
+    enable_lazy_verification: bool = True
+    fallback_to_threading: bool = True
+
+class InterpreterAtom(BaseAtom[Callable, Any]):
+    """
+    Atom that executes in isolated sub-interpreter.
+    Falls back to threading if interpreter creation fails.
+    """
+    
+    def __init__(
+        self,
+        value: Callable,
+        config: Optional[InterpreterConfig] = None,
+        flavor: ByteWordFlavor = ByteWordFlavor.POLYMORPHIC,
+        state: QuantumState = QuantumState.SUPERPOSITION
+    ):
+        super().__init__(value, flavor, state)
+        self.config = config or InterpreterConfig()
+        self._interp: Optional[interpreters.Interpreter] = None
+        self._thread: Optional[threading.Thread] = None
+        self._result: Optional[Any] = None
+        self._error: Optional[Exception] = None
+        self._channels: Optional[Tuple] = None
+    
+    def _create_interpreter(self) -> bool:
+        """Attempt to create sub-interpreter"""
+        try:
+            self._interp = interpreters.create()
+            recv_ch, send_ch = interpreters.create_channel()
+            self._channels = (recv_ch, send_ch)
+            logger.info(f"Created sub-interpreter for atom {self.id[:8]}")
+            return True
+        except Exception as e:
+            logger.warning(f"Failed to create sub-interpreter: {e}")
+            if self.config.fallback_to_threading:
+                logger.info("Falling back to threading mode")
+                return False
+            raise
+    
+    def _execute_in_interpreter(self) -> None:
+        """Execute code in sub-interpreter"""
+        if self._interp is None or self._channels is None:
+            raise RuntimeError("Interpreter not initialized")
+        
+        recv_ch, send_ch = self._channels
+        
+        # Prepare worker function
+        def worker():
+            try:
+                result = self._value()
+                send_ch.send(json.dumps({'status': 'success', 'result': result}))
+            except Exception as e:
+                send_ch.send(json.dumps({'status': 'error', 'error': str(e)}))
+        
+        # Execute in thread within interpreter
+        try:
+            thread = self._interp.call_in_thread(worker)
+            thread.join(timeout=self.config.timeout)
+            
+            if thread.is_alive():
+                raise TimeoutError(f"Execution exceeded {self.config.timeout}s")
+            
+            # Retrieve result
+            response = json.loads(recv_ch.recv(timeout=1.0))
+            if response['status'] == 'success':
+                self._result = response['result']
+            else:
+                self._error = RuntimeError(response['error'])
+                
+        except Exception as e:
+            self._error = e
+            logger.exception(f"Interpreter execution failed for atom {self.id[:8]}")
+    
+    def _execute_in_thread(self) -> None:
+        """Fallback: execute in thread"""
+        def worker():
+            try:
+                self._result = self._value()
+            except Exception as e:
+                self._error = e
+        
+        self._thread = threading.Thread(target=worker, daemon=True)
+        self._thread.start()
+        self._thread.join(timeout=self.config.timeout)
+        
+        if self._thread.is_alive():
+            logger.warning(f"Thread execution timeout for atom {self.id[:8]}")
+            self._error = TimeoutError(f"Execution exceeded {self.config.timeout}s")
+    
+    def execute(self) -> Any:
+        """Execute with interpreter-first strategy"""
+        self.collapse()  # Force state resolution
+        
+        if self.config.mode == ExecutionMode.INLINE:
+            # Direct execution (no isolation)
+            return self._value()
+        
+        # Attempt interpreter execution
+        if self.config.mode == ExecutionMode.INTERPRETER:
+            if self._create_interpreter():
+                self._execute_in_interpreter()
+            elif self.config.fallback_to_threading:
+                self._execute_in_thread()
+            else:
+                raise RuntimeError("Interpreter creation failed and fallback disabled")
+        else:
+            # Threading mode
+            self._execute_in_thread()
+        
+        # Check for errors
+        if self._error:
+            raise self._error
+        
+        return self._result
+    
+    def cleanup(self) -> None:
+        """Clean up interpreter resources"""
+        if self._interp and not self._interp.is_running():
+            self._interp.close()
+            logger.debug(f"Closed interpreter for atom {self.id[:8]}")
+    
+    def encode(self) -> bytes:
+        """Encode with execution metadata"""
+        data = self.to_dict()
+        data['config'] = {
+            'mode': self.config.mode.name,
+            'timeout': self.config.timeout
+        }
+        return json.dumps(data).encode('utf-8')
+    
+    @classmethod
+    def decode(cls, data: bytes) -> 'InterpreterAtom':
+        """Reconstruct with config"""
+        dict_data = json.loads(data.decode('utf-8'))
+        config_data = dict_data.pop('config', {})
+        config = InterpreterConfig(
+            mode=ExecutionMode[config_data.get('mode', 'INTERPRETER')],
+            timeout=config_data.get('timeout', 10.0)
+        )
+        atom = cls.from_dict(dict_data)
+        atom.config = config
+        return atom
+
 @dataclass
 class InterpreterConfig:
     """Configuration for sub-interpreter execution"""
