@@ -194,28 +194,28 @@ logger = setup_logging()
 # ============================================================================
 
 
-class MorphologicalError(Exception):
+
+
+class AppError(Exception):
+    """Base for analysis-specific errors"""
+
+    pass
+
+class MorphologicalError(AppError):
     """Base exception for all morphological engine errors"""
 
     def __init__(self, message: str, status_code: int = 500):
         self.status_code = status_code
         super().__init__(message)
 
-
-class AnalyzerError(MorphologicalError):
-    """Base for analysis-specific errors"""
-
-    pass
-
-
-class ConfigurationError(AnalyzerError):
+class ConfigurationError(AppError):
     """Invalid or insecure configuration"""
 
     def __init__(self, message: str):
         super().__init__(message, status_code=500)
 
 
-class SourceError(AnalyzerError):
+class SourceError(AppError):
     """Issues with source files"""
 
     pass
@@ -242,7 +242,7 @@ class SourceSizeExceededError(SourceError):
         super().__init__(message, status_code=413)
 
 
-class ParsingError(AnalyzerError):
+class ParsingError(AppError):
     """Invalid Python syntax"""
 
     def __init__(self, message: str):
@@ -270,7 +270,7 @@ class ResourceLimitExceededError(MorphologicalError):
         super().__init__(message, status_code=413)
 
 
-class LspError(AnalyzerError):
+class LspError(AppError):
     """LSP-specific errors"""
 
     pass

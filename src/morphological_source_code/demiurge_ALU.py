@@ -27,17 +27,7 @@ import sys
 import hashlib
 import math
 from dataclasses import dataclass, field
-from typing import (
-    Any,
-    List,
-    Optional,
-    Type,
-    TypeVar,
-    Dict,
-    Set,
-    Callable,
-    Tuple,
-)
+from typing import Any, List, Optional, Type, TypeVar, Dict, Set, Callable, Tuple
 
 """
 (MSC) Morphological Source Code Framework – V0.5.12-aleph
@@ -525,6 +515,7 @@ class PlatformFactory:
             return LinuxPlatform()
         else:
             return PlatformInterface()
+
 
 T = TypeVar('T')
 V = TypeVar('V')
@@ -1159,17 +1150,6 @@ class QuineTransducer:
 | **Momentum Operator (p̂)** | p̂ = -i ħ d/dx (in the spatial domain).  In the frequency domain, it becomes multiplication by ħk. |
 | **Unitary Transformation** | A transformation that preserves inner products (up to a normalization factor). The Fourier transform is unitary. |
 
-# SEMANTIC SUGAR (not syntax sugar; this is not your Mama's cupboard!)
-Semantic sugar is about tagging stdlib-only bytecode for re-interpretation by downstream compilers, etc.
-
-| Symbol  | AST Hint                        | MorphTag                 | Downstream Implication       |
-| ------- | ------------------------------- | ------------------------ | ---------------------------- |
-| `⟨f,g⟩` | `Operator(name='inner', ...)`   | `hilbert.L2.inner`       | Requires L² machinery        |
-| `F{f}`  | `Operator(name='fourier', ...)` | `hilbert.L2.fourier`     | Optional FFT backend         |
-| `δ`     | `Generator(name='delta', ...)`  | `hilbert.impulse.dirac`  | May suggest bandlimit        |
-| `ψ*ψ`   | `Operator(name='density', ...)` | `quantum.wavefn.density` | Suggests Born interpretation |
-
-Born interpretation: `ψ*ψ ⟹ morph.quantum.wavefn.density[normalized=True, probabilistic=True]`
 ---
 
 ## Fourier Transform

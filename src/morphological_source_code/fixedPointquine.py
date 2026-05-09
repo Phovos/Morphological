@@ -24,6 +24,7 @@ from dataclasses import dataclass
 from enum import IntEnum
 import struct
 import sys
+
 """
 Morphological Quantum Computing: The Complete Theory (FIXED)
 A self-contained implementation of quantum-morphological ByteWords
@@ -80,7 +81,7 @@ class MorphologicalSpace:
 
 
 # Global morphological space instance
-𝓗 = MorphologicalSpace()
+H = MorphologicalSpace()  # 𝓗 = MorphologicalSpace()
 
 # ============================================================================
 # Cook-Mertz Roots of Unity (FFT)
@@ -120,14 +121,14 @@ class CookMertzTransform:
             data.extend([complex(0, 0)] * (next_pow2 - n))
             n = next_pow2
 
-        # FIXED: Proper bit-reverse permutation
+        # bit-reverse permutation
         bits = n.bit_length() - 1
         for i in range(n):
             j = CookMertzTransform.bit_reverse(i, bits)
             if i < j:
                 data[i], data[j] = data[j], data[i]
 
-        # FIXED: Cooley-Tukey decimation-in-time
+        # Cooley-Tukey decimation-in-time
         length = 2
         while length <= n:
             w = CookMertzTransform.primitive_root_of_unity(length)
@@ -278,7 +279,8 @@ class ByteWord:
         interference_pattern = (amp1 + amp2) / math.sqrt(2)  # Normalize
 
         new_type = MorphologicalType(
-            semantic_signature=self.type.semantic_signature ^ other.type.semantic_signature,
+            semantic_signature=self.type.semantic_signature
+            ^ other.type.semantic_signature,
             thermodynamic_character=interference_pattern,
         )
 
@@ -309,13 +311,16 @@ class ByteWord:
 
             # Value evolution via nonlinear morphological dynamics
             # Use a better mixing function
-            rotated = ((current.value << 1) | (current.value >> 63)) & 0xFFFFFFFFFFFFFFFF
+            rotated = (
+                (current.value << 1) | (current.value >> 63)
+            ) & 0xFFFFFFFFFFFFFFFF
             # Golden ratio hash
             mixed = rotated ^ (current.value * 0x9E3779B97F4A7C15)
             new_value = mixed & 0xFFFFFFFFFFFFFFFF
 
             new_type = MorphologicalType(
-                semantic_signature=current.type.semantic_signature, thermodynamic_character=new_amplitude
+                semantic_signature=current.type.semantic_signature,
+                thermodynamic_character=new_amplitude,
             )
 
             current = ByteWord(new_value, new_type, ComputePhase.SUPERPOSITION)
@@ -349,7 +354,7 @@ class ByteWord:
             # Check if result is reasonable
             if math.isfinite(direct_float):
                 return direct_float * probability
-        except (OverflowError, struct.error):
+        except OverflowError, struct.error:
             pass
 
         # Fallback to manual construction
@@ -364,7 +369,7 @@ class ByteWord:
         try:
             result = sign * mantissa * (2.0**exponent)
             return result * probability if math.isfinite(result) else 0.0
-        except (OverflowError, ZeroDivisionError):
+        except OverflowError, ZeroDivisionError:
             return 0.0
 
     def to_float(self) -> float:
@@ -381,7 +386,7 @@ class ByteWord:
             # Pack float into 64-bit morphological representation
             packed = struct.pack("d", value)
             int_value = struct.unpack("Q", packed)[0]
-        except (OverflowError, struct.error):
+        except OverflowError, struct.error:
             int_value = 0
 
         # Create thermodynamic character from float properties
@@ -390,7 +395,8 @@ class ByteWord:
         amplitude = complex(math.cos(phase), math.sin(phase))
 
         morphological_type = MorphologicalType(
-            semantic_signature=hash(value) & 0xFFFFFFFF, thermodynamic_character=amplitude
+            semantic_signature=hash(value) & 0xFFFFFFFF,
+            thermodynamic_character=amplitude,
         )
 
         return cls(int_value, morphological_type, ComputePhase.MEASUREMENT)
@@ -422,7 +428,9 @@ class MorphologicalAlgebra:
             return False
 
     @staticmethod
-    def equivalence_principle(x: ByteWord, y: ByteWord, z: ByteWord, tolerance: float = 1e-10) -> bool:
+    def equivalence_principle(
+        x: ByteWord, y: ByteWord, z: ByteWord, tolerance: float = 1e-10
+    ) -> bool:
         """∀x, y ∈ S, x ≡ y ⇒ x * z ≡ y * z - Semantic invariance."""
         try:
             # Check if x ≡ y
@@ -444,7 +452,9 @@ class MorphologicalAlgebra:
             return False
 
     @staticmethod
-    def morphological_homomorphism(x: ByteWord, y: ByteWord, f: Callable, tolerance: float = 1e-10) -> bool:
+    def morphological_homomorphism(
+        x: ByteWord, y: ByteWord, f: Callable, tolerance: float = 1e-10
+    ) -> bool:
         """∀x, y ∈ S, f(x * y) ≡ f(x) * f(y) - Structure preservation."""
         try:
             xy = x.compose(y)
@@ -479,7 +489,9 @@ class QuantumMorphologicalAxioms:
         axiom = ByteWord(axiom_value, axiom_type)
 
         # QUINE PROPERTY: The axiom validates itself
-        assert MorphologicalAlgebra.closure_property(axiom, axiom), "Closure axiom failed self-validation"
+        assert MorphologicalAlgebra.closure_property(axiom, axiom), (
+            "Closure axiom failed self-validation"
+        )
         return axiom
 
     @staticmethod
@@ -506,7 +518,9 @@ class QuantumMorphologicalAxioms:
         # ENHANCED QUINE: Create a self-referential loop
         self_composed = axiom.compose(axiom)
         # The axiom should be approximately idempotent under composition
-        print(f"Idempotent axiom self-consistency: {MorphologicalAlgebra.idempotent_fixed_point(axiom)}")
+        print(
+            f"Idempotent axiom self-consistency: {MorphologicalAlgebra.idempotent_fixed_point(axiom)}"
+        )
 
         return axiom
 
@@ -534,12 +548,16 @@ class QuantumMorphologicalAxioms:
     def create_quine_axiom() -> ByteWord:
         """The ultimate quine: A ByteWord that contains its own source code hash."""
         # This is getting very meta...
-        source_hash = hash(QuantumMorphologicalAxioms.create_quine_axiom.__code__.co_code)
+        source_hash = hash(
+            QuantumMorphologicalAxioms.create_quine_axiom.__code__.co_code
+        )
         axiom_value = source_hash & 0xFFFFFFFFFFFFFFFF
 
         axiom_type = MorphologicalType(
             semantic_signature=source_hash & 0xFFFFFFFF,
-            thermodynamic_character=complex(math.e ** (-1), math.pi ** (-1)),  # Transcendental
+            thermodynamic_character=complex(
+                math.e ** (-1), math.pi ** (-1)
+            ),  # Transcendental
         )
 
         quine = ByteWord(axiom_value, axiom_type)
@@ -576,7 +594,7 @@ class MorphologicalFreeEnergyPrinciple:
             # Clamp probability to avoid log(0)
             probability = max(probability, 1e-15)
             return -math.log(probability)
-        except (ValueError, ZeroDivisionError):
+        except ValueError, ZeroDivisionError:
             return float("inf")  # Maximum surprise for invalid cases
 
     def complexity(self, model: ByteWord) -> float:
@@ -598,7 +616,11 @@ class MorphologicalFreeEnergyPrinciple:
         return surprise_term + complexity_term
 
     def minimize_free_energy(
-        self, observation: ByteWord, model: ByteWord, learning_rate: float = 0.01, max_attempts: int = 10
+        self,
+        observation: ByteWord,
+        model: ByteWord,
+        learning_rate: float = 0.01,
+        max_attempts: int = 10,
     ) -> ByteWord:
         """Δp = -∇F - Gradient descent in morphological space (ENHANCED)."""
         current_F = self.free_energy(observation, model)
@@ -627,7 +649,9 @@ class MorphologicalFreeEnergyPrinciple:
 
         # If we found improvement, interpolate
         if best_model != model:
-            new_value = int(model.value * (1 - learning_rate) + best_model.value * learning_rate)
+            new_value = int(
+                model.value * (1 - learning_rate) + best_model.value * learning_rate
+            )
             return ByteWord(new_value, model.type)
 
         return model  # No improvement found
@@ -720,7 +744,9 @@ class QuineMechanisms:
         # Apply self-modification
         modified = self_modify(quine)
 
-        print(f"Self-modifying quine: 0x{initial_value:016X} -> 0x{modified.value:016X}")
+        print(
+            f"Self-modifying quine: 0x{initial_value:016X} -> 0x{modified.value:016X}"
+        )
         return modified
 
     @staticmethod
@@ -829,7 +855,9 @@ def demonstrate_morphological_theory():
         print(f"   π: {word1.amplitude()}")
         print(f"   e: {word2.amplitude()}")
         print(f"   π ⊗ e: {composed.amplitude()}")
-        print(f"   Thermodynamic free energy: {composed.thermodynamic_free_energy():.6f}")
+        print(
+            f"   Thermodynamic free energy: {composed.thermodynamic_free_energy():.6f}"
+        )
         print(f"   Entanglement degree: {composed.entanglement_degree()}")
         print(f"   Coherent ByteWords in system: {𝓗.decoherence_count()}\n")
     except Exception as e:
@@ -873,7 +901,9 @@ def demonstrate_morphological_theory():
         test_word = ByteWord.from_float(1.618033988749)  # Golden ratio
         fixed_point = find_morphogenic_fixed_point(test_word, max_iterations=100)
         print(f"   Fixed point amplitude: {fixed_point.amplitude()}")
-        print(f"   Fixed point free energy: {fixed_point.thermodynamic_free_energy():.6f}")
+        print(
+            f"   Fixed point free energy: {fixed_point.thermodynamic_free_energy():.6f}"
+        )
         print(f"   Fixed point entropy: {fixed_point.morphological_entropy():.6f}\n")
     except Exception as e:
         print(f"   Fixed point search failed: {e}\n")
@@ -886,13 +916,17 @@ def demonstrate_morphological_theory():
 
         print(f"   Closure property: {algebra.closure_property(x, y)}")
         print(f"   Equivalence principle: {algebra.equivalence_principle(x, x, z)}")
-        print(f"   Idempotent fixed point: {algebra.idempotent_fixed_point(idempotent)}")
+        print(
+            f"   Idempotent fixed point: {algebra.idempotent_fixed_point(idempotent)}"
+        )
 
         # Test homomorphism with identity function
         def identity(bw):
             return bw
 
-        print(f"   Identity homomorphism: {algebra.morphological_homomorphism(x, y, identity)}")
+        print(
+            f"   Identity homomorphism: {algebra.morphological_homomorphism(x, y, identity)}"
+        )
     except Exception as e:
         print(f"   Algebraic verification failed: {e}")
     print()
@@ -951,7 +985,9 @@ def demonstrate_morphological_theory():
     print("- Quine-based reality manipulation")
     print("- Thermodynamic violation through morphological entanglement")
     print("\nProceed with caution. The morphological field is now active.")
-    print("象演旋态，炁流归一。(Morphemes evolve, spiral transforms, qi flows into unity.)")
+    print(
+        "象演旋态，炁流归一。(Morphemes evolve, spiral transforms, qi flows into unity.)"
+    )
 
 
 def run_shenanigans():
@@ -975,7 +1011,9 @@ def run_shenanigans():
         print("If you can see this message, reality has been successfully compromised.")
 
         # Find the fixed point of reality itself
-        reality_fixed_point = find_morphogenic_fixed_point(reality_hack, max_iterations=42)
+        reality_fixed_point = find_morphogenic_fixed_point(
+            reality_hack, max_iterations=42
+        )
         print(f"Reality fixed point: {reality_fixed_point.amplitude()}")
 
         # At this point, the program knows about itself
