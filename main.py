@@ -1,65 +1,42 @@
 #!/usr/bin/env -S uv run
-from __future__ import annotations
-
+# -*- coding: utf-8 -*-
 # /* script
-# requires-python = ">=3.12"
+# requires-python = ">=3.14"
 # dependencies = [
 #     "uv==*.*",
 # ]
-# */
-# Optional dependency handling (also add to '/* script..' comment, just above)
+# pyright: ignore-all
+# ruff: noqa: E401,F401,I001,F811,TC003,TC004,E402,E702,UP029,PLR0402,PLC0415,F406,E301,E302,E305
+#   "Morphological Source Code: MSC&QSD": >
 #   "© 2026 `Phovos` (phovos@outlook.com)":
-#     - "Morphological Source Code: MSC&QSD"
 #     - https://gitlab.com/morphological/source/code
 #     - https://github.com/Morphological-Source-Code
 #     - https://reddit.com/r/morphological
-# © 2024-2026 https://github.com/Phovos/Morphological-Source-Code
-# © 2023-2026 https://github.com/MOONLAPSED/cognosis
-import os
-import sys
-import time
-import math
-import enum
-import array
-import types
-import socket
-import select
-import ctypes
-import random
-import logging
-import asyncio
-import hashlib
-import functools
-import linecache
-import collections
-import tracemalloc
-from enum import Enum, auto, StrEnum
-from abc import ABC, abstractmethod
-from contextlib import contextmanager
-from functools import wraps, lru_cache
-from dataclasses import dataclass, field
-from typing import (
-    Any,
-    Dict,
-    List,
-    Optional,
-    Union,
-    Callable,
-    TypeVar,
-    Tuple,
-    Generic,
-    Set,
-    Type,
-    cast,
-    Hashable,
-    Iterator,
-)
+#   © 2024-2026 Phovos; https://github.com/Phovos/Morphological-Source-Code
+#   © 2023-2026 Moonlapsed; https://github.com/MOONLAPSED/cognosis
+#   description: >
+#     This project employs a layered licensing approach governed by the incl. Morphological LICENSE;
+#     The architecture (MSC&QSD) distinguishes between:
+#       (1) Individual source files, like this one (BSD 3-Clause)
+#       (2) Distributed collective works (CC BY-NC-SA 4.0)
+#       (3) Quine-generated outputs (CC0 1.0 + mandatory thermodynamic ledger)
+#       (4) Private ensemble configurations (operator's IP, until revealed/released)
+#           - Privacy of your Quineic-output is, therefore, your prerogative. CC0 carries, after 'escape'/release
+# ------------------------------
+# CPy3.14 std libs ONLY ;
+# Platform(s): (5600xRyzen (NA); hypervisor)
+# Win11: (production); Ubuntu-22.04: (dev, staging)
+# Optional dependency handling: "also add to '/* script..' comment (just above)"
+# ------------------------------
+# fmt: off
+import ast, os, sys, pathlib, logging, threading, datetime, inspect, uuid, base64, json, asyncio, functools, time, random, queue, hashlib, math, cmath, hashlib, enum, re, types, dataclasses, typing, contextlib, collections, abc, io, string, itertools, operator, copy, weakref, gc, marshal, struct, array, mmap, ssl, socket, concurrent, multiprocessing, subprocess, tempfile, shutil, glob, fnmatch, csv, pickle, sqlite3, urllib, http, ftplib, smtplib, email, mimetypes, imaplib, mailbox, hmac, secrets, ipaddress, socketserver, http.server, xml, html, webbrowser, tkinter, ctypes, ctypes.wintypes, site   # noqa: E401, F401, F811, E702 # fmt: skip
+from dataclasses import dataclass, field; from enum import Enum, auto, IntEnum; from types import SimpleNamespace, ModuleType; from functools import lru_cache; from decimal import Decimal, getcontext; from typing import Any, Dict, Optional, Set, Type, Union, Callable, List, Tuple, Generic, TypeVar, Protocol, runtime_checkable, cast, get_origin, get_args; from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer; from socketserver import ThreadingMixIn; from contextlib import contextmanager; from concurrent import interpreters; from concurrent.futures import ThreadPoolExecutor; # noqa: E401, F401, F811, E702 # fmt: skip
+_LOGGER_INIT_LOCK = threading.Lock();Path= pathlib.Path(__file__).resolve(); Queue = queue.Queue ;  # noqa: E702 # fmt: skip;
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 IS_WINDOWS = os.name == 'nt'
 IS_POSIX = os.name == 'posix'
-
 
 # Platform-specific file-lock helpers for header protection when no semaphores are shared.
 if os.name == "posix":
@@ -2190,7 +2167,7 @@ class BaseAtom(ABC, Generic[T, V]):
     Toggles between mutable dataclass and immutable struct modes.
     """
     __slots__ = ('_id', '_state', '_flavor', '_value', '_metadata', '_birth_time')
-    
+    # __slots__ = ('__weakref__',)  # if @frozen
     def __init__(
         self, 
         value: V,
@@ -2206,7 +2183,47 @@ class BaseAtom(ABC, Generic[T, V]):
         
         # Apply flavor-specific initialization
         self._configure_flavor()
-    
+
+    def __post_init__(self):
+        """Validate all fields after initialization."""
+        annotations = self.__annotations__
+        
+        for field_name, expected_type in annotations.items():
+            value = getattr(self, field_name)
+            
+            # === Type validation ===
+            if not _matches_type(value, expected_type):
+                raise TypeError(
+                    f"{self.__class__.__name__}.{field_name}: expected {expected_type}, "
+                    f"got {type(value).__name__}"
+                )
+            
+            # === Metadata-based validation ===
+            field_obj = next((f for f in fields(self) if f.name == field_name), None)
+            if field_obj:
+                validators = field_obj.metadata.get("validate")
+                if validators:
+                    for validator in (validators if isinstance(validators, (list, tuple)) else (validators,)):
+                        validator(value)
+            
+            # === Method-based validation (validate_fieldname) ===
+            validator_method = getattr(self, f'validate_{field_name}', None)
+            if validator_method and callable(validator_method):
+                # Support both direct callable and decorated methods with _validators
+                if hasattr(validator_method, '_validators'):
+                    for validator in validator_method._validators:
+                        validator(value)
+                else:
+                    validator_method(value)
+        
+        # === Model-level validation ===
+        if hasattr(self, '_validate_model'):
+            self._validate_model()
+
+    def _validate_model(self):
+        """Override for model-level validation logic."""
+        pass
+
     def _configure_flavor(self) -> None:
         """Apply flavor-specific configuration"""
         if self._flavor == ByteWordFlavor.IMMUTABLE:
@@ -2281,16 +2298,47 @@ class BaseAtom(ABC, Generic[T, V]):
         """Create entanglement relationship"""
         if not hasattr(self, '_entangled'):
             self._entangled: List[weakref.ref] = []
-        
         self._entangled.append(weakref.ref(other))
         if not hasattr(other, '_entangled'):
             other._entangled = []
         other._entangled.append(weakref.ref(self))
-        
         self._state = QuantumState.ENTANGLED
         other._state = QuantumState.ENTANGLED
         logger.debug(f"Entangled atoms: {self.id} <-> {other.id}")
-    
+
+    # === Core Serialization Methods ===
+    @classmethod
+    def from_dict(cls: Type[T], data: Dict[str, Any]) -> T:
+        """Create instance from dictionary with nested model support and coercion."""
+        if not isinstance(data, dict):
+            raise ValueError(f"Expected dict, got {type(data).__name__}")
+        # Filter to only known fields
+        field_names = {f.name for f in fields(cls)}
+        init_data = {k: v for k, v in data.items() if k in field_names}
+        # Get type hints for coercion
+        field_types = get_type_hints(cls)
+        
+        for field_name, field_type in field_types.items():
+            if field_name in init_data:
+                try:
+                    init_data[field_name] = _coerce(init_data[field_name], field_type)
+                except (TypeError, ValueError) as e:
+                    raise ValueError(f"Failed to coerce {field_name}: {e}")
+        try:
+            return cls(**init_data)
+        except TypeError as e:
+            raise ValueError(f"Failed to create {cls.__name__}: {e}")
+
+    def to_dict(self, exclude_none: bool = False) -> Dict[str, Any]:
+        """Convert to dictionary with nested model support."""
+        result = {}
+        for f in fields(self):
+            value = getattr(self, f.name)
+            if exclude_none and value is None:
+                continue
+            result[f.name] = _uncoerce(value)
+        return result
+
     @abstractmethod
     def encode(self) -> bytes:
         """Serialize to bytes - subclass must implement"""
@@ -2331,6 +2379,188 @@ class BaseAtom(ABC, Generic[T, V]):
                 f"state={self.state.name}, "
                 f"flavor={self.flavor.name}, "
                 f"value={self._value!r})")
+
+    # === Shared Validators ===
+    @staticmethod
+    def must_be_str(x: Any) -> None:
+        """Validator: ensure value is a string."""
+        if not isinstance(x, str):
+            raise ValueError(f"Expected a string, got {type(x).__name__}")
+
+    @staticmethod
+    def non_negative(x: Any) -> None:
+        """Validator: ensure value is a non-negative number."""
+        if not isinstance(x, (int, float)) or x < 0:
+            raise ValueError(f"Expected a non-negative number, got {x!r}")
+
+    @staticmethod
+    def positive(x: Any) -> None:
+        """Validator: ensure value is positive."""
+        if not isinstance(x, (int, float)) or x <= 0:
+            raise ValueError(f"Expected a positive number, got {x!r}")
+
+    @staticmethod
+    def non_empty_str(x: Any) -> None:
+        """Validator: ensure value is a non-empty string."""
+        if not isinstance(x, str) or not x.strip():
+            raise ValueError(f"Expected a non-empty string, got {x!r}")
+
+
+    # === Immutable Update Methods ===
+    def replace(self, **changes) -> T:
+        """Immutable clone with changes (dataclass-style)."""
+        data = self.to_dict()
+        data.update(changes)
+        return self.__class__.from_dict(data)
+
+    def clone(self, **overrides) -> T:
+        """Create a copy with optional field overrides (alias for replace)."""
+        return self.replace(**overrides)
+
+    # === Multi-Layer Communication Support ===
+    def to_datagram(self, format: SerializationFormat = SerializationFormat.JSON) -> bytes:
+        """Serialize to bytes for datagram transmission (UDP, etc.)."""
+        if format == SerializationFormat.JSON:
+            return json.dumps(self.to_dict()).encode('utf-8')
+        elif format == SerializationFormat.PICKLE:
+            return pickle.dumps(self)
+        elif format == SerializationFormat.REPR:
+            return repr(self).encode('utf-8')
+        else:
+            raise ValueError(f"Unsupported format: {format}")
+
+    @classmethod
+    def from_datagram(cls: Type[T], data: bytes, format: SerializationFormat = SerializationFormat.JSON) -> T:
+        """Deserialize from bytes datagram."""
+        if format == SerializationFormat.JSON:
+            return cls.from_dict(json.loads(data.decode('utf-8')))
+        elif format == SerializationFormat.PICKLE:
+            return pickle.loads(data)
+        elif format == SerializationFormat.REPR:
+            # This would require eval - not recommended for untrusted data
+            raise NotImplementedError("REPR deserialization requires eval - unsafe")
+        else:
+            raise ValueError(f"Unsupported format: {format}")
+
+    def to_json(self, **kwargs) -> str:
+        """Serialize to JSON string."""
+        return json.dumps(self.to_dict(), **kwargs)
+
+    @classmethod
+    def from_json(cls: Type[T], json_str: str) -> T:
+        """Deserialize from JSON string."""
+        return cls.from_dict(json.loads(json_str))
+
+    def to_base64(self, format: SerializationFormat = SerializationFormat.JSON) -> str:
+        """Encode as base64 string for text-based protocols."""
+        return base64.b64encode(self.to_datagram(format)).decode('ascii')
+
+    @classmethod
+    def from_base64(cls: Type[T], b64_str: str, format: SerializationFormat = SerializationFormat.JSON) -> T:
+        """Decode from base64 string."""
+        return cls.from_datagram(base64.b64decode(b64_str), format)
+
+    # === Identity and Hashing ===
+    def fingerprint(self) -> str:
+        """Generate a content-based fingerprint for caching/deduplication."""
+        content = json.dumps(self.to_dict(), sort_keys=True, separators=(',', ':'))
+        return hashlib.sha256(content.encode()).hexdigest()[:16]
+
+    def checksum(self) -> str:
+        """Generate a checksum for data integrity verification."""
+        return hashlib.md5(self.to_datagram()).hexdigest()
+
+    # === RPC/REST Helpers ===
+    @classmethod
+    def get_schema(cls) -> Dict[str, Any]:
+        """Generate a basic schema for API documentation."""
+        schema = {
+            "type": "object",
+            "properties": {},
+            "required": []
+        }
+        
+        field_types = get_type_hints(cls)
+        for f in fields(cls):
+            field_type = field_types.get(f.name, Any)
+            schema["properties"][f.name] = _type_to_schema(field_type)
+            if f.default == f.default_factory == dataclass.MISSING:
+                schema["required"].append(f.name)
+        
+        return schema
+
+    def validate_partial(self, **partial_data) -> Dict[str, Any]:
+        """Validate partial data without creating instance (useful for PATCH operations)."""
+        field_types = get_type_hints(self.__class__)
+        validated = {}
+        
+        for field_name, value in partial_data.items():
+            if field_name in field_types:
+                expected_type = field_types[field_name]
+                if not _matches_type(value, expected_type):
+                    raise TypeError(f"{field_name}: expected {expected_type}, got {type(value).__name__}")
+                validated[field_name] = _coerce(value, expected_type)
+            else:
+                raise ValueError(f"Unknown field: {field_name}")
+        
+        return validated
+
+    # === Debug and Development Helpers ===
+    def diff(self, other: 'BaseModel') -> Dict[str, Dict[str, Any]]:
+        """Compare with another instance and return differences."""
+        if not isinstance(other, self.__class__):
+            raise TypeError(f"Can only diff with same type, got {type(other)}")
+        
+        diffs = {}
+        for f in fields(self):
+            self_val = getattr(self, f.name)
+            other_val = getattr(other, f.name)
+            if self_val != other_val:
+                diffs[f.name] = {"self": self_val, "other": other_val}
+        
+        return diffs
+
+    def __repr__(self) -> str:
+        """Clean representation for debugging and repr-based serialization."""
+        kv = ", ".join(f"{f.name}={getattr(self, f.name)!r}" for f in fields(self))
+        return f"{self.__class__.__name__}({kv})"
+
+    def __str__(self) -> str:
+        return self.__repr__()
+
+def _type_to_schema(tp: Any) -> Dict[str, Any]:
+    """Convert Python type to JSON schema format."""
+    if tp is str:
+        return {"type": "string"}
+    elif tp is int:
+        return {"type": "integer"}
+    elif tp is float:
+        return {"type": "number"}
+    elif tp is bool:
+        return {"type": "boolean"}
+    elif tp is list or get_origin(tp) is list:
+        args = get_args(tp)
+        item_schema = _type_to_schema(args[0]) if args else {"type": "any"}
+        return {"type": "array", "items": item_schema}
+    elif tp is dict or get_origin(tp) is dict:
+        return {"type": "object"}
+    elif get_origin(tp) is Union:
+        # Handle Optional and Union types
+        args = get_args(tp)
+        if len(args) == 2 and type(None) in args:
+            # Optional type
+            non_none_type = next(arg for arg in args if arg is not type(None))
+            schema = _type_to_schema(non_none_type)
+            schema["nullable"] = True
+            return schema
+        else:
+            # Union type - return anyOf
+            return {"anyOf": [_type_to_schema(arg) for arg in args]}
+    elif inspect.isclass(tp) and issubclass(tp, BaseModel):
+        return tp.get_schema()
+    else:
+        return {"type": "any"}
+
 class Atom(Generic[T, V, C]):
     """
     Abstract Base Class for all Atom types.
@@ -4105,7 +4335,7 @@ class XOROperator(OperatorBase):
 
 
 # ============================================================================
-# SECTION 2: XOR LORENTZ GROUP — The Fiber Bundle Structure
+# 0. XOR LORENTZ GROUP — The Fiber Bundle Structure
 # ============================================================================
 
 
@@ -4213,7 +4443,7 @@ class XorLorentz:
 
 
 # ============================================================================
-# SECTION 3: THE MORPHOLOGICAL CLOCK — Ψ and Entropic Duration
+# 0. THE MORPHOLOGICAL CLOCK — Ψ and Entropic Duration
 # ============================================================================
 
 
@@ -4641,94 +4871,77 @@ class ByteWordOperator:
             f"<ByteWordOperator mapped={k} entries permutation={self.is_permutation()}>"
         )
 
+class QuantumNumber:
+    def __init__(self, hilbert_space: HilbertSpace):
+        self.hilbert_space = hilbert_space
+        self.amplitudes = [complex(0, 0)] * hilbert_space.dimension
+        self._quantum_numbers = None
+    @property
+    def quantum_numbers(self):
+        return self._quantum_numbers
+    @quantum_numbers.setter
+    def quantum_numbers(self, numbers: QuantumNumbers):
+        n, l, m, s = numbers
+        if self.hilbert_space.is_fermionic():
+            # Fermionic quantum number constraints
+            if not (n > 0 and 0 <= l < n and -l <= m <= l and s in (-0.5, 0.5)):
+                raise ValueError("Invalid fermionic quantum numbers")
+        elif self.hilbert_space.is_bosonic():
+            # Bosonic quantum number constraints
+            if not (n >= 0 and l >= 0 and m >= 0 and s == 0):
+                raise ValueError("Invalid bosonic quantum numbers")
+        self._quantum_numbers = numbers
 
-# ---------------------------------------------------------------------------
-# Cantor allocator: path encoding and exact rational intervals/measures
-# ---------------------------------------------------------------------------
+def evaluate_fitness(state: QuantumState, fitness_function: Callable[[QuantumState], float]) -> float:
+    return fitness_function(state)
 
+def probabilistic_prune(states: List[QuantumState], threshold: float) -> List[QuantumState]:
+    return [state for state in states if evaluate_fitness(state, example_fitness_function) >= threshold]
 
-@dataclass
-class CantorNode:
-    path_bits: int  # binary path where 0->left, 1->right (length = depth)
-    depth: int
-    measure: Fraction
-    parent: Optional["CantorNode"] = None
+def example_fitness_function(state: QuantumState) -> float:
+    """Example fitness function based on entropy and coherence."""
+    return 1 / (state.entropy + 1) * state.fitness_score
 
-    def fork(self) -> Tuple["CantorNode", "CantorNode"]:
-        d = self.depth + 1
-        left_bits = (self.path_bits << 1) | 0
-        right_bits = (self.path_bits << 1) | 1
-        m = Fraction(self.measure, 2)
-        left = CantorNode(left_bits, d, m, parent=self)
-        right = CantorNode(right_bits, d, m, parent=self)
-        return left, right
-
-    def key(self) -> str:
-        """Canonical key for SQL use: depth:hex(path_bits)."""
-        return f"{self.depth}:{self.path_bits:x}"
-
-    def interval(self) -> Tuple[Fraction, Fraction]:
-        """
-        Compute the closed interval [a,b] in [0,1] that this cylinder corresponds
-        to in the ternary Cantor construction. We map binary path bits {0,1}
-        to ternary digits {0,2} respectively. Exact arithmetic via Fraction.
-        """
-        a = Fraction(0, 1)
-        denom = Fraction(1, 1)
-        for i in range(1, self.depth + 1):
-            denom *= 3
-        # compute left endpoint
-        left = Fraction(0, 1)
-        for i in range(self.depth):
-            bit = (self.path_bits >> (self.depth - 1 - i)) & 0x1
-            digit = 0 if bit == 0 else 2
-            left += Fraction(digit, 3 ** (i + 1))
-        right = left + Fraction(1, 3**self.depth)
-        return left, right
-
-    def __repr__(self):
-        a, b = self.interval() if self.depth <= 20 else (Fraction(0), Fraction(0))
-        return (
-            f"CantorNode(depth={self.depth}, idx={self.path_bits}, mu={self.measure}, "
-            f"interval=[{a},{b}])"
-        )
+class QNumber(NamedTuple):  # 
+    n: int     # Principal quantum number
+    l: int     # Azimuthal quantum number
+    m: int     # Magnetic quantum number
+    s: float   # Spin quantum number
 
 
-class MorphologicalDerivative:
-    """
-    Morphological derivatives describe time-like bitwise mutations.
-
-    Δ¹: Elementary bit flip.
-    Δ²: Merge via XOR (gradient-neutral collapse).
-    Δⁿ: History-driven operator chain (≤16 morphs).
-    """
-    def __init__(self, order: int = 1):
-        if order > 16:
-            raise ValueError("Derivative order must be ≤ 16")
-        self.order = order
-        self.chain: List[ByteWord] = []
-
-    def delta_1(self, word: ByteWord) -> ByteWord:
-        flip_mask = 1 << random.randint(0, 1)
-        new_torus = word.torus_raw ^ flip_mask
-        new_raw = (word.raw & 0b11110000) | (new_torus & 0b00001111)
-        result = ByteWord(new_raw)
-        self.chain.append(result)
-        return result
-
-    def delta_2(self, word1: ByteWord, word2: ByteWord) -> ByteWord:
-        result = word1.xor_cascade(word2)
-        self.chain.append(result)
-        return result
-
-    def delta_n(self, word: ByteWord, steps: int) -> ByteWord:
-        current = word
-        for _ in range(min(steps, 16)):
-            current = self.delta_1(current)
-        return current
+# ======================
+# Torus (chiral Hamming)
+# ======================
+class TorusWinding(enum.Enum):
+    """4-state Church-Turing torus winding states as binary pairs (w₁,w₂). A ∅,null-'glue', Byte is valueless from the 'character' standpoint, but it can take-part in set-builder notation, where Extensive ByteWords point to it, creating second order logical operands at 'runtime'."""
+    NULL = (0, 0)      # ∅ — topological glue
+    AXIS_1 = (1, 0)    # winding along first axis
+    AXIS_2 = (0, 1)    # winding along second axis  
+    TWISTED = (1, 1)   # both axes wound
+    def __init__(self, w1: int, w2: int):
+        self.w1 = w1
+        self.w2 = w2
+    @classmethod
+    def from_bits(cls, t_bits: int) -> 'TorusWinding':
+        """Convert 4-bit T field to torus winding state"""
+        # Extract w1, w2 from lower 2 bits of T field
+        w1 = (t_bits >> 1) & 1
+        w2 = t_bits & 1
+        return cls((w1, w2))
+    
+    def to_bits(self) -> int:
+        """Convert torus winding to 4-bit T field"""
+        return (self.w1 << 1) | self.w2
+    
+    def xor(self, other: 'TorusWinding') -> 'TorusWinding':
+        """XOR operation on torus winding pairs - the fundamental unitary operator"""
+        new_w1 = self.w1 ^ other.w1
+        new_w2 = self.w2 ^ other.w2
+        return TorusWinding((new_w1, new_w2))
 
 class SparseUnitaryOperator:
     """
+    req. TorusWinding
     Sparse, self-adjoint operators representing involutory morphisms:
     (A ∘ A = I). Useful for stable oscillators and cycle preservation.
     """
@@ -4789,71 +5002,9 @@ class TorusTraversal:
                 return cycle_len
         return None
 
-class QuantumNumber:
-    def __init__(self, hilbert_space: HilbertSpace):
-        self.hilbert_space = hilbert_space
-        self.amplitudes = [complex(0, 0)] * hilbert_space.dimension
-        self._quantum_numbers = None
-    @property
-    def quantum_numbers(self):
-        return self._quantum_numbers
-    @quantum_numbers.setter
-    def quantum_numbers(self, numbers: QuantumNumbers):
-        n, l, m, s = numbers
-        if self.hilbert_space.is_fermionic():
-            # Fermionic quantum number constraints
-            if not (n > 0 and 0 <= l < n and -l <= m <= l and s in (-0.5, 0.5)):
-                raise ValueError("Invalid fermionic quantum numbers")
-        elif self.hilbert_space.is_bosonic():
-            # Bosonic quantum number constraints
-            if not (n >= 0 and l >= 0 and m >= 0 and s == 0):
-                raise ValueError("Invalid bosonic quantum numbers")
-        self._quantum_numbers = numbers
-
-def evaluate_fitness(state: QuantumState, fitness_function: Callable[[QuantumState], float]) -> float:
-    return fitness_function(state)
-
-def probabilistic_prune(states: List[QuantumState], threshold: float) -> List[QuantumState]:
-    return [state for state in states if evaluate_fitness(state, example_fitness_function) >= threshold]
-
-def example_fitness_function(state: QuantumState) -> float:
-    """Example fitness function based on entropy and coherence."""
-    return 1 / (state.entropy + 1) * state.fitness_score
-
-class QNumber(NamedTuple):  # 
-    n: int     # Principal quantum number
-    l: int     # Azimuthal quantum number
-    m: int     # Magnetic quantum number
-    s: float   # Spin quantum number
-
-class TorusWinding(enum.Enum):
-    """4-state Church-Turing torus winding states as binary pairs (w₁,w₂). A ∅,null-'glue', Byte is valueless from the 'character' standpoint, but it can take-part in set-builder notation, where Extensive ByteWords point to it, creating second order logical operands at 'runtime'."""
-    NULL = (0, 0)      # ∅ — topological glue
-    AXIS_1 = (1, 0)    # winding along first axis
-    AXIS_2 = (0, 1)    # winding along second axis  
-    TWISTED = (1, 1)   # both axes wound
-    def __init__(self, w1: int, w2: int):
-        self.w1 = w1
-        self.w2 = w2
-    @classmethod
-    def from_bits(cls, t_bits: int) -> 'TorusWinding':
-        """Convert 4-bit T field to torus winding state"""
-        # Extract w1, w2 from lower 2 bits of T field
-        w1 = (t_bits >> 1) & 1
-        w2 = t_bits & 1
-        return cls((w1, w2))
-    
-    def to_bits(self) -> int:
-        """Convert torus winding to 4-bit T field"""
-        return (self.w1 << 1) | self.w2
-    
-    def xor(self, other: 'TorusWinding') -> 'TorusWinding':
-        """XOR operation on torus winding pairs - the fundamental unitary operator"""
-        new_w1 = self.w1 ^ other.w1
-        new_w2 = self.w2 ^ other.w2
-        return TorusWinding((new_w1, new_w2)
-
-
+# ===========
+# MRO CLASSES
+# ===========
 class QuantumTemporalMRO:
     """Quantum-aware temporal method resolution"""
     
@@ -5261,7 +5412,7 @@ class HilbertSpace:
         return self.dimension == other.dimension
 
 # ============================================================================
-# MEMORY VECTOR (Lattice Coordinates)
+# 0. MEMORY VECTOR (Lattice Coordinates)
 # ============================================================================
 
 
@@ -5313,7 +5464,7 @@ class MemoryVector:
 
 
 # ============================================================================
-# HERMITIAN OPERATORS
+# 0. HERMITIAN OPERATORS
 # ============================================================================
 
 
@@ -5388,16 +5539,45 @@ class Measurement:
 # ============================================================================
 # CANTOR ALLOCATOR (Rational Path Measure)
 # ============================================================================
-
-
 @dataclass
-class CantorNode:
+class CantorNode:  # path encoding and exact rational intervals/measures
     """Node in measure-preserving binary tree"""
-
-    path_bits: int
+    path_bits: int  # binary path where 0->left, 1->right (length = depth)
     depth: int
     measure: Fraction
-    parent: Optional[CantorNode] = None
+    parent: Optional["CantorNode"] = None
+
+    def fork(self) -> Tuple["CantorNode", "CantorNode"]:
+        d = self.depth + 1
+        left_bits = (self.path_bits << 1) | 0
+        right_bits = (self.path_bits << 1) | 1
+        m = Fraction(self.measure, 2)
+        left = CantorNode(left_bits, d, m, parent=self)
+        right = CantorNode(right_bits, d, m, parent=self)
+        return left, right
+
+    def key(self) -> str:
+        """Canonical key for SQL use: depth:hex(path_bits)."""
+        return f"{self.depth}:{self.path_bits:x}"
+
+    def interval(self) -> Tuple[Fraction, Fraction]:
+        """
+        Compute the closed interval [a,b] in [0,1] that this cylinder corresponds
+        to in the ternary Cantor construction. We map binary path bits {0,1}
+        to ternary digits {0,2} respectively. Exact arithmetic via Fraction.
+        """
+        a = Fraction(0, 1)
+        denom = Fraction(1, 1)
+        for i in range(1, self.depth + 1):
+            denom *= 3
+        # compute left endpoint
+        left = Fraction(0, 1)
+        for i in range(self.depth):
+            bit = (self.path_bits >> (self.depth - 1 - i)) & 0x1
+            digit = 0 if bit == 0 else 2
+            left += Fraction(digit, 3 ** (i + 1))
+        right = left + Fraction(1, 3**self.depth)
+        return left, right
 
     def fork(self) -> Tuple[CantorNode, CantorNode]:
         depth = self.depth + 1
@@ -5411,12 +5591,48 @@ class CantorNode:
     def to_binary_index(self) -> int:
         return self.path_bits
 
-    def as_tstring(self) -> str:
+    def as_tstring(self) -> str:  # 3.12 f'string version
         return f"Node(depth={self.depth}, idx=0x{self.path_bits:x}, μ={self.measure})"
 
-    def __repr__(self) -> str:
-        return self.as_tstring()
+    def __repr__(self):
+        a, b = self.interval() if self.depth <= 20 else (Fraction(0), Fraction(0))
+        return (
+            f"CantorNode(depth={self.depth}, idx={self.path_bits}, mu={self.measure}, "
+            f"interval=[{a},{b}])"
+        )
 
+class MorphologicalDerivative:
+    """
+    Morphological derivatives describe time-like bitwise mutations.
+
+    Δ¹: Elementary bit flip.
+    Δ²: Merge via XOR (gradient-neutral collapse).
+    Δⁿ: History-driven operator chain (≤16 morphs).
+    """
+    def __init__(self, order: int = 1):
+        if order > 16:
+            raise ValueError("Derivative order must be ≤ 16")
+        self.order = order
+        self.chain: List[ByteWord] = []
+
+    def delta_1(self, word: ByteWord) -> ByteWord:
+        flip_mask = 1 << random.randint(0, 1)
+        new_torus = word.torus_raw ^ flip_mask
+        new_raw = (word.raw & 0b11110000) | (new_torus & 0b00001111)
+        result = ByteWord(new_raw)
+        self.chain.append(result)
+        return result
+
+    def delta_2(self, word1: ByteWord, word2: ByteWord) -> ByteWord:
+        result = word1.xor_cascade(word2)
+        self.chain.append(result)
+        return result
+
+    def delta_n(self, word: ByteWord, steps: int) -> ByteWord:
+        current = word
+        for _ in range(min(steps, 16)):
+            current = self.delta_1(current)
+        return current
 
 # ============================================================================
 # SQL SPINOR BOUNDARY (Persistence)
