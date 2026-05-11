@@ -15,8 +15,47 @@
 # © 2024-2026 https://github.com/Phovos/Morphological-Source-Code
 # © 2023-2026 https://github.com/MOONLAPSED/cognosis
 """
-Hermitian Dual Legendre Sentinels — MSC&QSD Atomic Update Protocol
-The quine is the trojan horse that verifies its own morphology.
+# Hermitian Dual Legendre Sentinels: MSC&QSD Atomic Update Protocol
+
+- The quine is the trojan horse that verifies its own morphology.
+
+More formally;
+
+F: A -> A-hat such that * is MorphologicalComposition and . is pointwise multiplication
+    - Convolution in the base domain: `*`
+    - Pointwise multiplication in the spectral domain: `.`
+    - F(a*b) = F(a).F(b)
+
+## Integration/future
+
+1. Manifold Coordination
+   Use one sentinel pair per major morphological region:
+   ```python
+   HEADER_SENTINEL = HermitianSentinel(
+       _SELF.with_suffix('.header.json'),
+       _SELF.with_suffix('.shape.json')
+   )
+   ```
+
+2. Quine Bootstrap Hook
+   ```python
+   def self_verify() -> None:
+       valid, msg = HEADER_SENTINEL.verify()
+       if not valid:
+           logger.warning("Hermitian duality broken: %s — attempting recovery", msg)
+           recovered, rmsg = HEADER_SENTINEL.recover()
+           logger.info("Recovery: %s — %s", recovered, rmsg)
+   ```
+
+3. ByteWord / DoF / TVC Tie-in
+   Each `ByteWord` atom can carry a lightweight sentinel hash for its local morphology. The captain bit (C) flips on verification events and feeding/feedbacking w/ the microcanonical ghost ensemble.
+
+4. Update Pattern** (example)
+   ```python
+   success, msg = sentinel.update({"manifold_region": "[6,42]", "dof_count": 137})
+   if success:
+       logger.info("Morphology advanced: %s", msg)
+   ```
 """
 import hashlib
 import json
