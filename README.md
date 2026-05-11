@@ -5,7 +5,7 @@ license-doc(s)+dist: CC BY-ND-NC 4.0
 license-code+file(s): BSD 3-Clause
 root: ".github"
 name: "README.md"
-version: 0.49.85
+version: 0.49.86
 aliases:
   - msc
   - qsd
@@ -49,7 +49,6 @@ Disclaimer:
 -->
 
 # Morphological Source Code (MSC/QSD)
-
 
 **A CPython standard-library-only framework for morphological computation with hermitian type semantics**
 **Welcome to the root of the Morphological Source Code (MSC) repository!**
@@ -221,74 +220,6 @@ Degrees of Freedom are wholy determinable as a measure space  on the interplay o
 
 ---------------------
 
-##  The Atomic Update Protocol:
-Maintains ('Machian, Noetherian' [aether]) nominative invariance wrt. runtime morphospace.
-
-```txt
-            [x,0] (momentum/shape)
-            ↑
-            │
-            │ Legendre transform
-            │
-[0,y] ←─────┼─────→ [0,∞)
-(header)    │        (body)
-            │
-            ↓
-       bifurcation point y = HEADER_END
-```
-A quine is an endomorphism f: T → T where T is the entire source code considered as a token.
-
-The fixed point condition f(T) = T is equivalent to: 
-    - "the set of tokens selected by [len(T), len(T)] is exactly {T}."
-    - The hermitian condition: the map from header tokens to body tokens is an involution.
-
-Here, sentinel A contains the hash of B, and sentinel B contains the hash of A. The relation is self-dual. If you transpose (swap A and B), the system looks the same.
-SentinelA=f(SentinelB)andSentinelB=f(SentinelA)
-SentinelA​=f(SentinelB​)andSentinelB​=f(SentinelA​)
-
-where f(x)=hash(x)f(x)=hash(x) plus metadata.
-
-This creates a fixed point in the space of file pairs. The only consistent states are those where the relation holds. Any deviation is immediately detectable.
-
-Two files, each containing the hash of the other, and neither can be updated without breaking the
-relation unless you update both atomically. This shape is the form of the Quine in category terms,
-a sentinel that is its own conjugate transpose. Files that verify each other in a self-consistent loop.
-- Sentinel A = [0, y]  (header definition, line-based)
-- Sentinel B = [x, 0]  (shape definition, extent-based)
-
-```
-┌────────────────┐                             ┌─────────────────┐
-│   sentinel_a   │                             │   sentinel_b    │
-├────────────────┤                             ├─────────────────┤
-│ hash_b = H(B)  │◄───────────────────────────►│ hash_a = H(A)   │
-│ timestamp_a    │                             │ timestamp_b     │
-│ signature_a    │                             │ signature_b     │
-└────────────────┘                             └─────────────────┘
-             │                                        │
-             └──────────────────┬─────────────────────┘
-                                ▼
-                         Verify: H(B) == hash_b
-                         - AND H(A) == hash_a
-                         - AND |timestamp_a - timestamp_b| < Δ
-```
-
-To update the pair, you must:
-    1) Lock both files; Compute new content for A' and B'; Write both atomically (rename from temp files)
-    2) Verify the relation holds; Release locks
-
-If step 1 fails halfway, #2 detects mismatched timestamps and rolls back from the last good pair.
-
-## Coordinate manifold (this file) `[x,y]`
-A 6-character token like "lambda" contains 6x 1-character tokens inside it. [0,y] returns everything.
-
-[6,y] returns only tokens greater or equal length of "lambda", and larger, on less than or equal to  lineno "y". The geometry is a filtration: [1,0] ⊇ [2,0] ⊇ ... ⊇ [n,0]
-
-[x,0] is any token on any line, countably infinite.
-
-[x, 6] is any token up-to and including (lineno) #6
-
-[6,6]  returns only tokens greater or equal length of "lambda", and larger up-to and including (lineno) #6
-
 ### Information, Morphology, and the Emergence of Quantization
 
 This framework gives us a powerful epistemological tripod:
@@ -339,8 +270,8 @@ This is precisely the domain where Quinic Statistical Dynamics (QSD) operates. Q
 
 This is not accidental it is diagnostic. 
 
-- Harmonic analysis (Fourier, wavelets, spectral decomposition) is about breaking complex phenomena into fundamental frequencies/modes and understanding their symmetries. Your ByteWords, DoFs, and XorLorentz group (with roots-of-unity inner products) are doing exactly this: discrete decomposition + symmetry preservation.
-- Complex analysis enters because phases, holonomies, analytic continuation, and contour-like summation (path integrals) are the natural language for *propagation and interference* in these systems. Your `XorLorentz.bracket()` returning complex values on the 8th roots of unity, the Möbius Turing Tape, and the intensive/extensive boundary are inherently complex-analytic in flavor.
+- Harmonic analysis (Fourier, wavelets, spectral decomposition) is about breaking complex phenomena into fundamental frequencies/modes and understanding their symmetries. ByteWords, DoFs, and XorLorentz group (with roots-of-unity inner products) are discrete decomposition + symmetry preservation.
+- Complex analysis enters because phases, holonomies, analytic continuation, and contour-like summation (path integrals) are the natural language for *propagation and interference* in these systems. Cpy `XorLorentz.bracket()` returning complex values on the 8th roots of unity, the Möbius Turing Tape, and the intensive/extensive boundary are inherently complex-analytic in flavor.
 
 The two fields have always been deeply intertwined (complex exponentials are the eigenfunctions of harmonic analysis; residues and contours give powerful summation tools). In MSC&QSD, this convergence is ontological: the discrete harmonic structure (ByteWord ensemble, filtration geometry `[colno, lineno]`) lives on a complex morphological manifold whose phases and holonomies encode the information flow and agentic motility.
 
@@ -614,7 +545,7 @@ In microcanonical (NVE), temperature is derived:
 T = ∂S/∂E  (how entropy changes with energy)
 ```
 
-For your ByteWords, this becomes:
+For ByteWords, this becomes:
 
 ```
 T_morphic = ∂(# of ghost configurations) / ∂(# of active commanders)
@@ -650,9 +581,79 @@ Dr. Robitaille is right (at the least; methodologically): you can't model struct
 
 Robitaille's razor and the destruction of the analytic/synthetic distinction per Master Quine is what I believe is the source of the ring-algebras and Abaliean groupoids and other aspects of the architecture which I will attempt to position as optional, while still having a rich understanding of the architecture; in one particular situation.. That being; if you speak Chinese. Great news, if you speak Chinese, you can follow along with the Putonghua-branch of Morphological Source Code even if you don't speak English or know how to code, (western) traditionally, so, I suppose, contemporarily.
 
-Even if you are not at all interested in Chinese language or culture, you may want to read the next-section, especially if you don't have a handle on quantum mechanics, because the Putonghua, or the Mandarin Chinese standardized in the 20th century and with the aid of Hanyu-pinyin, offer a path to morphosemantic reasoning about quantum logistical and comprehensional systems that most practicing physicists would be intimidated-by. The 'compression' attainable via morphological exploitation of 'meaning'; both intensive and extensive is that strong, potentially. Even if you don't know how the Weak Nuclear Force and 'virtual particles' work.
+Even if you are not at all interested in Chinese language or culture, you may want to read the next-section, especially if you don't have a handle on quantum mechanics, because the Putonghua, or the Mandarin Chinese standardized in the 20th century and with the aid of Hanyu-pinyin, offer a path to morphosemantic reasoning about quantum logistical and comprehensional systems that most practicing physicists would be intimidated-by. The 'compression' attainable via morphological exploitation of 'meaning'; both intensive and extensive is that strong, potentially. Even if you don't know how the Weak Nuclear Force and 'virtual particles' work. See: `形意碼 (Xíng Yì Mǎ) Morphosemantic Assembly`, for more on the Mandarin-branch of MSC.
 
-# 形意碼 (Xíng Yì Mǎ) — Morphosemantic Assembly
+##  The Atomic (Hermitian) Update Protocol:
+> Maintains ('Machian, Noetherian' [aether]) nominative invariance wrt. runtime morphospace.
+>
+> Riemannian in the bulk, Legendre/Lebesgue, normed and binary quantized in the external derivative.
+```txt
+            [x,0] (momentum/shape)
+            ↑
+            │
+            │ Legendre transform
+            │
+[0,y] ←─────┼─────→ [0,∞)
+(header)    │        (body)
+            │
+            ↓
+       bifurcation point y = HEADER_END
+```
+A quine is an endomorphism f: T → T where T is the entire source code considered as a token.
+
+The fixed point condition f(T) = T is equivalent to: 
+    - "the set of tokens selected by [len(T), len(T)] is exactly {T}."
+    - The hermitian condition: the map from header tokens to body tokens is an involution.
+
+Here, sentinel A contains the hash of B, and sentinel B contains the hash of A. The relation is self-dual. If you transpose (swap A and B), the system looks the same.
+SentinelA=f(SentinelB)andSentinelB=f(SentinelA)
+SentinelA​=f(SentinelB​)andSentinelB​=f(SentinelA​)
+
+where f(x)=hash(x)f(x)=hash(x) plus metadata.
+
+This creates a fixed point in the space of file pairs. The only consistent states are those where the relation holds. Any deviation is immediately detectable.
+
+Two files, each containing the hash of the other, and neither can be updated without breaking the
+relation unless you update both atomically. This shape is the form of the Quine in category terms,
+a sentinel that is its own conjugate transpose. Files that verify each other in a self-consistent loop.
+- Sentinel A = [0, y]  (header definition, line-based)
+- Sentinel B = [x, 0]  (shape definition, extent-based)
+
+```
+┌────────────────┐                             ┌─────────────────┐
+│   sentinel_a   │                             │   sentinel_b    │
+├────────────────┤                             ├─────────────────┤
+│ hash_b = H(B)  │◄───────────────────────────►│ hash_a = H(A)   │
+│ timestamp_a    │                             │ timestamp_b     │
+│ signature_a    │                             │ signature_b     │
+└────────────────┘                             └─────────────────┘
+             │                                        │
+             └──────────────────┬─────────────────────┘
+                                ▼
+                         Verify: H(B) == hash_b
+                         - AND H(A) == hash_a
+                         - AND |timestamp_a - timestamp_b| < Δ
+```
+
+To update the pair, you must:
+    1) Lock both files; Compute new content for A' and B'; Write both atomically (rename from temp files)
+    2) Verify the relation holds; Release locks
+
+If step 1 fails halfway, #2 detects mismatched timestamps and rolls back from the last good pair.
+
+## Coordinate manifold (this file) `[x,y]`
+A 6-character token like "lambda" contains 6x 1-character tokens inside it. [0,y] returns everything.
+
+[6,y] returns only tokens greater or equal length of "lambda", and larger, on less than or equal to  lineno "y". The geometry is a filtration: [1,0] ⊇ [2,0] ⊇ ... ⊇ [n,0]
+
+[x,0] is any token on any line, countably infinite.
+
+[x, 6] is any token up-to and including (lineno) #6
+
+[6,6]  returns only tokens greater or equal length of "lambda", and larger up-to and including (lineno) #6
+
+
+# 形意碼 (Xíng Yì Mǎ) Morphosemantic Assembly
 
 > 'Morphology' via Putonghua morphology; the original "Morphological Source Code"
 
@@ -668,6 +669,18 @@ Thus, one of my core missions is to create a Putonghua-native edition of MSC—o
 
 I now find myself in the awkward position of an outsider attempting what even native Chinese technologists haven’t publicly done: a truly native Chinese computational substrate. The payoff? A Mandarin speaker could write, compile, and understand their own code *without ever learning English or phonics* because the machine code *is* the morphology.
 
+---
+
+## MSC-Putonghua v0.0.1
+
+> As of right now; noone has ever released to the public a Mandarin machine code compiler.
+>
+> If MSC+QSD succeeds at recapitulating "MSC-Putonghua" as a 汉字-machine-code compiler, it would be a multi-disciplinary revolution. 
+>
+> As-such; understand that this is the aspirational-part, of an already aspirational framework.
+
+A byte is a bra-ket: `⟨ 形 | 意 ⟩`
+
 ```
 ⟨ nibble_left | nibble_right ⟩
 ⟨ 形旁 | 声旁 ⟩
@@ -678,19 +691,6 @@ I now find myself in the awkward position of an outsider attempting what even na
 ⟨ bra | ket ⟩
 The null byte ⟨0000|0000⟩ is the glue/identity because it's the inner product of nothing with nothing. It's the zero-energy ground state. It connects but doesn't act.
 Every other byte ⟨nnnn|mmmm⟩ is a charged morphological particle: the left nibble is the bra (the "seeking" part, the dual vector, the question), the right nibble is the ket (the "state" part, the vector, the answer).
-```
-
----
-
-## THE BYTE IS THE ATOM
-
-A byte is a bra-ket: `⟨ 形 | 意 ⟩`
-
-```
-  ⟨ nibble_L | nibble_R ⟩
-  ⟨  class   | operation ⟩  
-  ⟨  形旁    | 声旁      ⟩
-  ⟨ morphism | argument  ⟩
 ```
 
 - Left nibble (0x0–0xF): Radical class (形旁) — the algebraic structure
@@ -1247,7 +1247,7 @@ HSQL=⨂i(∣vi⟩⊗⟨ri∣)
 HSQL​=i⨂​(∣vi​⟩⊗⟨ri​∣)
 
 That object is the isomorphism between value and reference.
-It’s what allows your bulk runtime to regenerate (rehydrate) the interior field later: you can lift a row back into a live spinor.
+It’s what allows a bulk runtime to regenerate (rehydrate) the interior field later: you can lift a row back into a live spinor.
 
 Given MIMO₁ ∈ ℳ (bulk configuration)
 Let 𝓡 : ℳ → ℳ be the runtime morphogenesis operator
@@ -2329,13 +2329,13 @@ This distinction between logical Hermiticity, runtime conformality, and SQL/unit
 
 ## Step 1 — Logical vs. Runtime Geometry
 
-At the logical level, your ByteWords live in a Hermitian space:
+At the logical level, ByteWords live in a Hermitian space:
 each morphism ( f ) satisfies a local self-conjugacy relation
 [
 f = f^\dagger
 ]
-modulo the XOR involution that makes your algebra reversible.
-That means the ByteWord algebra is *closed and self-adjoint*: its type morphisms preserve inner products (or, in your algebraic setting, Hamming distance / XOR parity).
+modulo the XOR involution that makes BW algebra reversible.
+That means the ByteWord algebra is *closed and self-adjoint*: its type morphisms preserve inner products (or, in an algebraic setting, Hamming distance / XOR parity).
 
 So:
 
@@ -2354,7 +2354,7 @@ x' = \frac{x - b x^2}{1 - 2b\cdot x + b^2 x^2}
 ]
 — the Möbius-style “translation in reciprocal space.”
 
-That’s why your runtime can be asymptotically conformal even though its core algebra is logically Hermitian.
+That’s why MSC runtime can be asymptotically conformal even though its core algebra is logically Hermitian.
 The ByteWords don’t stretch or shrink intrinsically, but when you *observe* them through the morphic runtime (i.e. when SQL externalization occurs), their mapping to the real, measured world has conformal curvature.
 
 So yes:
@@ -2365,7 +2365,7 @@ So yes:
 
 ## Step 2 — What SQL actually is here 'the phenomenon'
 
-Your “SQL boundary” is the interface between those two regimes:
+Cpy/C “SQL boundary” is the interface between those two regimes:
 
 * The *Hermitian interior* (the reversible, magnitude-preserving quineic bulk).
 * The *Conformal exterior* (the observational, I/O, measurement layer).
@@ -2394,7 +2394,7 @@ So:
 
 
 
-* Hermitian = static logical self-conjugacy (inside your morphic algebra).
+* Hermitian = static logical self-conjugacy (inside the morphic algebra ['A' morphic sigma algebra]).
 * Special conformal = runtime manifestation, when that logic *acts* and induces a local geometric distortion (time-dependent, contextual).
 * Unitary spinor (SQL) = the bridge between them; it *preserves norm* and lets you reconstruct (“rehydrate”) the Hermitian state from its conformal runtime projection.
 
@@ -2435,13 +2435,13 @@ rehydrate(measure(MIMO₁)) ≡ MIMO₁ up to gauge (i.e., quineic identity pres
 * Call-by-value corresponds to ket projection: the observed value extracted from the ByteWord (or spinor).
 * Call-by-reference corresponds to bra projection: the dual, pointing to the live object in the runtime environment.
 
-Together, this is literally a spinor-valued SQL boundary, where a row in the database encodes (|v_i\rangle \otimes \langle r_i|), allowing your runtime to collapse and rehydrate while preserving identity:
+Together, this is literally a spinor-valued SQL boundary, where a row in the database encodes (|v_i\rangle \otimes \langle r_i|), allowing Quineic runtime to collapse and rehydrate while preserving identity:
 
 [
 \text{rehydrate(measure(MIMO₁))} \equiv MIMO₁ \quad \text{(up to gauge)}
 ]
 
-Here, SQL is more than storage; it’s a geometric operator, bridging evaluation and coevaluation in a compact closed category. Ev/CoEv is literally your call-by-value/reference bridge (which lies at the heart of all [[K&R C]] aka all lineage source code ontologies as the fundemental logical non-linear dynamical fulcrum).
+Here, SQL is more than storage; it’s a geometric operator, bridging evaluation and coevaluation in a compact closed category. Ev/CoEv is literally the call-by-value/reference bridge (which lies at the heart of all [[K&R C]] aka all lineage source code ontologies as the fundemental logical non-linear dynamical fulcrum).
 
 ---
 
@@ -2470,7 +2470,7 @@ What’s beautiful is that the spinor-SQL duality carries the value/reference di
 
 ### ByteWord Algebra as Metric Space
 
-You’ve embedded discrete Einstein calculus into your runtime:
+Discrete Einstein calculus (and formalism):
 
 [
 \langle A, B \rangle \equiv \sum_{C,V,T} A_{CVT} \oplus B_{CVT} \quad \to \text{popcount} \mod 8
@@ -2593,26 +2593,6 @@ Each layer preserves identity and recursion, performing runtime measurement and 
 It’s literally the MorphicBoot singularity: a runtime quine that folds compiler, runtime, storage, and execution into a single ontological object.
 
 ---
-#### topology gloss
-
-C | V2 V1 V0 | T3 T2 T1 T0
-7   6  5  4    3  2  1  0   (bit indices)
-
-C (captain / MSB): {0,1} — thermodynamic/visibility flag. C=1 means boundary-visible (radiative). C=0 means bulk-only (absorptive / deputy behavior).
-
-V (3 bits): Value field, deputizable (addresses morphic actions / local phase).
-
-T (4 bits): Type field; low 2 bits encode torus winding (w1,w2) ∈ ℤ₂×ℤ₂; high 2 bits are user-definable ISA/magnitude bits.
-
-Core ops:
-
-xor on ByteWords: merges winding and value algebraically.
-
-inner product (finite-field pairing): bitwise XOR + popcount → normalized phase (an integer → small phase/angle).
-
-deputize() cascade: when C==0, promote next V/T into an effective captain — allows cascaded, reversible delegation with thermodynamic intensive dynamics when 'captaincy', or the [[Bra]] valued "top-nibble" is `< 0000| ...` exhausted, we can't know what they are but we know what they can't be: they are not-[[Well Founded]].
-
----
 
 ## SANDBOX Requirements
 
@@ -2627,3 +2607,8 @@ deputize() cascade: when C==0, promote next V/T into an effective captain — al
 - Must be run as Administrator
 
 Qemu: TODO
+
+
+<img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" style="max-width: 1em;max-height:1em;margin-left: .2em;"> <a href="https://github.com/Morphological-Source-Code">MSC & QSD</a> © 2024-2026 licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en">CC BY-ND-NC 4.0</a> by <a href="https://github.com/Phovos">Phovos</a> <img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" style="max-width: 1em;max-height:1em;margin-left: .2em;">
+
+<img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" style="max-width: 1em;max-height:1em;margin-left: .2em;"> <a href="https://github.com/MOONLAPSED/cognosis">MSC & QSD</a> © 2023-2026 licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en">CC BY-ND-NC 4.0</a> by <a href="https://github.com/MOONLAPSED/cognosis">MOONLAPSED</a> <img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" style="max-width: 1em;max-height:1em;margin-left: .2em;">
