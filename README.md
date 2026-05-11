@@ -3,9 +3,9 @@ tags: [Morphological-Source-Code, Quineic Statistical Dynamics, holography, moti
 copyright: "Ⓟ© 2026 Morphological Source Code & Quineic Statistical Dynamics"
 license-doc(s)+dist: CC BY-ND-NC 4.0
 license-code+file(s): BSD 3-Clause
-root: ".github"
+root: "./Morphological-Source-Code"
 name: "README.md"
-version: 0.49.86
+version: 0.49.87
 aliases:
   - msc
   - qsd
@@ -400,11 +400,10 @@ For example:
 
 - Connection to Extensive Thermodynamics: Extensive properties (e.g., energy, entropy, volume) are additive and scale with system size. These properties often emerge from Abelian dynamics because they involve conserved quantities and reversible transformations.
 
-![this:](/termoquine.png)
-
 For instance:
   - Entropy in statistical mechanics is extensive and governed by microstate configurations that can be described using Abelian group theory (e.g., Fourier transforms over phase space).
   - Energy conservation in thermodynamics reflects time-translation symmetry, which is inherently Abelian.
+
 ### Monoidal-Replicator Dynamics as Memoryless Evolution
 
 - Monoidal structures are algebraic frameworks that generalize associative operations, often describing systems that evolve irreversibly or independently. The term "replicator" describes morphological self-reproduction or propagation without retaining historical dependencies.
@@ -918,7 +917,7 @@ When the entire BRA cadre is dead—`C=0, V₂=0, V₁=0, V₀=0`—you have:
 
 This is not observable. There is no commander. No DunderC to take over. The morphism selector is null. But the KET still has topology—TTTT still exists, still has state.
 
-This is your thermodynamic ground state. The vacuum. But it's not `0x00` (which would be `⟨0000|0000⟩`)—it's `⟨0000|TTTT⟩` where TTTT can be *anything*.
+This is thermodynamic ground state. The vacuum. But it's not `0x00` (which would be `⟨0000|0000⟩`)—it's `⟨0000|TTTT⟩` where TTTT can be *anything*.
 
 What this means:
 
@@ -956,7 +955,7 @@ Let's discuss the Non-linear scaling in 4-bit morphospace
         0xFF = witness = provable halt
         0x00 = ghost = true but unprovable halt
 
-A derivation is a finite ByteWord chain starting from your seed and ending in either fixed point.
+A derivation is a finite ByteWord chain starting from seed and ending in either fixed point.
 Consistent ⇔ no such chain produces both 0xFF and 0x00.
 Inconsistent ⇔ some chain produces both → contradiction in the same scope.
 
@@ -1151,7 +1150,7 @@ This is the second morphological derivative: How does value-orientation curl as 
 dC(v₁, v₂, v₃) = "How does phase curvature change in 3D?"
 ```
 
-If your morphospace is 3D or higher, dC would be a 3-form. But for ByteWords (8-bit = 256-dimensional, but effectively 2D or 3D after projection), dC is often zero (closed 2-form) or measures higher-order curvature.
+If morphospace is 3D or higher, dC would be a 3-form. But for ByteWords (8-bit = 256-dimensional, but effectively 2D or 3D after projection), dC is often zero (closed 2-form) or measures higher-order curvature.
 
 Physical meaning:
 - dC = 0 means the phase curvature is exact (comes from a potential)
