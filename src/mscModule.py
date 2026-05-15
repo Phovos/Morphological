@@ -18,6 +18,7 @@ from __future__ import annotations
 from __future__ import annotations
 import sys
 import ast
+import os
 import json
 import logging
 import argparse
@@ -69,10 +70,8 @@ Design Principles:
 """
 IS_WINDOWS = os.name == 'nt'
 if IS_WINDOWS:
-    from ctypes import windll
-    from ctypes import wintypes
-    from ctypes.wintypes import HANDLE, DWORD, LPWSTR, LPVOID, BOOL
     from pathlib import PureWindowsPath
+
     WINDOWS_SANDBOX = Path(PureWindowsPath(r'C:\Users\WDAGUtilityAccount\Desktop'))
 
 # ---------------------------------------------------------------------------
@@ -180,58 +179,92 @@ def create_module(
         sys.modules.pop(module_name, None)
         return None
 
+
 class LogFilter(logging.Filter):
     """Filter that can exclude specific log patterns."""
+
     def __init__(self, exclude_patterns: List[str] = None):
         super().__init__()
         self.exclude_patterns = exclude_patterns or []
+
     def filter(self, record):
         message = record.getMessage()
         return not any(pattern in message for pattern in self.exclude_patterns)
+
+
 class AppError(Exception):
     """Base exception for application errors."""
-    def __init__(self, message: str, error_code: str = "APP_ERROR", status_code: int = 420):
+
+    def __init__(
+        self, message: str, error_code: str = "APP_ERROR", status_code: int = 420
+    ):
         self.message = message
         self.status_code = status_code
         self.error_code = error_code
         self.timestamp = datetime.now()
         super().__init__(message)  # 420
+
+
 class ConfigError(AppError):
     """Configuration related errors."""
+
     def __init__(self, message: str):
         super().__init__(message, "CONFIG_ERROR")  # 500
+
+
 class SecurityError(AppError):
     """Security related errors."""
+
     def __init__(self, message: str):
         super().__init__(message, "SECURITY_ERROR")  # 403
+
+
 class ContentError(AppError):
     """Content related errors."""
+
     def __init__(self, message: str):
         super().__init__(message, "CONTENT_ERROR")  # 400
+
+
 class NamespaceError(AppError):
     """Namespace related errors."""
+
     def __init__(self, message: str):
-        super().__init__(message, "NAMESPACE_ERROR") # 404
+        super().__init__(message, "NAMESPACE_ERROR")  # 404
+
+
 def error_handler(logger):
     """Decorator for standardized error handling."""
+
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
             try:
                 return func(*args, **kwargs)
             except AppError as e:
-                logger.error(f"{e.__class__.__name__}: {e.message}", 
-                             exc_info=True, 
-                             extra={'status_code': e.status_code})
+                logger.error(
+                    f"{e.__class__.__name__}: {e.message}",
+                    exc_info=True,
+                    extra={'status_code': e.status_code},
+                )
                 raise
             except Exception as e:
                 logger.error(f"Unexpected error: {str(e)}", exc_info=True)
                 raise AppError(f"An unexpected error occurred: {str(e)}")
+
         return wrapper
+
     return decorator
-def retry(max_attempts: int = 3, backoff_factor: float = 1.5, 
-          exceptions: tuple = (Exception,), logger: Optional[logging.Logger] = None):
+
+
+def retry(
+    max_attempts: int = 3,
+    backoff_factor: float = 1.5,
+    exceptions: tuple = (Exception,),
+    logger: Optional[logging.Logger] = None,
+):
     """Decorator to retry functions with exponential backoff."""
+
     def decorator(func: Callable[..., T]) -> Callable[..., T]:
         @wraps(func)
         def wrapper(*args, **kwargs) -> T:
@@ -250,8 +283,11 @@ def retry(max_attempts: int = 3, backoff_factor: float = 1.5,
                         raise
                     time.sleep(wait_time)
                     attempt += 1
+
         return wrapper
+
     return decorator
+
 
 # ---------------------------------------------------------------------------
 # Static Analysis (Python)
