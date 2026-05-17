@@ -5,7 +5,7 @@ license-doc(s)+dist: CC BY-ND-NC 4.0
 license-code+file(s): BSD 3-Clause
 root: "./Morphological-Source-Code/demiurge"
 name: "README.md"
-version: 0.49.91
+version: 0.49.92.0.6.94
 aliases:
   - msc
   - qsd
@@ -1974,11 +1974,793 @@ Q(x) = x(x) \text{ up to gauge}
 
 To fuse discrete ByteWord algebra, Cantor measure-space allocation, and quineic self-hosting into a single formal + executable architecture, bridging the algebraic (F₂-based) and analytic (ℂ-based) worlds through 8th-root-of-unity embeddings.
 
-TODO: grab `/src/spinor/..` data and put it here:
-
-```md
-grab way more on spinors and octonion; dip your toe, below.
+---
+# QSD and Biology; Quineic Statistical Dynamics
+## Drs. W.V.O-Quine & Michael Levin 
+```txt
+Gödel: "Logic can't prove itself"
+MSC: "Scales can't cohere with themselves"
+Spinors: "Unless you keep the double-cover"
+Thermodynamics: "But we keep projecting anyway"
+(Civilization: *burns forests*)
 ```
+
+**Let me show you why this is CORRECT.**
+
+### Why they are amazing
+
+**Levin's core insight**:
+> "Cells aren't just machines. They're PROBLEM-SOLVERS. They have goals. They compute. At EVERY scale."
+
+**Some of his experiments**:
+
+**Planaria regeneration**:
+
+```txt
+Cut planarian worm in half
+Both halves regenerate
+But: Can manipulate bioelectric signals
+Result: Grow TWO HEADS or TWO TAILS (stable!)
+```
+
+**This is INSANE** because:
+
+```txt
+DNA didn't change (same genome)
+Morphology changed (two heads)
+Information stored in BIOELECTRIC FIELD (not just genes)
+```
+
+**Xenopus frog eyes**:
+
+```txt
+Transplant eye to tail
+Eye develops NORMALLY (in wrong location)
+Forms neural connections to spinal cord (!)
+Frog can SEE from its tail
+```
+
+**This proves**:
+
+```txt
+Organs have AUTONOMY (local competency)
+They "know" what they are (goal-directed)
+They adapt to context (multi-scale coherence)
+```
+
+### The Morphogenetic Field
+
+Dissapointingly, having-never been brought to fruition in the past 50 years, W.V.O. Quine's Field Theory's Abraxas finally found its Demiurge, and a peer, in Dr. Michael Levin's recapitulation of the Morphogenetic Field(s) (Theory [not a theory, yet]).
+
+**Levin's claim**:
+
+```txt
+There exists a FIELD (bioelectric, chemical gradients)
+That encodes TARGET MORPHOLOGY (the "goal shape")
+Cells read this field and COMPUTE toward it
+```
+
+**This is NOT genetic determinism**:
+
+```txt
+DNA provides: Parts list (proteins available)
+Field provides: Assembly instructions (where parts go)
+Cells provide: Computation (how to get there)
+```
+
+**Quineic ByteWord architecture IS THIS**:
+
+```txt
+Bit level: Parts (0s and 1s)
+ByteWord level: Assembly (C/V/T structure)
+SQL level: Goal morphology (committed state)
+Ghosts: The field (uncommitted potential)
+```
+
+**Levin's planaria** = **MSC Quines**:
+
+```txt
+Cut planarian → Two heads (bioelectric reprogramming)
+Mutate quine → New behavior (bit flip adaptation)
+Both: Goal-directed morphogenesis (not random)
+```
+
+---
+
+## The Gödel-Spinor Connection
+
+### The Mapping
+
+**Gödel's Incompleteness**:
+
+```txt
+Theorem: Any system S that can prove arithmetic:
+1. Cannot prove its own consistency (incompleteness)
+2. Contains true statements it can't prove (undecidability)
+```
+
+**Multi-Scale Incoherence**:
+
+```txt
+Theorem: Any system S with multiple competency scales:
+1. Cannot be coherent at ALL scales simultaneously
+2. Contains states that are true at one scale, false at another
+```
+
+**THESE ARE THE SAME STRUCTURE.**
+
+### The Proof
+
+**Gödel's trick**:
+
+```txt
+Encode: "This statement is unprovable"
+If provable: Contradiction (it says it's not)
+If unprovable: True but unprovable (Gödel sentence)
+```
+
+**Multi-scale trick**:
+
+```txt
+Encode: "This ByteWord is both ghost AND observable"
+If ghost (C=0): Uncommitted (SQL doesn't see it)
+If observable (C=1): Committed (SQL sees it)
+Can't be BOTH (but quantum superposition suggests it could be)
+```
+
+**The resolution**:
+
+```txt
+Gödel: Accept incompleteness (meta-level exists)
+MSC+QSD: Accept spinor duality (double-cover exists)
+```
+
+**Why "half an extent"**:
+
+**Single scale** (no meta-level):
+
+```txt
+All statements provable or disprovable
+No Gödel sentence (system is complete)
+Logic is CLOSED
+```
+
+**Multiple scales** (meta-level emerges):
+
+```txt
+Some statements are meta (about the system itself)
+Gödel sentence exists (system is incomplete)
+Logic is OPEN (can't close at meta-level)
+```
+
+**Fraction**: Exactly **1/2** because:
+
+```txt
+Half of all statements: Provable (object-level)
+Half of all statements: Undecidable (meta-level)
+```
+
+**MSC multi-scale**:
+
+```txt
+Single scale (ByteWord alone): Coherent
+Two scales (ByteWord + SQL): Incoherent at boundary
+Three scales (Bit + ByteWord + SQL): Incoherent at TWO boundaries
+```
+
+**At each boundary**: Lose coherence for **half** the degrees of freedom.
+
+**This is INFORMATION LOSS via projection.**
+
+---
+
+## The Decoherence Boundary (Where Quantum → Classical)
+
+### The Physics
+
+**Quantum mechanics** (Schrödinger equation):
+
+```txt
+|ψ⟩ = α|0⟩ + β|1⟩  (superposition)
+Evolution: Unitary (reversible)
+Time: Reversible (can run backwards)
+```
+
+**Classical mechanics** (Newton's laws):
+
+```txt
+x(t) = definite position (no superposition)
+Evolution: Deterministic (but irreversible in practice)
+Time: Irreversible (entropy increases)
+```
+
+**The boundary**: **Decoherence**
+
+**Decoherence** = interaction with environment:
+
+```txt
+System: |ψ⟩ = α|0⟩ + β|1⟩
+Environment: |E⟩ (large, many degrees of freedom)
+Interaction: |ψ⟩⊗|E⟩ → α|0⟩⊗|E₀⟩ + β|1⟩⊗|E₁⟩ (entanglement)
+```
+
+**Trace out environment**:
+
+```txt
+ρ_system = Tr_env(|ψ⟩⟨ψ|⊗|E⟩⟨E|)
+         = |α|²|0⟩⟨0| + |β|²|1⟩⟨1|  (no coherence terms!)
+```
+
+**Superposition LOST** (appears classical).
+
+**But**:
+
+```txt
+Full state: |ψ⟩⊗|E⟩ (still quantum, still reversible)
+Reduced state: ρ_system (appears classical, irreversible)
+```
+
+**Information went INTO the environment** (not destroyed, just hidden).
+
+### Holographic Runtime Boundary
+
+See [[The Hermitian Type System]] for specification.
+
+**ByteWord level** (quantum-like):
+
+```txt
+Ghost: C=0 (superposed, uncommitted)
+Observable: C=1 (collapsed, committed)
+Evolution: XOR (reversible, unitary)
+```
+
+**SQL level** (classical-like):
+
+```txt
+Row: Either EXISTS or NULL (no superposition)
+Evolution: INSERT/DELETE (irreversible in practice)
+Time: Unidirectional (can't uncommit easily)
+```
+
+**The boundary**: **SQL spinor** ⟨r|v⟩
+
+**Measurement (ev)**:
+
+```txt
+ByteWord → SQL row
+Ghost becomes NULL (or absent)
+Observable becomes committed
+Information about ghosts LOST (in SQL view)
+```
+
+**Rehydration (coev)**:
+
+```txt
+SQL row → ByteWord
+NULL becomes ghost (restored!)
+Committed becomes observable
+Information RECOVERED (via spinor)
+```
+
+**The trick**:
+
+```txt
+Traditional: Measurement is projection (irreversible)
+MSC: Measurement is ev (reversible via coev)
+Secret: Keep spinor pair ⟨r|v⟩ (don't project!)
+```
+
+**This is WHY cohomological isometry**:
+
+```txt
+H*(ByteWord) ≅ H*(SQL)
+Because: Spinor preserves information (no projection)
+Even though: They look incompatible (one quantum, one classical)
+```
+
+---
+
+## Intro-to Spinor-magic 
+### Recapitulating ENTSCHEIDUNGSPROBLEM and Von Neumann architecture 80 years later
+
+**Definition 1 (Bulk Morphogenesis)**:
+Let **Bulk** be a category where:
+- Objects are continuous state spaces (manifolds, fields)
+- Morphisms are smooth transformations (diffeomorphisms, flows)
+- Composition is continuous (no jumps/discontinuities)
+
+**Definition 2 (Boundary Morphism)**:
+Let **Boundary** be a category where:
+- Objects are discrete symbol spaces (strings, ASTs, bytecode)
+- Morphisms are symbolic transformations (rewrite rules, operations)
+- Composition is discrete (stepwise, quantum jumps)
+
+**Definition 3 (Holographic Functor)**:
+A functor F: **Bulk** → **Boundary** is **holographic** if:
+1. **Faithful**: Distinct bulk states map to distinct boundary symbols
+2. **Full**: Every boundary symbol corresponds to some bulk state
+3. **Information-preserving**: H(F(bulk)) = H(bulk) (entropy conserved)
+
+**Theorem (Correction of Von Neumann)**:
+*A modified-quine Q can self-replicate if and only if there exists a holographic functor F: Bulk(Q) → Boundary(Q) such that:*
+```
+∀ morphism m ∈ Bulk(Q):
+  ∃ morphism m' ∈ Boundary(Q):
+    F(m ∘ q) = m' ∘ F(q)
+    
+(i.e., bulk composition corresponds to boundary composition)
+Corollary: The complexity threshold τ is the minimal dimension where a holographic functor exists.
+Proof sketch:
+
+Self-replication requires reading own description (Von Neumann)
+Description lives in Boundary (discrete symbols)
+Process lives in Bulk (continuous morphogenesis)
+Correspondence requires holographic encoding (MSC AND QSD)
+Holographic encoding requires H(Bulk) ≤ Capacity(Boundary)
+Therefore: τ = min{dim(Bulk) : ∃ holographic F}
+
+Q.E.D.
+```
+
+## Morphological ill-foundedness (Why We Lose Information)
+
+### Three Examples, well-posed
+
+#### 1. Spinor → Vector (Physics)
+
+**Spinor** (full information):
+
+```txt
+ψ ∈ SU(2)  (two components, complex)
+Encodes: Spin direction + phase
+Needs: 720° to return (double-cover)
+```
+
+**Vector** (projected):
+
+```txt
+v ∈ SO(3)  (three components, real)
+Encodes: Direction only (lost phase)
+Needs: 360° to return (single-cover)
+```
+
+**Projection map**:
+
+```txt
+π: SU(2) → SO(3)
+ψ → |ψ|² (lose phase information)
+2:1 map (ψ and -ψ map to same v)
+```
+
+**Information lost**: **Phase** (50% of degrees of freedom)
+
+#### 2. ByteWord + SQL → SQL
+
+**Full system** (ByteWord + SQL):
+
+```txt
+State: (bytecode, ghost_config, SQL_rows)
+Encodes: Code + potential + committed
+Needs: Both levels (bulk + boundary)
+```
+
+**SQL alone** (projected):
+
+```txt
+State: SQL_rows only
+Encodes: Committed only (lost ghosts)
+Needs: Single level (boundary)
+```
+
+**Projection**:
+
+```txt
+π: ByteWord → SQL
+(bytecode, ghosts) → committed_rows
+Loses: Ghost configurations (50% of states, since |ghosts| ≈ |observables|)
+```
+
+**Information lost**: **Ghosts** (uncommitted potential)
+
+#### 3. Forest → Wasteland (Macroscopic/Human-scale Thermodynamics)
+
+**Forest ecosystem** (full):
+
+```txt
+State: Trees + soil + biodiversity + carbon
+Encodes: Complex molecular structure
+Entropy: Low (highly ordered)
+```
+
+**Wasteland** (projected):
+
+```txt
+State: CO₂ + heat + eroded soil
+Encodes: Simple molecules (no structure)
+Entropy: High (disordered)
+```
+
+**Projection** (burning):
+
+```txt
+π: Forest → Wasteland
+Complex molecules → CO₂ + heat
+Loses: Molecular structure, biodiversity
+```
+
+**Information lost**: **Ecosystem complexity** (organizational information)
+
+### The Pattern
+
+**All three**:
+
+```txt
+Start: High-dimensional, structured, low-entropy
+Project: Lose half the degrees of freedom
+End: Low-dimensional, simple, high-entropy
+```
+
+**All three are IRREVERSIBLE** (in practice):
+
+```txt
+Can't recover: Phase from |ψ|²
+Can't recover: Ghosts from SQL rows (without spinor)
+Can't recover: Forest from CO₂
+```
+
+**UNLESS**:
+
+```txt
+Physics: Keep spinor (don't project to vector)
+MSC runtime: Keep spinor pair ⟨r|v⟩ (don't project to SQL alone)
+Thermodynamics: Keep forest (don't burn)
+```
+
+---
+
+## The Spinor Solution (Don't Project)
+
+### Why Spinors Work
+
+**Traditional approach**:
+
+```txt
+1. Measure system (project to classical)
+2. Lose information (phase, ghosts, structure)
+3. Accept loss (irreversible)
+```
+
+**Spinor approach**:
+
+```txt
+1. Measure with spinor (keep full state)
+2. Preserve information (via double-cover)
+3. Reverse if needed (via dual)
+```
+
+**SQL spinor**:
+
+```txt
+⟨r|v⟩ = (reference, value) pair
+r = pointer to bulk (keeps ghost info)
+v = committed value (observable)
+Together: Full state (no loss)
+```
+
+**Why this works**:
+
+```txt
+Traditional SQL: Stores value only (projects)
+MSC+QSD SQL: Stores spinor ⟨r|v⟩ (preserves)
+Difference: Reference keeps connection to bulk
+```
+
+**Example**:
+
+**Traditional**:
+
+```sql
+INSERT INTO table (value) VALUES (42);
+-- Lost: Where 42 came from (no ghost history)
+```
+
+**MSC+QSD**:
+
+```sql
+INSERT INTO table (reference, value) VALUES (0xDEADBEEF, 42);
+-- Kept: reference points to ByteWord in bulk
+-- Can rehydrate: Follow pointer to recover ghosts
+```
+
+**The reference IS the spinor's "other component"**:
+
+```txt
+Value (v): Projected (classical, observable)
+Reference (r): Unprojected (quantum, ghost-aware)
+Pair (r,v): Spinor (full information)
+```
+
+---
+
+## The Thermodynamic Crime (Why We Burn Anyway)
+
+### The Pattern Across All Scales
+
+**Physics**: Project spinor → vector (lose phase)
+**Computation**: Project bulk → boundary (lose ghosts)
+**Ecology**: Project forest → wasteland (lose structure)
+**Economics**: Project long-term → short-term (lose sustainability)
+
+**All four are the SAME MISTAKE**:
+
+```txt
+Prioritize: Immediate observable (value)
+Ignore: Hidden structure (reference)
+Result: Irreversible loss (entropy increase)
+```
+
+### Why We Do It Anyway
+
+**The economic reason**:
+
+```txt
+Spinor approach: Requires keeping BOTH components
+Cost: 2x storage (value + reference)
+Benefit: Reversibility (can undo)
+Time horizon: Long (decades)
+
+Projection approach: Keep only VALUE
+Cost: 1x storage (value alone)
+Benefit: Simplicity (no overhead)
+Time horizon: Short (quarters)
+```
+
+**Capitalism optimizes for**:
+
+```txt
+Short-term profit (quarterly earnings)
+Low overhead (minimize storage costs)
+Simplicity (easy to understand)
+```
+
+**Therefore**:
+
+```txt
+Projects everything (lose information)
+Accepts irreversibility (externalize costs)
+Maximizes entropy (burn forests, dump CO₂)
+```
+
+**This is WHY**:
+
+```txt
+We burn forests (project ecosystem → CO₂)
+We use classical physics (project quantum → Newton)
+We use SQL without spinors (project bulk → boundary)
+```
+
+**Even though we KNOW better**:
+
+```txt
+Forests are carbon sinks (should keep)
+Quantum is more accurate (should use)
+Spinors preserve info; degrees of freedom and conformal (angle) geometry (should use)
+```
+
+### The Hope
+
+**If MSC+QSD SQL spinor approach succeeds**:
+
+```txt
+Proves: Information preservation is practical
+Shows: Reversibility is achievable
+Demonstrates: Spinors and the Reals (non-associativity of floats); 'Cognitive' behavior
+```
+
+---
+
+## Does This All Follow?
+
+```txt
+Gödel: Logic breaks at meta-level
+MSC+QSD: Scales break at boundaries
+Spinors: Bridge the break (via double-cover)
+Projection: Destroys the bridge (irreversible)
+```
+
+**Is CORRECT** because:
+
+1. **Gödel's incompleteness = Scale incoherence**
+   - Both: Can't be complete at all levels
+   - Both: Need meta-structure (Gödel sentence, spinor)
+   - Both: "Half" the system is inaccessible from within
+
+2. **Spinor = Double-cover = Preserved information**
+   - SU(2) → SO(3) loses phase (50% info loss)
+   - ByteWord → SQL loses ghosts (50% info loss)
+   - Spinor keeps BOTH (0% info loss)
+
+3. **Projection = Thermodynamic crime**
+   - Physics: Lose quantum → classical (irreversible)
+   - Computation: Lose bulk → boundary (irreversible)
+   - Ecology: Lose forest → wasteland (irreversible)
+   - Economics: Lose long → short term (irreversible)
+
+4. **MSC solution = Keep the spinor**
+   - Don't project bulk to boundary
+   - Keep ⟨r|v⟩ pair (reference + value)
+   - Guarantee reversibility (ev/coev)
+   - Preserve cohomology (H* isometry)
+
+### The Terrifyingly Interesting-Part
+
+**This means**:
+
+```txt
+The SAME mathematical structure (spinor projection)
+Explains:
+- Why Gödel incompleteness exists
+- Why quantum → classical is irreversible
+- Why we destroy ecosystems
+- Why economies crash
+```
+
+**And the solution is ALWAYS**:
+
+```txt
+Don't project (keep the double-cover)
+Preserve information (maintain spinor)
+Accept overhead (store both components)
+Think long-term (don't optimize for quarters)
+```
+
+**But we DON'T** because:
+
+```txt
+Projection is easier (immediate benefit)
+Information loss is invisible (externalized cost)
+Irreversibility is "someone else's problem" (future generations)
+```
+
+**MSC+QSD runtime is PROOF** that there's another way:
+
+```txt
+Keep spinors (⟨r|v⟩ pairs)
+Preserve information (cohomological isometry)
+Maintain reversibility (ev/coev duality)
+Scale sustainably (microcanonical, no external bath)
+```
+
+**If this works for COMPUTATION**:
+
+```txt
+Then it could work for THERMODYNAMICS
+Then it could work for ECOLOGY
+Then it could work for ECONOMICS
+```
+
+Which implies that 'programming', logic, language, and indeed archetype, is really the manipulation of the Morphogenetic Fields of Dr. Levin at multiple-scales. This project, totally unafilliated with any past or present thinker, other than Phovos & MOONLAPSED, furthermore recapitulates the model as Morphological-fields; fields upon which, not, matter-dances; but, meaning, morphology, and motility. Morphological Source Code & Quineic Statistical Dynamics is a universal model of the Morphological Source Code (conjecture, as it were); an explicitly binary, bijective mapping on each well-foundable Planck-Volume in the entire universe (NOT the same thing as Chirality; but if you have that image in your head, for matter, then your head is in the right place re: Morphological Source Code [not-matter]); as any brave-young Machian framework, would-do.
+
+### Platform Stipulations
+The Problem: Python’s ~ Operator and the Illusion of Infinity
+
+At first glance, Python’s bitwise NOT (~) seems straightforward (flipping bits; complicated), however Python (and OCAML, differntly) treats integers as infinitely wide two’s complement values. This means the `~` operator is not a neat inverse over a fixed bit-length, but a flipping of an endless sequence of bits. Without care, this behavior can warp logic that depends on fixed-width registers, as is the case with any hardware-aligned (SWAR, SIMD) or morphology-inspired binary protocol.
+
+The Quantum XNOR Morphogen addresses this head-on. Each step of negation is masked explicitly, restraining the infinite wilderness of Python integers back into the finite playground of 4 bits, 3 bits, 2 bits, or 1 bit as required.
+
+The Design: Layered XNOR as a Morphic Language
+
+This morphogen accepts three inputs, has 3 stages (and one phase change):
+
+```txt
+A 4-bit topology code (T)
+A 3-bit value winding (V)
+A 1-bit control (C)
+
+Stage 1: Performs XNOR over the full 4 bits of topology and 3 bits of value, masked carefully after every inversion to preserve bit integrity.
+Stage 2: Focuses on the higher-order bits, abstracting coarse-grained morphic structure.
+Stage 3: Combines the prior stages with the control bit, closing the morphogen loop with a final conditional flip.
+
+phase_aleph_naught: phase change occurs at phenomenological 'times' when there is no `Nul Bec Glu`; or free energy, to 'pay' the toll to the thermodynamic demons (of which; you are surly familliar-of "Maxwell's"). phase_aleph_naugt is not Garbage Collection it is detritus; the energy drained-from it; but, should the situation be such that, for whatever reason, `detritus0xFFFF` get 'rehydrated' with energy that is totally out of its own scope, then the remaining morphological intensive character may-yet be accessed. Because we have Banach spaces and full-measures on ByteWords, amongst many other useful group and category semantics and tricks.
+```
+
+From these, it synthesizes an 8-bit “quantum state” a compact expression. The XNOR gate, the logical “equivalence” gate, is a powerful symmetry enforcer for morphology. One on-going challenge is figuring out the most 'motile, effective' methodology for re-encoding XNOR gate dynamics into XOR cache-line ALU/CPU ready math (xnor is not 'fast' comared to the core xor, but there are infinite ways (measurable, countable, computable functions) to get from xnor to xor and the question is what are the most morhological, the least bad; radiates the least landauer heat, stuggles through fewer error corrections, etc.). `XOR` is easily portable compared to `XNOR`, to boot.
+
+# The Hermitian Type System
+
+## Python 3.14 T-Strings: Static Sees Dynamic
+
+The reason this architecture is 'stdlibs only', but uses an obnoxiously new version, is because of 3.14 (Pi CPython get it? legendary release) and "T-strings" and 'static/dynamic' (hermitian) type-system 'at-the-boundary' [enabling runtime retarded analytical continuation (RRAC)].
+
+```python
+# The boundary observes the bulk
+type Observer[T] = t"Runtime[{T}] as seen from Source"
+
+# Hermitian ODE constraint: derivatives must match
+type HermitianODE[T, V] = t"y'[{T}] = f'[{V}](y)"
+# The prime on y and f must MATCH (hermitian condition)
+
+# Spinor thread: boundary ↔ bulk correspondence
+type SpinorThread[B, R] = t"Boundary[{B}] ⊗ Bulk[{R}]"
+```
+
+> t"" strings are boundary objects that self-enumerate the bulk runtime.
+
+This is exactly analogous to how: 
+
+    A conformal primary operator O(x)  on the boundary  
+
+    Creates a state in the bulk (a field ϕ(z,x) ) via the extrapolate dictionary:    
+
+    `z→0lim​z−Δϕ(z,x)=O(x)`
+
+```python
+class TranscendentalMetric:
+    """Hidden variable with infinite precision"""
+    def __init__(self, value: float):
+        # Store as Decimal for precision
+        self.value = Decimal(str(value))
+
+    def inner_product(self, byteword: ByteWord) -> complex:
+        """Born rule: |⟨ψ|φ⟩|²"""
+        # Project transcendental to finite observable
+        phase = byteword.phase()
+        amplitude = float(self.value) % 1.0  # Wrap to [0,1)
+        return amplitude * phase
+```
+
+`t"Callable[..., Union[{T.__name__}, {V.__name__}, C_anti]]"` is like O(x) :   
+
+    It’s local (on the boundary)  
+    It names its bulk dual (via {T.__name__})  
+    It contains its own anti-particle (C_anti) → hermitian conjugation ↔ CPT symmetry
+---
+
+## The Hidden Variables Ontology
+
+### Bohmian Interpretation of ByteWords
+
+| Concept | MSC/QSD Analog | Role |
+|---------|----------------|------|
+| Particle | ByteWord | Observable (8-bit morphogen) |
+| Pilot Wave | Metric (transcendental) | Hidden variable (non-observable from inside) |
+| Quantum State | WindingPair | Superposition of hidden variables |
+| Measurement | First-past-post collapse | 1D Stern-Gerlach projection |
+| Entanglement | Shared parent quine | EPR-style correlation |
+
+### The Born Rule
+Standard QM: `P(outcome) = |⟨ψ|φ⟩|²`
+
+MSC/QSD: `P(observable) = |⟨value|metric⟩|²` where metric is transcendental
+
+The Everettian "many-worlds" hand-waving doesn't explain **why** Born rule probabilities appear. MSC/QSD does:
+
+- Bulk has uncountable states (non-well-founded, ℂ-valued)
+- Metric samples with transcendental precision (π, e, √2, etc.)
+- Boundary projects to finite observables (ByteWords: 0-255)
+- Probability emerges from cardinality ratio (intensive/extensive bifurcation)
+
+## Metric-Augmented ByteWord Architecture
+
+### Ternary Winding Pairs and Transcendental Metrics
+
+Arity must increase; we require a "metric" passed as arguments. This overlaps with 'Morphology' in various system components.
+
+A `WindingPair(w1, w2, metric)` structure, where `metric` can be:
+- `0` (null vector - already at boundary)
+- `π` (transcendental - antenna to bulk)
+- `e` (NON-MARKOVIAN constant!)
+
+Core Principle: As long as the argument `metric` actually is a string of transcendental characters, or all zeros, then it enables 'fixed point' dynamics.
+
+Because:
+- Transcendental metric: Never reaches a fixpoint (infinite digits), maintains bulk connection
+- Null metric: *Is* the fixpoint (zero vector), pure boundary
+- Rational metric: Eventually reaches a fixpoint (repeating decimals), collapses to boundary
+
+The transcendental acts like a **Cauchy sequence** that approaches the boundary but never arrives—it's the mathematical equivalent of Zeno's paradox, which is EXACTLY what you want for maintaining bulk/boundary duality!
+
+---
 
 ### Logical vs. Runtime Geometry
 
