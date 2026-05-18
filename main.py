@@ -5,8 +5,6 @@
 # dependencies = [
 #     "uv==*.*",
 # ]
-# pyright: ignore-all
-# ruff: noqa: E401,F401,I001,F811,TC003,TC004,E402,E702,UP029,PLR0402,PLC0415,F406,E301,E302,E305
 #   "Morphological Source Code: MSC&QSD": >
 #   "© 2026 `Phovos` (phovos@outlook.com)":
 #     - https://gitlab.com/morphological/source/code
@@ -28,44 +26,110 @@
 # Win11: (production); Ubuntu-22.04: (dev, staging)
 # Optional dependency handling: "also add to '/* script..' comment (just above)"
 # ------------------------------
-# fmt: off
 import ast, os, sys, pathlib, logging, threading, datetime, inspect, uuid, base64, json, asyncio, functools, time, random, queue, hashlib, math, cmath, hashlib, enum, re, types, dataclasses, typing, contextlib, collections, abc, io, string, itertools, operator, copy, weakref, gc, marshal, struct, array, mmap, ssl, socket, concurrent, multiprocessing, subprocess, tempfile, shutil, glob, fnmatch, csv, pickle, sqlite3, urllib, http, ftplib, smtplib, email, mimetypes, imaplib, mailbox, hmac, secrets, ipaddress, socketserver, http.server, xml, html, webbrowser, tkinter, ctypes, ctypes.wintypes, site   # noqa: E401, F401, F811, E702 # fmt: skip
 from dataclasses import dataclass, field; from enum import Enum, auto, IntEnum; from types import SimpleNamespace, ModuleType; from functools import lru_cache; from decimal import Decimal, getcontext; from typing import Any, Dict, Optional, Set, Type, Union, Callable, List, Tuple, Generic, TypeVar, Protocol, runtime_checkable, cast, get_origin, get_args; from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer; from socketserver import ThreadingMixIn; from contextlib import contextmanager; from concurrent import interpreters; from concurrent.futures import ThreadPoolExecutor; # noqa: E401, F401, F811, E702 # fmt: skip
 _LOGGER_INIT_LOCK = threading.Lock();Path= pathlib.Path(__file__).resolve(); Queue = queue.Queue ;  # noqa: E702 # fmt: skip;
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-IS_WINDOWS = os.name == 'nt'
-IS_POSIX = os.name == 'posix'
-
-# Platform-specific file-lock helpers for header protection when no semaphores are shared.
-if os.name == "posix":
-    import fcntl
-
-    def lock_file(f):
-        fcntl.lockf(f.fileno(), fcntl.LOCK_EX)
-
-    def unlock_file(f):
-        fcntl.lockf(f.fileno(), fcntl.LOCK_UN)
-else:  # windows
-    import msvcrt
-
-    def lock_file(f):
-        msvcrt.locking(f.fileno(), msvcrt.LK_LOCK, 1)
-
-    def unlock_file(f):
-        try:
-            msvcrt.locking(f.fileno(), msvcrt.LK_UNLCK, 1)
-        except Exception:
-            pass
-
-
 # =================
 # CORE MSC TYPES
 # =================
+
+# ── What a t-string actually IS ───────────────────────────────────────────
+from string.templatelib import Template, Interpolation
+name = "Observable"
+variance = "covariant"
+tmpl: Template = t"_{name}_co  [{variance}]"
+# A Template is an iterable of alternating str and Interpolation chunks:
+for part in tmpl:
+    if isinstance(part, str):
+        print(f"  literal:  {part!r}")
+    else:  # Interpolation
+        print(f"  interp:   value={part.value!r}  expr={part.expression!r}")
+
+# Output:
+#   literal:  '_'
+#   interp:   value='Observable'  expr='name'
+#   literal:  '_co  ['
+#   interp:   value='covariant'   expr='variance'
+#   literal:  ']'
+
+# ── Why you can't just str() a Template ───────────────────────────────────
+# str(tmpl)  →  TypeError (or returns something like "<Template ...>")
+# This is intentional: t-strings keep values *separate* so a renderer
+# can sanitize/escape/log them.  f"" would have already collapsed everything.
+
+# ── _tv: the minimal "just give me the flat string" renderer ──────────────
+
+def _tv(template: Template) -> str:
+    return "".join(
+        part if isinstance(part, str) else str(part.value) for part in template
+    )
+print(_tv(t"_{name}_co"))  # → '_Observable_co'
+
 _F_ = TypeVar(
     "F", bound=any
 )  # equiv to the function/combinator f (that is being computed); not VOID, identity; idempotent wrt 'a runtime'
+
+# With an f-string the name is gone at parse time:
+#   f"_{name}_co"  →  '_Observable_co'   (opaque string, can't inspect)
+#
+# With a t-string you still have the Template object before rendering,
+# so you can do things like:
+
+def validate_typevar_name(tmpl: Template) -> str:
+    """Render, but assert no interpolated value is empty or contains spaces."""
+    for part in tmpl:
+        if isinstance(part, Interpolation):
+            val = str(part.value)
+            if not val or " " in val:
+                raise ValueError(
+                    f"TypeVar name fragment {part.expression!r} "
+                    f"resolved to invalid segment: {val!r}"
+                )
+    return _tv(tmpl)
+
+# ── Applied to TypeVars ──────────────────────────────────────────────
+from typing import TypeVar, Callable, Union, Any
+# ==== ENUMS, STATIC/DYNAMIC Holographic type system
+T = TypeVar('T')  # Type structure ['Topology']
+V = TypeVar('V')  # Value space ['Morphology']
+C = TypeVar('C')  # 'Computation'/control type ['Captaincy']
+R = TypeVar('R')  # Result type
+BYTE = TypeVar("BYTE", bound="ByteWord")
+# Covariant/contravariant type variables for advanced type modeling
+T_co = TypeVar('T_co', covariant=True)  # Covariant Type structure
+V_co = TypeVar('V_co', covariant=True)  # Covariant Value space
+C_co = TypeVar(
+    'C_co', bound=Callable[..., Any], covariant=True
+)  # Covariant Control space
+T_anti = TypeVar('T_anti', contravariant=True)  # Contravariant Type structure
+V_anti = TypeVar('V_anti', contravariant=True)  # Contravariant Value space
+C_anti = TypeVar(
+    'C_anti', bound=Callable[..., Any], contravariant=True
+)  # Contravariant Computation space
+
+_T = TypeVar('_T', bound=Any)
+_V = TypeVar('_V', bound=Union[int, float, str, bool])
+_C_anti = TypeVar('_C_anti', bound=Callable[..., Any], contravariant=True)
+# The composite name is *readable* as a template before it collapses:
+_C_super = TypeVar(
+    validate_typevar_name(t"C|{_V.__name__}|{_T.__name__}|C_anti"),
+    bound=Callable[..., Any],
+)
+print(_C_super.__name__)  # → 'C|_V|_T|C_anti'
+# ── Bonus: a logging-aware renderer ───────────────────────────────────────
+import logging
+def _tv_debug(template: Template) -> str:
+    """Like _tv but logs each interpolated segment - useful during refactors."""
+    parts = []
+    for part in template:
+        if isinstance(part, str):
+            parts.append(part)
+        else:
+            rendered = str(part.value)
+            logging.debug("t-string segment  %r → %r", part.expression, rendered)
+            parts.append(rendered)
+    return "".join(parts)
 
 class ExecutionMode(IntEnum):
     """Runtime architecture selection"""
@@ -111,6 +175,10 @@ class QuantumState(enum.Enum):
     - Type: Tape (poset/frozenset) evolves via chiral tx (-1, 0, 1).
     - Value: Semantic vector (posit) tracks position with chiral updates.
     - Code: QOperator evolves ByteWords as quantum-like states.
+
+    Zeroth Law (Holographic Foundation):
+    
+    Symbols and observations are perceived as real due to intrinsic system properties, creating self-consistent realities. 
     """
 
     SUPERPOSITION = 1  # Handle-only state, like a MARKOVIAN (-1) ByteWord with chiral tx (-1), history-dependent.
