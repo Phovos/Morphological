@@ -1,7 +1,7 @@
 ---
+  author: "Morphological Source Code: MSC&QSD"
   article: complexity_ODE_PDE.md
   version: 0.1.23
-  author: "Morphological Source Code: MSC&QSD" |
   "© 2026 `Phovos` & `MOONLAPSED`; (phovos@outlook.com, MOONLAPSED@gmail.com)":
     - https://gitlab.com/morphological/source/code
     - https://github.com/Morphological-Source-Code
