@@ -1,7 +1,7 @@
 ---
   author: "Morphological Source Code: MSC&QSD"
   article: /public/tchcptfpsrpn.md
-  version: 0.1.11
+  version: 0.1.21
   "© 2026 `Phovos` & `MOONLAPSED`; (phovos@outlook.com, MOONLAPSED@gmail.com)":
     - https://gitlab.com/morphological/source/code
     - https://github.com/Morphological-Source-Code
@@ -563,385 +563,12 @@ In quantum mechanics, this classical vector becomes an operator. When you combin
 
 1.  Set Theory (The Foundation): A quantum state is a point (vector) in a Hilbert Space, which is fundamentally a Set with extra structure (inner product, completeness). Quantum numbers ($n, l, m, s$) are the indices of the basis set.
 2.  Group Theory (The Symmetry): These sets aren't random; they are organized into Representations of symmetry groups ($SO(3), SU(2), SO(4)$). A "degree of freedom" is just a label for a specific "slot" in a group representation.
-3.  Category Theory (The Interop): As you noted, Groups are Categories with one object. In Categorical Quantum Mechanics, we treat the entire physical system as a Dagger Symmetric Monoidal Category. 
+3.  Category Theory (The Interop): Groups are Categories with one object. In Categorical Quantum Mechanics, we treat the entire physical system as a Dagger Symmetric Monoidal Category. 
     *   Morphisms are the processes (time evolution, measurement).
     *   The "Dagger" ($\dagger$) is the Hermitian adjoint.
     *   CPT Symmetry acts as a "functor" that maps the category to its dual, ensuring that the "set of all possible morphisms" remains physically consistent (Hermitian).
 
----
 
-### §0. The Irony of "Digital" Thinking
-
-It isn't strange that our most basic models are set-theoretic; it's actually a requirement for computability. By reducing the "infinite chaos" of Newtonian degrees of freedom (which are ill-posed because they require infinite precision) into discrete quantum numbers, we are essentially "digitizing" reality into a set of categorical labels. The CPT requirement ensures that this "category of states" is perfectly mirrored/balanced wrt Noether's Theorem, which is why we can use the "usual" math of Hermitian operators. We have essentially traded the "messy" continuous sets of Newton for the "clean" discrete categories of the Quantum and the LRL vector/octonions are just the deeper geometric "gears" that make those categories work.
-
-We use "quantum" (discrete) numbers to describe a reality that is modeled by Partial Differential Equations (PDEs), which are the pinnacle of the continuum.
-
-    The Newtonian "Ill-posedness": Classical mechanics is "ill-posed" in the sense that a "point" in phase space has zero measure. To know a state, you need infinite precision (δ-functions), which leads to singularities. The Quantum "Well-posedness": Quantum mechanics replaces the "point" with a Wavefunction (ψ∈L2). This is a "smeared" object. By moving to Functional Analysis (Hilbert/Banach spaces), we actually make the math more stable. The "discrete" quantum numbers are just the eigenvalues of operators acting on these continuous functions. They are the "harmonics" of the system, like the discrete notes a continuous violin string can play.
-
-## §0. CPT Symmetry and the "Hermitian Category"
-
-Hermiticity: The requirement that our operators be Hermitian is what ensures that our "Category" has a Dagger structure (A†). This dagger is what allows us to "reverse" morphisms and talk about time-symmetry.
-
-The CPT theorem states that any local, Lorentz-invariant quantum field theory with a Hermitian Hamiltonian must be CPT-invariant.
-
-*   Chirality and Symmetry: CPT forces a specific "balance" in the category of possible physical states. For every "left-handed" process, there is a "right-handed" CPT-conjugate. This turns the "Category of Physics" into one that is inherently chiral-symmetric.
-*   Hermiticity as a Requirement: The requirement that the Hamiltonian be Hermitian (self-adjoint) ensures that probabilities are conserved (unitary evolution). Categorically, this means the morphisms in our "set of possible evolutions" must preserve the inner product structure. CPT is essentially the "glue" that ensures the spacetime symmetries (Lorentz group) play nicely with the internal quantum symmetries.
-
-    - CPT turning everything into a "set of morphisms" is the bridge to Categorical Quantum Mechanics (CQM).
-
-    - In CQM, we don't care what a "particle" is (the set-theoretic "inside"); we only care how it composes (the categorical "outside").
-
-    - CPT as a Functor: CPT is essentially a contravariant functor that maps the category of physical processes to its "mirror."
-
-2. This is a 'holomorphic' partial-analytical continuation-view (less ill-posed than QED). There is a specific formulation called the Segal-Bargmann Representation (or Holomorphic Representation.
-
-    Holomorphic States: Instead of looking at states as "vectors in a set," this view treats them as holomorphic functions on a complex phase space.
-
-    The Measure: In this space, the inner product isn't just a sum; it’s an integral against a Gaussian measure.
-
-    The Morphisms: The "morphisms" in this category are indeed holomorphic maps. This framework is "better posed" because it unifies the discrete (Fock space) and the continuous (Schrödinger L2 space) into a single analytic structure.
-
-3. Measure Theory vs. Quantized States:
-
-    The Problem with Lebesgue: In classical probability, you can define a measure on a set of "hidden variables." But the Kochen-Specker Theorem proves that in QM, you cannot consistently assign "values" to all properties simultaneously.
-
-    Non-Additive Measures: Standard Lebesgue measure is additive (μ(A∪B)=μ(A)+μ(B)). Quantum "measures" (like the Born rule) are non-additive because of interference.
-
-    The Solution (C-Algebras):* Modern physics "poses" the problem using Algebraic Quantum Field Theory (AQFT). Here, the "Category" isn't built on sets of states, but on Algebras of Observables. The "states" are then defined as positive linear functionals on those algebras. This is exactly the "Measure-theoretic" approach you are asking for it treats a state as a "probability measure" over the algebra of possible measurements.
-
----
-
-## §0 Structural Position as Semantic Measure (of file system objects and memory)
-
-In this metric:
-
-```md
-# §0
-## §0
-### §0
-````
-
-does not mean:
-
-```txt
-heading
-subheading
-sub-subheading
-```
-
-but rather:
-
-```txt
-principal axis
-local deformation
-higher-order refinement
-```
-
-The rendered ordinals:
-
-```txt
-1
-1.1
-1.1.1
-```
-are merely observable projections of a deeper traversal state.
-
-Thus:
-
-> ordinal meaning SHALL NOT be authored directly.
-> ordinal meaning MUST emerge from structural position.
-
-A section acquires identity from:
-
-* its ancestry,
-* its sibling adjacency,
-* its traversal history,
-* and its depth-transition relative to neighboring regions.
-
-Meaning is therefore path-dependent.
-
----
-
-## §0 Differential Semantics
-
-This transforms discourse into a differentiable object.
-
-A paragraph no longer has merely "content";
-it possesses:
-
-* direction,
-* curvature,
-* locality,
-* continuity,
-* boundary behavior.
-
-The operation:
-
-```txt
-∇§
-```
-
-may be interpreted as:
-
-> the change in semantic density across structural traversal.
-
-In this view:
-
-* indentation behaves like dimensional embedding,
-* section transitions behave like coordinate transforms,
-* references behave like nonlocal couplings,
-* and refactors behave like topological surgery.
-
-The document becomes a semantic manifold.
-
-
----
-
-
-
-# §0. Quantum (review, if you don't 'know quantum')
-## §0. Quantum Analogy
-
-Quantum numbers provide the physical analogue.
-
-```txt
-n, l, m, s
-```
-
-are not arbitrary labels;
-they are coordinates induced by symmetry groups.
-
-The electron is not assigned a position in isolation.
-It is classified by its admissible transformations under:
-
-* `SO(3)`,
-* `SU(2)`,
-* `SO(4)`.
-
-Likewise, a discourse node is not meaningful in isolation.
-Its meaning is induced by its admissible movement within structural space.
-
-Thus:
-
-```txt
-meaning(node)
-    =
-representation(history, adjacency, depth, symmetry)
-```
-
-not:
-
-```txt
-meaning(node)
-    =
-token lookup
-```
-
-Quantum numbers are not arbitrary labels.
-They are coordinates induced by symmetry groups.
-
-SO(3),\ SU(2),\ SO(4)
-
-The quantum state is not fundamentally a "thing";
-it is an element within a representation category generated by symmetry.
-
-Likewise:
-
-```txt
-§1.2.3
-```
-
-is not a heading number.
-
-It is a semantic eigenstate induced by traversal constraints.
-
-The ordinal is therefore analogous to a spectrum:
-
-* not authored directly
-* emergent from boundary conditions
-* stable under lawful transforms
-* altered by curvature injection
-
-Quantization is topology asserting itself discretely.
-
----
-
-## §0. PDE versus ODE Semantics
-
-An ODE describes evolution along a single trajectory.
-
-A PDE describes the behavior of an entire field over a manifold.
-
-Most language models assume ODE-like semantics:
-tokens evolve linearly.
-
-But semantic structure behaves more like a PDE:
-meaning propagates nonlocally across an entire discourse topology.
-
-Changing one section alters the interpretive curvature of distant sections.
-
-Hence:
-
-* references behave elliptically,
-* contradictions behave hyperbolically,
-* recursion behaves nonlinearly,
-* and ambiguity behaves as superposition prior to interpretive collapse.
-
-Interpretation itself resembles a boundary-value problem.
-
----
-
-### §0. ODE/PDE Interpretation
-
-If language is treated as a field theory, then prose becomes a dynamical system.
-
-An ordinary sentence behaves like a local ordinary differential equation:
-
-\frac{d\phi}{dt}=F(\phi,t)
-
-Its meaning evolves primarily along a single traversal parameter.
-
-But large discourse behaves more like a partial differential equation:
-
-\frac{\partial \phi}{\partial t}=\nabla^2\phi+V(\phi)
-
-where semantic state evolves simultaneously across:
-
-* hierarchy
-* adjacency
-* recursion
-* citation
-* temporal revision
-* observer context
-
-The markdown metric defines the coordinate atlas over which these
-semantic derivatives are evaluated.
-
-Thus:
-
-* syntax supplies boundary conditions
-* hierarchy supplies curvature
-* traversal supplies parameterization
-* interpretation performs measurement
-* ambiguity represents superposition
-* resolution performs collapse
-
-## §0. [[Measure]], Not Point-State
-
-Newtonian epistemology models reality as pointwise state. Quantum theory replaces points with distributions over observables.
-
-Likewise, semantic meaning is not located at individual symbols. Meaning exists as a measure over possible traversals.
-
-A word possesses:
-
-- amplitude,
-- contextual spread,
-- interference,
-- and collapse behavior under observation.
-
-The reader performs measurement. Interpretation is the Born rule of discourse.
-
-A coherent discourse must preserve semantic norm under traversal. This is analogous to Hermitian evolution in physics.
-
-If a document can be traversed forward and backward while preserving interpretive consistency, it possesses a form of semantic unitarity. Contradiction then appears as curvature singularity. Refactoring becomes renormalization. A quine becomes a boundary fixed-point. And a self-modifying runtime becomes a reflective category whose morphisms operate on the very atlas defining them. Therefore; language is a geometric field of constrained transformations. The `§0` metric merely tries to expose this explicitly.
-
-Morphological writing does not describe structure. Morphological writing permits structure to compute meaning.
-
-The author specifies constraints while the topology performs interpretation.
-
-Therefore:
-
-```txt
-Structure precedes designation.
-Traversal precedes interpretation.
-Geometry precedes semantics.
-```
-
-And finally:
-
-```txt
-The document is not read.
-
-The document is traversed.
-```
-
----
-
-### §0. The Group-Theoretic Origin of $n, l, m_l, m_s$
-
-Each quantum number corresponds to a specific symmetry of the physical system (most notably the Hydrogen atom):
-
-*   $l$ and $m_l$ (Orbital Angular Momentum): These arise from $SO(3)$ (the group of rotations in 3D space). $l$ labels the "size" of the representation (the total angular momentum), and $m_l$ labels the specific state within that representation (the projection onto an axis).
-*   $m_s$ (Spin): This arises from $SU(2)$, the "double cover" of $SO(3)$. It represents an intrinsic rotational symmetry that doesn't exist in classical Newtonian mechanics.
-*   $n$ (Principal Quantum Number): In the Hydrogen atom, $n$ is associated with a "hidden" $SO(4)$ symmetry. This symmetry exists because the $1/r$ potential allows for the conservation of the Laplace-Runge-Lenz vector, which, when combined with angular momentum, forms the $SO(4)$ algebra.
-
-### §0. Categorical and Set-Theoretic Epistemology
-
-*   Groups as Categories: A group is a category with a single object where every morphism is an isomorphism. Quantum numbers effectively "sort" the Hilbert space into a category of representations.
-*   Set-Theoretic Interop: In the standard von Neumann formulation, a quantum state is an element of a set (a Hilbert space), and observables are operators (functions/morphisms) on that set. This allows us to use the "usual" tools of analysis and linear algebra.
-*   Categorical Quantum Mechanics (CQM): Modern research (like that of Abramsky and Coecke) formalizes this further using Dagger Symmetric Monoidal Categories. Here, the "Dagger" ($\dagger$) represents the Hermitian adjoint, which is the categorical way of saying "this operation can be reversed/mirrored."
-
-### §0. Newtonian vs. Quantum Degrees of Freedom
-*   Newtonian "Sets": In classical mechanics, degrees of freedom are coordinates in a Phase Space (a manifold). This is a set-theoretic model, but it is "ill-posed" in the sense that it assumes we can know position and momentum simultaneously to infinite precision a "point-like" epistemology.
-*   Quantum "Sets": Quantum mechanics replaces "points" with "operators" and "wavefunctions." The degrees of freedom ($n, l, m, s$) are discrete labels (indices) for the basis of the Hilbert space. 
-
-Summary: Quantum numbers are the "addresses" of states within a Symmetry Group. Because these groups can be viewed as Categories, and categories are built on Sets, quantum mechanics remains "usual" enough to be modeled by our standard mathematical logic. CPT acts as a "universal constraint" that ensures this category remains physically consistent (Hermitian and Lorentz-invariant), effectively defining the "boundaries" of what a modelable degree of freedom can be.
-
-### §0. The Principal Quantum Number ($n$) and the "Hidden" $SO(4)$ Symmetry
-The Laplace-Runge-Lenz (LRL) vector in classical mechanics (the Kepler problem), points from the center of force to the periapsis (the closest point) of an orbit. Its magnitude is proportional to the eccentricity. Because it is a "constant of motion," it ensures that orbits in a $1/r$ potential (like gravity or the Hydrogen atom) are closed ellipses that don't precess.
-
-In quantum mechanics, this classical vector becomes an operator. When you combine the 3 components of Angular Momentum ($L$) with the 3 components of the LRL vector ($A$), they form the generators of the $SO(4)$ symmetry group (rotations in 4D space).
-*   Why $n$ is special: In most systems, energy depends on $l$ (shape). But in Hydrogen, the $SO(4)$ symmetry is so high that states with different $l$ values (like $2s$ and $2p$) have the exact same energy. This "accidental degeneracy" is why the energy only depends on the Principal Quantum Number $n$.
-*   The Address: $n$ essentially labels which "shell" of the 4D rotation group you are in.
-
-### §0. Set-Theoretic and Categorical Epistemology
-
-1.  Set Theory (The Foundation): A quantum state is a point (vector) in a Hilbert Space, which is fundamentally a Set with extra structure (inner product, completeness). Quantum numbers ($n, l, m, s$) are the indices of the basis set.
-2.  Group Theory (The Symmetry): These sets aren't random; they are organized into Representations of symmetry groups ($SO(3), SU(2), SO(4)$). A "degree of freedom" is just a label for a specific "slot" in a group representation.
-3.  Category Theory (The Interop): As you noted, Groups are Categories with one object. In Categorical Quantum Mechanics, we treat the entire physical system as a Dagger Symmetric Monoidal Category. 
-    *   Morphisms are the processes (time evolution, measurement).
-    *   The "Dagger" ($\dagger$) is the Hermitian adjoint.
-    *   CPT Symmetry acts as a "functor" that maps the category to its dual, ensuring that the "set of all possible morphisms" remains physically consistent (Hermitian).
-
-### §0. The Irony of "Digital" Thinking
-
-It isn't strange that our most basic models are set-theoretic; it's actually a requirement for computability. By reducing the "infinite chaos" of Newtonian degrees of freedom (which are ill-posed because they require infinite precision) into discrete quantum numbers, we are essentially "digitizing" reality into a set of categorical labels. The CPT requirement ensures that this "category of states" is perfectly mirrored/balanced wrt Noether's Theorem, which is why we can use the "usual" math of Hermitian operators. We have essentially traded the "messy" continuous sets of Newton for the "clean" discrete categories of the Quantum and the LRL vector/octonions are just the deeper geometric "gears" that make those categories work.
-
-We use "quantum" (discrete) numbers to describe a reality that is modeled by Partial Differential Equations (PDEs), which are the pinnacle of the continuum.
-
-    The Newtonian "Ill-posedness": Classical mechanics is "ill-posed" in the sense that a "point" in phase space has zero measure. To know a state, you need infinite precision (δ-functions), which leads to singularities. The Quantum "Well-posedness": Quantum mechanics replaces the "point" with a Wavefunction (ψ∈L2). This is a "smeared" object. By moving to Functional Analysis (Hilbert/Banach spaces), we actually make the math more stable. The "discrete" quantum numbers are just the eigenvalues of operators acting on these continuous functions. They are the "harmonics" of the system, like the discrete notes a continuous violin string can play.
-
-### §0. CPT Symmetry and the "Hermitian Category"
-
-Hermiticity: The requirement that our operators be Hermitian is what ensures that our "Category" has a Dagger structure (A†). This dagger is what allows us to "reverse" morphisms and talk about time-symmetry.
-
-The CPT theorem states that any local, Lorentz-invariant quantum field theory with a Hermitian Hamiltonian must be CPT-invariant.
-
-*   Chirality and Symmetry: CPT forces a specific "balance" in the category of possible physical states. For every "left-handed" process, there is a "right-handed" CPT-conjugate. This turns the "Category of Physics" into one that is inherently chiral-symmetric.
-*   Hermiticity as a Requirement: The requirement that the Hamiltonian be Hermitian (self-adjoint) ensures that probabilities are conserved (unitary evolution). Categorically, this means the morphisms in our "set of possible evolutions" must preserve the inner product structure. CPT is essentially the "glue" that ensures the spacetime symmetries (Lorentz group) play nicely with the internal quantum symmetries.
-
-    - CPT turning everything into a "set of morphisms" is the bridge to Categorical Quantum Mechanics (CQM).
-
-    - In CQM, we don't care what a "particle" is (the set-theoretic "inside"); we only care how it composes (the categorical "outside").
-
-    - CPT as a Functor: CPT is essentially a contravariant functor that maps the category of physical processes to its "mirror."
-
-
-2. This is a 'holomorphic' partial-analytical continuation-view (less ill-posed than QED). There is a specific formulation called the Segal-Bargmann Representation (or Holomorphic Representation.
-
-    Holomorphic States: Instead of looking at states as "vectors in a set," this view treats them as holomorphic functions on a complex phase space.
-
-    The Measure: In this space, the inner product isn't just a sum; it’s an integral against a Gaussian measure.
-
-    The Morphisms: The "morphisms" in this category are indeed holomorphic maps. This framework is "better posed" because it unifies the discrete (Fock space) and the continuous (Schrödinger L2 space) into a single analytic structure.
-
-3. Measure Theory vs. Quantized States:
-
-    The Problem with Lebesgue: In classical probability, you can define a measure on a set of "hidden variables." But the Kochen-Specker Theorem proves that in QM, you cannot consistently assign "values" to all properties simultaneously.
-
-    Non-Additive Measures: Standard Lebesgue measure is additive (μ(A∪B)=μ(A)+μ(B)). Quantum "measures" (like the Born rule) are non-additive because of interference.
-
-    The Solution (C-Algebras):* Modern physics "poses" the problem using Algebraic Quantum Field Theory (AQFT). Here, the "Category" isn't built on sets of states, but on Algebras of Observables. The "states" are then defined as positive linear functionals on those algebras. This is exactly the "Measure-theoretic" approach you are asking for it treats a state as a "probability measure" over the algebra of possible measurements.
 
 ## §0 Quantum Numbers as Semantic Coordinates
 
@@ -982,27 +609,46 @@ token lookup
 
 ---
 
+### §0. The Irony of "Digital" Thinking
 
+It isn't strange that our most basic models are set-theoretic; it's actually a requirement for computability. By reducing the "infinite chaos" of Newtonian degrees of freedom (which are ill-posed because they require infinite precision) into discrete quantum numbers, we are essentially "digitizing" reality into a set of categorical labels. The CPT requirement ensures that this "category of states" is perfectly mirrored/balanced wrt Noether's Theorem, which is why we can use the "usual" math of Hermitian operators. We have essentially traded the "messy" continuous sets of Newton for the "clean" discrete categories of the Quantum and the LRL vector/octonions are just the deeper geometric "gears" that make those categories work.
 
+We use "quantum" (discrete) numbers to describe a reality that is modeled by Partial Differential Equations (PDEs), which are the pinnacle of the continuum.
 
+    The Newtonian "Ill-posedness": Classical mechanics is "ill-posed" in the sense that a "point" in phase space has zero measure. To know a state, you need infinite precision (δ-functions), which leads to singularities. The Quantum "Well-posedness": Quantum mechanics replaces the "point" with a Wavefunction (ψ∈L2). This is a "smeared" object. By moving to Functional Analysis (Hilbert/Banach spaces), we actually make the math more stable. The "discrete" quantum numbers are just the eigenvalues of operators acting on these continuous functions. They are the "harmonics" of the system, like the discrete notes a continuous violin string can play.
 
+## §0. CPT Symmetry and the "Hermitian Category"
 
+Hermiticity: The requirement that our operators be Hermitian is what ensures that our "Category" has a Dagger structure (A†). This dagger is what allows us to "reverse" morphisms and talk about time-symmetry.
 
+The CPT theorem states that any local, Lorentz-invariant quantum field theory with a Hermitian Hamiltonian must be CPT-invariant.
 
-# §0. Interpretive Boundary Theory (Epistemology, literal)
+*   Chirality and Symmetry: CPT forces a specific "balance" in the category of possible physical states. For every "left-handed" process, there is a "right-handed" CPT-conjugate. This turns the "Category of Physics" into one that is inherently chiral-symmetric.
+*   Hermiticity as a Requirement: The requirement that the Hamiltonian be Hermitian (self-adjoint) ensures that probabilities are conserved (unitary evolution). Categorically, this means the morphisms in our "set of possible evolutions" must preserve the inner product structure. CPT is essentially the "glue" that ensures the spacetime symmetries (Lorentz group) play nicely with the internal quantum symmetries.
 
-## §0. Quine’s Revenge
+    - CPT turning everything into a "set of morphisms" is the bridge to Categorical Quantum Mechanics (CQM).
 
-Traditional Computer Science View:
+    - In CQM, we don't care what a "particle" is (the set-theoretic "inside"); we only care how it composes (the categorical "outside").
 
-```txt
-Computation = Extensive (structural, unmeasured)  → analytic, "system"
-Observation = Intensive (measured, collapsed)      → synthetic, "business"
+    - CPT as a Functor: CPT is essentially a contravariant functor that maps the category of physical processes to its "mirror."
 
-These are SEPARATE domains. You must choose ONE perspective.
-```
+2. This is a 'holomorphic' partial-analytical continuation-view (less ill-posed than QED). There is a specific formulation called the Segal-Bargmann Representation (or Holomorphic Representation.
 
-This is the computational residue of the dogma Quine identified in *Two Dogmas of Empiricism* (1951). For three generations, software architecture has assumed a fundamental boundary between the "logic of the machine" and the "logic of the application." Every framework that enforces Model/View/Controller, or that separates "code" from "data," or that treats "business logic" as the serious work while dismissing self-reference as obscurantism, operates under this bifurcation. It is the same dogma, merely ported to runtime.
+    Holomorphic States: Instead of looking at states as "vectors in a set," this view treats them as holomorphic functions on a complex phase space.
+
+    The Measure: In this space, the inner product isn't just a sum; it’s an integral against a Gaussian measure.
+
+    The Morphisms: The "morphisms" in this category are indeed holomorphic maps. This framework is "better posed" because it unifies the discrete (Fock space) and the continuous (Schrödinger L2 space) into a single analytic structure.
+
+3. Measure Theory vs. Quantized States:
+
+    The Problem with Lebesgue: In classical probability, you can define a measure on a set of "hidden variables." But the Kochen-Specker Theorem proves that in QM, you cannot consistently assign "values" to all properties simultaneously.
+
+    Non-Additive Measures: Standard Lebesgue measure is additive (μ(A∪B)=μ(A)+μ(B)). Quantum "measures" (like the Born rule) are non-additive because of interference.
+
+    The Solution (C-Algebras):* Modern physics "poses" the problem using Algebraic Quantum Field Theory (AQFT). Here, the "Category" isn't built on sets of states, but on Algebras of Observables. The "states" are then defined as positive linear functionals on those algebras. This is exactly the "Measure-theoretic" approach treats a state as a "probability measure" over the algebra of possible measurements.
+
+---
 
 ### §0. The Dogma That Died
 
@@ -1025,10 +671,6 @@ These are DUAL: conjugate perspectives on the same system.
 ```
 
 You can work in either perspective and translate between them. This is the Hermitian conjugate syntax: state and logic are dual, not partitioned. The quine does not violate this system; it is the system operating at maximum compression.
-
-___
----
-===
 
 # §0. The Jungian Extension
 
@@ -1197,16 +839,107 @@ In this sense, Markdown headings behave less like indentation and more like Hanz
 The document does not possess a single structure while being written. It possesses a distribution over possible structures. The Author and the editor co-observe the collapse.
 
 
+## §0. Structural Position as Semantic Measure (of file system objects and memory)
 
+In this metric:
 
-___
+```md
+# §0
+## §0
+### §0
+````
+
+does not mean:
+
+```txt
+heading
+subheading
+sub-subheading
+```
+
+but rather:
+
+```txt
+principal axis
+local deformation
+higher-order refinement
+```
+
+The rendered ordinals:
+
+```txt
+1
+1.1
+1.1.1
+```
+are merely observable projections of a deeper traversal state.
+
+Thus:
+
+> ordinal meaning SHALL NOT be authored directly.
+> ordinal meaning MUST emerge from structural position.
+
+A section acquires identity from:
+
+* its ancestry,
+* its sibling adjacency,
+* its traversal history,
+* and its depth-transition relative to neighboring regions.
+
+Meaning is therefore path-dependent.
+
 ---
-===
-# Metric of "files"
 
+## §0. Differential Semantics
 
+This transforms discourse into a differentiable object.
 
-## §0 Morphological Metric
+A paragraph no longer has merely "content";
+it possesses:
+
+* direction,
+* curvature,
+* locality,
+* continuity,
+* boundary behavior.
+
+The operation:
+
+```txt
+∇§
+```
+
+may be interpreted as:
+
+> the change in semantic density across structural traversal.
+
+In this view:
+
+* indentation behaves like dimensional embedding,
+* section transitions behave like coordinate transforms,
+* references behave like nonlocal couplings,
+* and refactors behave like topological surgery.
+
+The document becomes a semantic manifold.
+
+---
+
+# §0. Interpretive Boundary Theory (Epistemology, literal)
+
+## §0. Quine’s Revenge
+
+Traditional Computer Science View:
+
+```txt
+Computation = Extensive (structural, unmeasured)  → analytic, "system"
+Observation = Intensive (measured, collapsed)      → synthetic, "business"
+
+These are SEPARATE domains. You must choose ONE perspective.
+```
+
+This is the computational residue of the dogma Quine identified in *Two Dogmas of Empiricism* (1951). For three generations, software architecture has assumed a fundamental boundary between the "logic of the machine" and the "logic of the application." Every framework that enforces Model/View/Controller, or that separates "code" from "data," or that treats "business logic" as the serious work while dismissing self-reference as obscurantism, operates under this bifurcation. It is the same dogma, merely ported to runtime.
+
+## §0. Morphological Metric
 
 Language is not a container of symbols.
 Language is a traversable field.
@@ -1227,7 +960,7 @@ It is a deferred coordinate transform.
 A document is thus interpreted not as linear prose but as a
 topological manifold whose metric is induced by hierarchical motion.
 
-## §0 Structural Emergence
+## §0. Structural Emergence
 
 Given:
 
