@@ -50,8 +50,8 @@ Disclaimer:
 
 # Morphological Source Code (MSC/QSD)
 
-**A CPython standard-library-only framework for morphological computation with hermitian type semantics**
-**Welcome to the root of the Morphological Source Code (MSC) repository!**
+A CPython standard-library-only framework for morphological computation with hermitian type semantics
+Welcome to the root of the Morphological Source Code (MSC) repository!
 
 [![Python 3.14+](https://img.shields.io/badge/python-3.14+-blue.svg)](https://www.python.org/downloads/)
 [![Code+File(s): BSD 3-Clause](https://img.shields.io/badge/Code-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
@@ -67,14 +67,14 @@ NEW: [r/Quine](https://www.reddit.com/r/Quine); | [production gitter(dev-chat)](
 > © 2023-2026 Moonlapsed https://github.com/MOONLAPSED/Cognosis
 
 This SDK implements Morphological Source Code exhibiting Quineic Statistical Dynamics (QSD), a computational framework where:
-- **ByteWords** are atomic morphogens (8-bit quantum observables)
-- **Metrics** are hidden variables (transcendental, non-observable from inside)
-- **WindingPairs** encode non-Markovian state (holonomic memory)
-- **T-strings** (Python 3.14) enforce hermitian type constraints at the boundary
+- ByteWords are atomic morphogens (8-bit quantum observables)
+- Metrics are hidden variables (transcendental, non-observable from inside)
+- WindingPairs encode non-Markovian state (holonomic memory)
+- T-strings (Python 3.14) enforce hermitian type constraints at the boundary
 
-The result: A system where **computation is measurement**, **types are boundary conditions**, and **the morphological clock emerges from thermodynamic cost**.
+The result: A system where computation is measurement, types are boundary conditions, and the morphological clock emerges from thermodynamic cost.
 
-**Time, causality, and identity emerge from morphology and, specifically, not the other way around.** A multi-scale ontogeny must do-so in [[Hermitian Conjugation]] syntax. This very requirement also gives rise to the [[Fermionic]] half-integer spin and it's symmetry group. It is thereby extended into the local domain using 'correspondence' about a 'boundary'; a type of symmetry that is something like mirror-symmetry, implying an observer and a two way speed of light, if nothing else. The spinor - Dual-Valued Representation in Holographic Runtime Systems (Classically Non-Determinable 2-Valuedness in Phase Space Topology) is the substrate of said aformentioned **time**, and importantly; entropy and ergodic, intensive character:
+Time, causality, and identity emerge from morphology and, specifically, not the other way around. A multi-scale ontogeny must do-so in [[Hermitian Conjugation]] syntax. This very requirement also gives rise to the [[Fermionic]] half-integer spin and it's symmetry group. It is thereby extended into the local domain using 'correspondence' about a 'boundary'; a type of symmetry that is something like mirror-symmetry, implying an observer and a two way speed of light, if nothing else. The spinor - Dual-Valued Representation in Holographic Runtime Systems (Classically Non-Determinable 2-Valuedness in Phase Space Topology) is the substrate of said aformentioned time, and importantly; entropy and ergodic, intensive character:
 
 > In a dual-representational phase/state space—trivially a Hilbert Space, the AdS/CFT correspondence manifests as the 'special conformal twist' operator: the 'spinor' in boundary-bulk correspondence.
 
@@ -102,19 +102,19 @@ In modern computational paradigms, we face an ongoing challenge: how do we effic
 
 ## Theoretical Foundation: Operators and Observables in MSC
 
-In MSC, source code is represented not as traditional bytecode or static data but as **stateful entities** embedded in a **high-dimensional space**—a space governed by the properties of **Hilbert spaces** and **self-adjoint operators**. The evolution of these stateful entities is driven by **eigenvalues** that act as both **data** and **program logic**. This self-reflective model of computation ensures that source code behaves not as an immutable object but as a **quantum-inspired, evolving system**.
+In MSC, source code is represented not as traditional bytecode or static data but as stateful entities embedded in a high-dimensional space—a space governed by the properties of Hilbert spaces and self-adjoint operators. The evolution of these stateful entities is driven by eigenvalues that act as both data and program logic. This self-reflective model of computation ensures that source code behaves not as an immutable object but as a quantum-inspired, evolving system.
 
 ## Morphology of MSC: Embedding Data and Logic
 
-**Hilbert Space Encoding**: Each unit of code (or its state) exists as a vector in a Hilbert space, with each vector representing an eigenstate of an operator. This enables "morphological reasoning" about the state of the system. Imagine representing your code as points in a structured multi-dimensional space. Each point corresponds to a specific state of your code. By using a Hilbert space, we can analyze and transform (using Lagrangian or other methods) these states in a way that mirrors how quantum systems evolve, by representing potential states and transitions between them. This corresponds with how the code evolves through its lifecycle, its behaviors and interactions with the environment (and the outcomes of those interactions).
+Hilbert Space Encoding: Each unit of code (or its state) exists as a vector in a Hilbert space, with each vector representing an eigenstate of an operator. This enables "morphological reasoning" about the state of the system. Imagine representing your code as points in a structured multi-dimensional space. Each point corresponds to a specific state of your code. By using a Hilbert space, we can analyze and transform (using Lagrangian or other methods) these states in a way that mirrors how quantum systems evolve, by representing potential states and transitions between them. This corresponds with how the code evolves through its lifecycle, its behaviors and interactions with the environment (and the outcomes of those interactions).
 
 MSC treats code as a vector in a Hilbert space, acted upon by self-adjoint operators. Execution is no longer a linear traversal—it's a unitary transformation. Your program isn't *run*, it's *collapsed* from a superposed semantic state into an observable behavior.
 
-1. **Stateful Dynamics**: Imagine your code not as a static set of instructions, but as a dynamic entity that changes over time. These changes are driven by "operators," which act like rules that transform the code's state. Think of these transformations as a series of steps, where each step has a probability of occurring, much like a quantum system. This process, known as a "quantum stochastic process," or '(non)Markovian' processes, eventually leads to a final, observable state—the outcome of your code's execution -— functions of time that collapse into a final observable state.
+1. Stateful Dynamics: Imagine your code not as a static set of instructions, but as a dynamic entity that changes over time. These changes are driven by "operators," which act like rules that transform the code's state. Think of these transformations as a series of steps, where each step has a probability of occurring, much like a quantum system. This process, known as a "quantum stochastic process," or '(non)Markovian' processes, eventually leads to a final, observable state—the outcome of your code's execution -— functions of time that collapse into a final observable state.
 
-2. **Symmetry and Reversibility**: At the core of MSC are "self-adjoint operators." These special operators ensure that the transformations within your code are symmetrical and reversible. This means that for every change your code undergoes, there's a corresponding reverse change, maintaining a balance. This is similar to how quantum systems evolve in a way that preserves information. The computation is inherently tied to **symmetry** and **reversibility**, with self-adjoint operators ensuring the system's **unitary evolution** over time. This property is correlated with Markovian and Non-Markovian behavior and its thermodynamic character and it can only reasonably be done within a categorical-theory framework; this symmetry and reversibility tie back to concepts like Maxwell’s Demon and the homological structure of adjoint operators, with implications that scale up to cosmic information theory—topics we’ll explore further.
+2. Symmetry and Reversibility: At the core of MSC are "self-adjoint operators." These special operators ensure that the transformations within your code are symmetrical and reversible. This means that for every change your code undergoes, there's a corresponding reverse change, maintaining a balance. This is similar to how quantum systems evolve in a way that preserves information. The computation is inherently tied to symmetry and reversibility, with self-adjoint operators ensuring the system's unitary evolution over time. This property is correlated with Markovian and Non-Markovian behavior and its thermodynamic character and it can only reasonably be done within a categorical-theory framework; this symmetry and reversibility tie back to concepts like Maxwell’s Demon and the homological structure of adjoint operators, with implications that scale up to cosmic information theory—topics we’ll explore further.
 
-3. **Coroutines/Quines/State(oh my!):**
+3. Coroutines/Quines/State(oh my!):
 MSC is a self-referential, generator-theoretic model of computation that treats code, runtime, and output as cryptographically bound stages of a single morphogenetic object. Think of it as training-as-mining, execution-as-proof, and computation as evolution across high-dimensional space. Where source code isn't static, execution isn't a black box, and inference becomes constructive proof-of-work.
 In MSC, generators are the foundational units of computation—and the goal is to find fixpoints where (in the most 'morphological'-case; most probable):
 
@@ -134,16 +134,16 @@ MSC goes beyond simply running code. It captures the dynamic interplay between d
 
 ## Practical Applications of Morphological Source Code
 
-**1. Local LLM Inference:**
+1. Local LLM Inference:
 MSC enables lightweight semantic indexing of code and data—embedding vectorized meaning directly into the source. This empowers local language models and context engines to perform fast, meaningful lookups and self-alteration. Think of code that knows its own domain, adapts across scales, and infers beyond its initial context—without relying on monolithic cloud infrastructure.
 
-**2. Game Development:**
+2. Game Development:
 In MSC, game objects are morphodynamic entities: stateful structures evolving within a high-dimensional phase space. Physics, narrative, and interaction mechanics become algebraic transitions—eigenvalue-driven shifts in identity. Memory layouts align with morphological constraints, enabling cache-local, context-aware simulation at scale, especially for AI-rich environments.
 
-**3. Real-Time Systems:**
+3. Real-Time Systems:
 MSC's operator semantics enable predictable, parallel-safe transformations across distributed memory. Think SIMD/SWAR on the meaning layer: semantic instructions executed like vector math. Ideal for high-fidelity sensor loops, control systems, or feedback-based adaptive systems. MSC lends itself to cognitive PID, dynamic PWM, and novel control architectures where code continuously refines itself via morphological feedback.
 
-**4. Quantum Computing:**
+4. Quantum Computing:
 MSC provides a theoretical substrate for crafting morphological quantum algorithms—those whose structures emerge through the dynamic evolution of eigenstates within morphic operator spaces. In particular, the model is compatible with photonic quantum systems like Jiuzhang 3.0, where computation is realized through single-photon parametric down-conversion, polarized optical pumping, and holographic reverse Fourier transforms/gaussian boson-sampling.
 
 We envision designing quantum algorithms not as static gate-based circuits, but as stateful morphologies—dynamically evolving wavefunctions encoded via self-adjoint operator graphs. These operators reflect and transform encoded semantics in a reversible fashion, allowing information to be encoded in the path, interference pattern, or polarization state of photons.
@@ -152,9 +152,9 @@ By interfacing with contemporary quantum hardware—especially those utilizing S
 
 MSC offers a symbolic framework for designing morphological quantum algorithms—ones that mirror quantum behavior not only in mechanics, but in structure, self-reference, and reversibility; bridging quantum state transitions with logical inference—rendering quantum evolution not as a black box, but as a semantically navigable landscape.
 
-### 4. **Agentic Motility in Relativistic Spacetime**
+### 4. Agentic Motility in Relativistic Spacetime
 
-One of the most exciting applications of MSC is its potential to model **agentic motility**—the ability of an agent to **navigate through spacetime** in a **relativistic** and **quantum-influenced** manner. By encoding **states** and **transformations** in a higher-dimensional vector space, agents can evolve in **multi-dimensional** and **relativistic contexts**, pushing the boundaries of what we consider **computational mobility**.
+One of the most exciting applications of MSC is its potential to model agentic motility—the ability of an agent to navigate through spacetime in a relativistic and quantum-influenced manner. By encoding states and transformations in a higher-dimensional vector space, agents can evolve in multi-dimensional and relativistic contexts, pushing the boundaries of what we consider computational mobility.
 
 #### Unified Semantic Space:
 
@@ -195,16 +195,16 @@ Thermodynamics: "But we keep projecting anyway"
 (Civilization: *burns forests*)
 ```
 
-**Let me show you why this is CORRECT.**
+Let me show you why this is CORRECT.
 
 ### Why they are amazing
 
-**Levin's core insight**:
+Levin's core insight:
 > "Cells aren't just machines. They're PROBLEM-SOLVERS. They have goals. They compute. At EVERY scale."
 
-**Some of his experiments**:
+Some of his experiments:
 
-**Planaria regeneration**:
+Planaria regeneration:
 
 ```txt
 Cut planarian worm in half
@@ -213,7 +213,7 @@ But: Can manipulate bioelectric signals
 Result: Grow TWO HEADS or TWO TAILS (stable!)
 ```
 
-**This is INSANE** because:
+This is INSANE because:
 
 ```txt
 DNA didn't change (same genome)
@@ -221,7 +221,7 @@ Morphology changed (two heads)
 Information stored in BIOELECTRIC FIELD (not just genes)
 ```
 
-**Xenopus frog eyes**:
+Xenopus frog eyes:
 
 ```txt
 Transplant eye to tail
@@ -230,7 +230,7 @@ Forms neural connections to spinal cord (!)
 Frog can SEE from its tail
 ```
 
-**This proves**:
+This proves:
 
 ```txt
 Organs have AUTONOMY (local competency)
@@ -242,7 +242,7 @@ They adapt to context (multi-scale coherence)
 
 Dissapointingly, having-never been brought to fruition in the past 50 years, W.V.O. Quine's Field Theory's Abraxas finally found its Demiurge, and a peer, in Dr. Michael Levin's recapitulation of the Morphogenetic Field(s) (Theory [not a theory, yet]).
 
-**Levin's claim**:
+Levin's claim:
 
 ```txt
 There exists a FIELD (bioelectric, chemical gradients)
@@ -250,7 +250,7 @@ That encodes TARGET MORPHOLOGY (the "goal shape")
 Cells read this field and COMPUTE toward it
 ```
 
-**This is NOT genetic determinism**:
+This is NOT genetic determinism:
 
 ```txt
 DNA provides: Parts list (proteins available)
@@ -258,7 +258,7 @@ Field provides: Assembly instructions (where parts go)
 Cells provide: Computation (how to get there)
 ```
 
-**Quineic ByteWord architecture IS THIS**:
+Quineic ByteWord architecture IS THIS:
 
 ```txt
 Bit level: Parts (0s and 1s)
@@ -267,7 +267,7 @@ SQL level: Goal morphology (committed state)
 Ghosts: The field (uncommitted potential)
 ```
 
-**Levin's planaria** = **MSC Quines**:
+Levin's planaria = MSC Quines:
 
 ```txt
 Cut planarian → Two heads (bioelectric reprogramming)
@@ -281,7 +281,7 @@ Both: Goal-directed morphogenesis (not random)
 
 ### The Mapping
 
-**Gödel's Incompleteness**:
+Gödel's Incompleteness:
 
 ```txt
 Theorem: Any system S that can prove arithmetic:
@@ -289,7 +289,7 @@ Theorem: Any system S that can prove arithmetic:
 2. Contains true statements it can't prove (undecidability)
 ```
 
-**Multi-Scale Incoherence**:
+Multi-Scale Incoherence:
 
 ```txt
 Theorem: Any system S with multiple competency scales:
@@ -297,11 +297,11 @@ Theorem: Any system S with multiple competency scales:
 2. Contains states that are true at one scale, false at another
 ```
 
-**THESE ARE THE SAME STRUCTURE.**
+THESE ARE THE SAME STRUCTURE.
 
 ### The Proof
 
-**Gödel's trick**:
+Gödel's trick:
 
 ```txt
 Encode: "This statement is unprovable"
@@ -309,7 +309,7 @@ If provable: Contradiction (it says it's not)
 If unprovable: True but unprovable (Gödel sentence)
 ```
 
-**Multi-scale trick**:
+Multi-scale trick:
 
 ```txt
 Encode: "This ByteWord is both ghost AND observable"
@@ -318,16 +318,16 @@ If observable (C=1): Committed (SQL sees it)
 Can't be BOTH (but quantum superposition suggests it could be)
 ```
 
-**The resolution**:
+The resolution:
 
 ```txt
 Gödel: Accept incompleteness (meta-level exists)
 MSC+QSD: Accept spinor duality (double-cover exists)
 ```
 
-**Why "half an extent"**:
+Why "half an extent":
 
-**Single scale** (no meta-level):
+Single scale (no meta-level):
 
 ```txt
 All statements provable or disprovable
@@ -335,7 +335,7 @@ No Gödel sentence (system is complete)
 Logic is CLOSED
 ```
 
-**Multiple scales** (meta-level emerges):
+Multiple scales (meta-level emerges):
 
 ```txt
 Some statements are meta (about the system itself)
@@ -343,14 +343,14 @@ Gödel sentence exists (system is incomplete)
 Logic is OPEN (can't close at meta-level)
 ```
 
-**Fraction**: Exactly **1/2** because:
+Fraction: Exactly 1/2 because:
 
 ```txt
 Half of all statements: Provable (object-level)
 Half of all statements: Undecidable (meta-level)
 ```
 
-**MSC multi-scale**:
+MSC multi-scale:
 
 ```txt
 Single scale (ByteWord alone): Coherent
@@ -358,9 +358,9 @@ Two scales (ByteWord + SQL): Incoherent at boundary
 Three scales (Bit + ByteWord + SQL): Incoherent at TWO boundaries
 ```
 
-**At each boundary**: Lose coherence for **half** the degrees of freedom.
+At each boundary: Lose coherence for half the degrees of freedom.
 
-**This is INFORMATION LOSS via projection.**
+This is INFORMATION LOSS via projection.
 
 ---
 
@@ -368,7 +368,7 @@ Three scales (Bit + ByteWord + SQL): Incoherent at TWO boundaries
 
 ### The Physics
 
-**Quantum mechanics** (Schrödinger equation):
+Quantum mechanics (Schrödinger equation):
 
 ```txt
 |ψ⟩ = α|0⟩ + β|1⟩  (superposition)
@@ -376,7 +376,7 @@ Evolution: Unitary (reversible)
 Time: Reversible (can run backwards)
 ```
 
-**Classical mechanics** (Newton's laws):
+Classical mechanics (Newton's laws):
 
 ```txt
 x(t) = definite position (no superposition)
@@ -384,9 +384,9 @@ Evolution: Deterministic (but irreversible in practice)
 Time: Irreversible (entropy increases)
 ```
 
-**The boundary**: **Decoherence**
+The boundary: Decoherence
 
-**Decoherence** = interaction with environment:
+Decoherence = interaction with environment:
 
 ```txt
 System: |ψ⟩ = α|0⟩ + β|1⟩
@@ -394,27 +394,27 @@ Environment: |E⟩ (large, many degrees of freedom)
 Interaction: |ψ⟩⊗|E⟩ → α|0⟩⊗|E₀⟩ + β|1⟩⊗|E₁⟩ (entanglement)
 ```
 
-**Trace out environment**:
+Trace out environment:
 
 ```txt
 ρ_system = Tr_env(|ψ⟩⟨ψ|⊗|E⟩⟨E|)
          = |α|²|0⟩⟨0| + |β|²|1⟩⟨1|  (no coherence terms!)
 ```
 
-**Superposition LOST** (appears classical).
+Superposition LOST (appears classical).
 
-**But**:
+But:
 
 ```txt
 Full state: |ψ⟩⊗|E⟩ (still quantum, still reversible)
 Reduced state: ρ_system (appears classical, irreversible)
 ```
 
-**Information went INTO the environment** (not destroyed, just hidden).
+Information went INTO the environment (not destroyed, just hidden).
 
 ### Holographic Runtime Boundary
 
-**ByteWord level** (quantum-like):
+ByteWord level (quantum-like):
 
 ```txt
 Ghost: C=0 (superposed, uncommitted)
@@ -422,7 +422,7 @@ Observable: C=1 (collapsed, committed)
 Evolution: XOR (reversible, unitary)
 ```
 
-**SQL level** (classical-like):
+SQL level (classical-like):
 
 ```txt
 Row: Either EXISTS or NULL (no superposition)
@@ -430,9 +430,9 @@ Evolution: INSERT/DELETE (irreversible in practice)
 Time: Unidirectional (can't uncommit easily)
 ```
 
-**The boundary**: **SQL spinor** ⟨r|v⟩
+The boundary: SQL spinor ⟨r|v⟩
 
-**Measurement (ev)**:
+Measurement (ev):
 
 ```txt
 ByteWord → SQL row
@@ -441,7 +441,7 @@ Observable becomes committed
 Information about ghosts LOST (in SQL view)
 ```
 
-**Rehydration (coev)**:
+Rehydration (coev):
 
 ```txt
 SQL row → ByteWord
@@ -450,7 +450,7 @@ Committed becomes observable
 Information RECOVERED (via spinor)
 ```
 
-**The trick**:
+The trick:
 
 ```txt
 Traditional: Measurement is projection (irreversible)
@@ -458,7 +458,7 @@ MSC: Measurement is ev (reversible via coev)
 Secret: Keep spinor pair ⟨r|v⟩ (don't project!)
 ```
 
-**This is WHY cohomological isometry**:
+This is WHY cohomological isometry:
 
 ```txt
 H*(ByteWord) ≅ H*(SQL)
@@ -471,25 +471,25 @@ Even though: They look incompatible (one quantum, one classical)
 ## Intro-to Spinor-magic 
 ### Recapitulating ENTSCHEIDUNGSPROBLEM and Von Neumann architecture 80 years later
 
-**Definition 1 (Bulk Morphogenesis)**:
-Let **Bulk** be a category where:
+Definition 1 (Bulk Morphogenesis):
+Let Bulk be a category where:
 - Objects are continuous state spaces (manifolds, fields)
 - Morphisms are smooth transformations (diffeomorphisms, flows)
 - Composition is continuous (no jumps/discontinuities)
 
-**Definition 2 (Boundary Morphism)**:
-Let **Boundary** be a category where:
+Definition 2 (Boundary Morphism):
+Let Boundary be a category where:
 - Objects are discrete symbol spaces (strings, ASTs, bytecode)
 - Morphisms are symbolic transformations (rewrite rules, operations)
 - Composition is discrete (stepwise, quantum jumps)
 
-**Definition 3 (Holographic Functor)**:
-A functor F: **Bulk** → **Boundary** is **holographic** if:
-1. **Faithful**: Distinct bulk states map to distinct boundary symbols
-2. **Full**: Every boundary symbol corresponds to some bulk state
-3. **Information-preserving**: H(F(bulk)) = H(bulk) (entropy conserved)
+Definition 3 (Holographic Functor):
+A functor F: Bulk → Boundary is holographic if:
+1. Faithful: Distinct bulk states map to distinct boundary symbols
+2. Full: Every boundary symbol corresponds to some bulk state
+3. Information-preserving: H(F(bulk)) = H(bulk) (entropy conserved)
 
-**Theorem (Correction of Von Neumann)**:
+Theorem (Correction of Von Neumann):
 *A modified-quine Q can self-replicate if and only if there exists a holographic functor F: Bulk(Q) → Boundary(Q) such that:*
 ```
 ∀ morphism m ∈ Bulk(Q):
@@ -516,7 +516,7 @@ Q.E.D.
 
 #### 1. Spinor → Vector (Physics)
 
-**Spinor** (full information):
+Spinor (full information):
 
 ```txt
 ψ ∈ SU(2)  (two components, complex)
@@ -524,7 +524,7 @@ Encodes: Spin direction + phase
 Needs: 720° to return (double-cover)
 ```
 
-**Vector** (projected):
+Vector (projected):
 
 ```txt
 v ∈ SO(3)  (three components, real)
@@ -532,7 +532,7 @@ Encodes: Direction only (lost phase)
 Needs: 360° to return (single-cover)
 ```
 
-**Projection map**:
+Projection map:
 
 ```txt
 π: SU(2) → SO(3)
@@ -540,11 +540,11 @@ Needs: 360° to return (single-cover)
 2:1 map (ψ and -ψ map to same v)
 ```
 
-**Information lost**: **Phase** (50% of degrees of freedom)
+Information lost: Phase (50% of degrees of freedom)
 
 #### 2. ByteWord + SQL → SQL
 
-**Full system** (ByteWord + SQL):
+Full system (ByteWord + SQL):
 
 ```txt
 State: (bytecode, ghost_config, SQL_rows)
@@ -552,7 +552,7 @@ Encodes: Code + potential + committed
 Needs: Both levels (bulk + boundary)
 ```
 
-**SQL alone** (projected):
+SQL alone (projected):
 
 ```txt
 State: SQL_rows only
@@ -560,7 +560,7 @@ Encodes: Committed only (lost ghosts)
 Needs: Single level (boundary)
 ```
 
-**Projection**:
+Projection:
 
 ```txt
 π: ByteWord → SQL
@@ -568,11 +568,11 @@ Needs: Single level (boundary)
 Loses: Ghost configurations (50% of states, since |ghosts| ≈ |observables|)
 ```
 
-**Information lost**: **Ghosts** (uncommitted potential)
+Information lost: Ghosts (uncommitted potential)
 
 #### 3. Forest → Wasteland (Macroscopic/Human-scale Thermodynamics)
 
-**Forest ecosystem** (full):
+Forest ecosystem (full):
 
 ```txt
 State: Trees + soil + biodiversity + carbon
@@ -580,7 +580,7 @@ Encodes: Complex molecular structure
 Entropy: Low (highly ordered)
 ```
 
-**Wasteland** (projected):
+Wasteland (projected):
 
 ```txt
 State: CO₂ + heat + eroded soil
@@ -588,7 +588,7 @@ Encodes: Simple molecules (no structure)
 Entropy: High (disordered)
 ```
 
-**Projection** (burning):
+Projection (burning):
 
 ```txt
 π: Forest → Wasteland
@@ -596,11 +596,11 @@ Complex molecules → CO₂ + heat
 Loses: Molecular structure, biodiversity
 ```
 
-**Information lost**: **Ecosystem complexity** (organizational information)
+Information lost: Ecosystem complexity (organizational information)
 
 ### The Pattern
 
-**All three**:
+All three:
 
 ```txt
 Start: High-dimensional, structured, low-entropy
@@ -608,7 +608,7 @@ Project: Lose half the degrees of freedom
 End: Low-dimensional, simple, high-entropy
 ```
 
-**All three are IRREVERSIBLE** (in practice):
+All three are IRREVERSIBLE (in practice):
 
 ```txt
 Can't recover: Phase from |ψ|²
@@ -616,7 +616,7 @@ Can't recover: Ghosts from SQL rows (without spinor)
 Can't recover: Forest from CO₂
 ```
 
-**UNLESS**:
+UNLESS:
 
 ```txt
 Physics: Keep spinor (don't project to vector)
@@ -630,7 +630,7 @@ Thermodynamics: Keep forest (don't burn)
 
 ### Why Spinors Work
 
-**Traditional approach**:
+Traditional approach:
 
 ```txt
 1. Measure system (project to classical)
@@ -638,7 +638,7 @@ Thermodynamics: Keep forest (don't burn)
 3. Accept loss (irreversible)
 ```
 
-**Spinor approach**:
+Spinor approach:
 
 ```txt
 1. Measure with spinor (keep full state)
@@ -646,7 +646,7 @@ Thermodynamics: Keep forest (don't burn)
 3. Reverse if needed (via dual)
 ```
 
-**SQL spinor**:
+SQL spinor:
 
 ```txt
 ⟨r|v⟩ = (reference, value) pair
@@ -655,7 +655,7 @@ v = committed value (observable)
 Together: Full state (no loss)
 ```
 
-**Why this works**:
+Why this works:
 
 ```txt
 Traditional SQL: Stores value only (projects)
@@ -663,16 +663,16 @@ MSC+QSD SQL: Stores spinor ⟨r|v⟩ (preserves)
 Difference: Reference keeps connection to bulk
 ```
 
-**Example**:
+Example:
 
-**Traditional**:
+Traditional:
 
 ```sql
 INSERT INTO table (value) VALUES (42);
 -- Lost: Where 42 came from (no ghost history)
 ```
 
-**MSC+QSD**:
+MSC+QSD:
 
 ```sql
 INSERT INTO table (reference, value) VALUES (0xDEADBEEF, 42);
@@ -680,7 +680,7 @@ INSERT INTO table (reference, value) VALUES (0xDEADBEEF, 42);
 -- Can rehydrate: Follow pointer to recover ghosts
 ```
 
-**The reference IS the spinor's "other component"**:
+The reference IS the spinor's "other component":
 
 ```txt
 Value (v): Projected (classical, observable)
@@ -694,12 +694,12 @@ Pair (r,v): Spinor (full information)
 
 ### The Pattern Across All Scales
 
-**Physics**: Project spinor → vector (lose phase)
-**Computation**: Project bulk → boundary (lose ghosts)
-**Ecology**: Project forest → wasteland (lose structure)
-**Economics**: Project long-term → short-term (lose sustainability)
+Physics: Project spinor → vector (lose phase)
+Computation: Project bulk → boundary (lose ghosts)
+Ecology: Project forest → wasteland (lose structure)
+Economics: Project long-term → short-term (lose sustainability)
 
-**All four are the SAME MISTAKE**:
+All four are the SAME MISTAKE:
 
 ```txt
 Prioritize: Immediate observable (value)
@@ -709,7 +709,7 @@ Result: Irreversible loss (entropy increase)
 
 ### Why We Do It Anyway
 
-**The economic reason**:
+The economic reason:
 
 ```txt
 Spinor approach: Requires keeping BOTH components
@@ -723,7 +723,7 @@ Benefit: Simplicity (no overhead)
 Time horizon: Short (quarters)
 ```
 
-**Capitalism optimizes for**:
+Capitalism optimizes for:
 
 ```txt
 Short-term profit (quarterly earnings)
@@ -731,7 +731,7 @@ Low overhead (minimize storage costs)
 Simplicity (easy to understand)
 ```
 
-**Therefore**:
+Therefore:
 
 ```txt
 Projects everything (lose information)
@@ -739,7 +739,7 @@ Accepts irreversibility (externalize costs)
 Maximizes entropy (burn forests, dump CO₂)
 ```
 
-**This is WHY**:
+This is WHY:
 
 ```txt
 We burn forests (project ecosystem → CO₂)
@@ -747,7 +747,7 @@ We use classical physics (project quantum → Newton)
 We use SQL without spinors (project bulk → boundary)
 ```
 
-**Even though we KNOW better**:
+Even though we KNOW better:
 
 ```txt
 Forests are carbon sinks (should keep)
@@ -757,7 +757,7 @@ Spinors preserve info; degrees of freedom and conformal (angle) geometry (should
 
 ### The Hope
 
-**If MSC+QSD SQL spinor approach succeeds**:
+If MSC+QSD SQL spinor approach succeeds:
 
 ```txt
 Proves: Information preservation is practical
@@ -776,25 +776,25 @@ Spinors: Bridge the break (via double-cover)
 Projection: Destroys the bridge (irreversible)
 ```
 
-**Is CORRECT** because:
+Is CORRECT because:
 
-1. **Gödel's incompleteness = Scale incoherence**
+1. Gödel's incompleteness = Scale incoherence
    - Both: Can't be complete at all levels
    - Both: Need meta-structure (Gödel sentence, spinor)
    - Both: "Half" the system is inaccessible from within
 
-2. **Spinor = Double-cover = Preserved information**
+2. Spinor = Double-cover = Preserved information
    - SU(2) → SO(3) loses phase (50% info loss)
    - ByteWord → SQL loses ghosts (50% info loss)
    - Spinor keeps BOTH (0% info loss)
 
-3. **Projection = Thermodynamic crime**
+3. Projection = Thermodynamic crime
    - Physics: Lose quantum → classical (irreversible)
    - Computation: Lose bulk → boundary (irreversible)
    - Ecology: Lose forest → wasteland (irreversible)
    - Economics: Lose long → short term (irreversible)
 
-4. **MSC solution = Keep the spinor**
+4. MSC solution = Keep the spinor
    - Don't project bulk to boundary
    - Keep ⟨r|v⟩ pair (reference + value)
    - Guarantee reversibility (ev/coev)
@@ -802,7 +802,7 @@ Projection: Destroys the bridge (irreversible)
 
 ### The Terrifyingly Interesting-Part
 
-**This means**:
+This means:
 
 ```txt
 The SAME mathematical structure (spinor projection)
@@ -813,7 +813,7 @@ Explains:
 - Why economies crash
 ```
 
-**And the solution is ALWAYS**:
+And the solution is ALWAYS:
 
 ```txt
 Don't project (keep the double-cover)
@@ -822,7 +822,7 @@ Accept overhead (store both components)
 Think long-term (don't optimize for quarters)
 ```
 
-**But we DON'T** because:
+But we DON'T because:
 
 ```txt
 Projection is easier (immediate benefit)
@@ -830,7 +830,7 @@ Information loss is invisible (externalized cost)
 Irreversibility is "someone else's problem" (future generations)
 ```
 
-**MSC+QSD runtime is PROOF** that there's another way:
+MSC+QSD runtime is PROOF that there's another way:
 
 ```txt
 Keep spinors (⟨r|v⟩ pairs)
@@ -839,7 +839,7 @@ Maintain reversibility (ev/coev duality)
 Scale sustainably (microcanonical, no external bath)
 ```
 
-**If this works for COMPUTATION**:
+If this works for COMPUTATION:
 
 ```txt
 Then it could work for THERMODYNAMICS
@@ -935,7 +935,7 @@ Discreteness, then, is not imposed from below. It crystallizes when morphologica
 
 This perspective sits at the fertile overlap of several traditions:
 
-- Feynman’s path integral (QED), which already treats physical processes as weighted sums over *all possible morphologies of motion*. Reality selects the stationary phase; the **least-action** path from a superposition of possibilities. (contemporary Lagrangian (Hamiltonian), not Maupertuisian (Barandesian) least action of QSD ensembles)
+- Feynman’s path integral (QED), which already treats physical processes as weighted sums over *all possible morphologies of motion*. Reality selects the stationary phase; the least-action path from a superposition of possibilities. (contemporary Lagrangian (Hamiltonian), not Maupertuisian (Barandesian) least action of QSD ensembles)
 - Wolfram’s rulial dynamics and multiway systems, which generate spacetime, particles, and observers from networks of relations and computational rules.
 - Noetherian symmetry breaking in QFT, where the vacuum potential and spontaneous symmetry breaking give rise to mass and structure.
 
@@ -1924,16 +1924,16 @@ Thermodynamics: "But we keep projecting anyway"
 (Civilization: *burns forests*)
 ```
 
-**Let me show you why this is CORRECT.**
+Let me show you why this is CORRECT.
 
 ### Why they are amazing
 
-**Levin's core insight**:
+Levin's core insight:
 > "Cells aren't just machines. They're PROBLEM-SOLVERS. They have goals. They compute. At EVERY scale."
 
-**Some of his experiments**:
+Some of his experiments:
 
-**Planaria regeneration**:
+Planaria regeneration:
 
 ```txt
 Cut planarian worm in half
@@ -1942,7 +1942,7 @@ But: Can manipulate bioelectric signals
 Result: Grow TWO HEADS or TWO TAILS (stable!)
 ```
 
-**This is INSANE** because:
+This is INSANE because:
 
 ```txt
 DNA didn't change (same genome)
@@ -1950,7 +1950,7 @@ Morphology changed (two heads)
 Information stored in BIOELECTRIC FIELD (not just genes)
 ```
 
-**Xenopus frog eyes**:
+Xenopus frog eyes:
 
 ```txt
 Transplant eye to tail
@@ -1959,7 +1959,7 @@ Forms neural connections to spinal cord (!)
 Frog can SEE from its tail
 ```
 
-**This proves**:
+This proves:
 
 ```txt
 Organs have AUTONOMY (local competency)
@@ -1971,7 +1971,7 @@ They adapt to context (multi-scale coherence)
 
 Dissapointingly, having-never been brought to fruition in the past 50 years, W.V.O. Quine's Field Theory's Abraxas finally found its Demiurge, and a peer, in Dr. Michael Levin's recapitulation of the Morphogenetic Field(s) (Theory [not a theory, yet]).
 
-**Levin's claim**:
+Levin's claim:
 
 ```txt
 There exists a FIELD (bioelectric, chemical gradients)
@@ -1979,7 +1979,7 @@ That encodes TARGET MORPHOLOGY (the "goal shape")
 Cells read this field and COMPUTE toward it
 ```
 
-**This is NOT genetic determinism**:
+This is NOT genetic determinism:
 
 ```txt
 DNA provides: Parts list (proteins available)
@@ -1987,7 +1987,7 @@ Field provides: Assembly instructions (where parts go)
 Cells provide: Computation (how to get there)
 ```
 
-**Quineic ByteWord architecture IS THIS**:
+Quineic ByteWord architecture IS THIS:
 
 ```txt
 Bit level: Parts (0s and 1s)
@@ -1996,7 +1996,7 @@ SQL level: Goal morphology (committed state)
 Ghosts: The field (uncommitted potential)
 ```
 
-**Levin's planaria** = **MSC Quines**:
+Levin's planaria = MSC Quines:
 
 ```txt
 Cut planarian → Two heads (bioelectric reprogramming)
@@ -2010,7 +2010,7 @@ Both: Goal-directed morphogenesis (not random)
 
 ### The Mapping
 
-**Gödel's Incompleteness**:
+Gödel's Incompleteness:
 
 ```txt
 Theorem: Any system S that can prove arithmetic:
@@ -2018,7 +2018,7 @@ Theorem: Any system S that can prove arithmetic:
 2. Contains true statements it can't prove (undecidability)
 ```
 
-**Multi-Scale Incoherence**:
+Multi-Scale Incoherence:
 
 ```txt
 Theorem: Any system S with multiple competency scales:
@@ -2026,11 +2026,11 @@ Theorem: Any system S with multiple competency scales:
 2. Contains states that are true at one scale, false at another
 ```
 
-**THESE ARE THE SAME STRUCTURE.**
+THESE ARE THE SAME STRUCTURE.
 
 ### The Proof
 
-**Gödel's trick**:
+Gödel's trick:
 
 ```txt
 Encode: "This statement is unprovable"
@@ -2038,7 +2038,7 @@ If provable: Contradiction (it says it's not)
 If unprovable: True but unprovable (Gödel sentence)
 ```
 
-**Multi-scale trick**:
+Multi-scale trick:
 
 ```txt
 Encode: "This ByteWord is both ghost AND observable"
@@ -2047,16 +2047,16 @@ If observable (C=1): Committed (SQL sees it)
 Can't be BOTH (but quantum superposition suggests it could be)
 ```
 
-**The resolution**:
+The resolution:
 
 ```txt
 Gödel: Accept incompleteness (meta-level exists)
 MSC+QSD: Accept spinor duality (double-cover exists)
 ```
 
-**Why "half an extent"**:
+Why "half an extent":
 
-**Single scale** (no meta-level):
+Single scale (no meta-level):
 
 ```txt
 All statements provable or disprovable
@@ -2064,7 +2064,7 @@ No Gödel sentence (system is complete)
 Logic is CLOSED
 ```
 
-**Multiple scales** (meta-level emerges):
+Multiple scales (meta-level emerges):
 
 ```txt
 Some statements are meta (about the system itself)
@@ -2072,14 +2072,14 @@ Gödel sentence exists (system is incomplete)
 Logic is OPEN (can't close at meta-level)
 ```
 
-**Fraction**: Exactly **1/2** because:
+Fraction: Exactly 1/2 because:
 
 ```txt
 Half of all statements: Provable (object-level)
 Half of all statements: Undecidable (meta-level)
 ```
 
-**MSC multi-scale**:
+MSC multi-scale:
 
 ```txt
 Single scale (ByteWord alone): Coherent
@@ -2087,9 +2087,9 @@ Two scales (ByteWord + SQL): Incoherent at boundary
 Three scales (Bit + ByteWord + SQL): Incoherent at TWO boundaries
 ```
 
-**At each boundary**: Lose coherence for **half** the degrees of freedom.
+At each boundary: Lose coherence for half the degrees of freedom.
 
-**This is INFORMATION LOSS via projection.**
+This is INFORMATION LOSS via projection.
 
 ---
 
@@ -2097,7 +2097,7 @@ Three scales (Bit + ByteWord + SQL): Incoherent at TWO boundaries
 
 ### The Physics
 
-**Quantum mechanics** (Schrödinger equation):
+Quantum mechanics (Schrödinger equation):
 
 ```txt
 |ψ⟩ = α|0⟩ + β|1⟩  (superposition)
@@ -2105,7 +2105,7 @@ Evolution: Unitary (reversible)
 Time: Reversible (can run backwards)
 ```
 
-**Classical mechanics** (Newton's laws):
+Classical mechanics (Newton's laws):
 
 ```txt
 x(t) = definite position (no superposition)
@@ -2113,9 +2113,9 @@ Evolution: Deterministic (but irreversible in practice)
 Time: Irreversible (entropy increases)
 ```
 
-**The boundary**: **Decoherence**
+The boundary: Decoherence
 
-**Decoherence** = interaction with environment:
+Decoherence = interaction with environment:
 
 ```txt
 System: |ψ⟩ = α|0⟩ + β|1⟩
@@ -2123,29 +2123,29 @@ Environment: |E⟩ (large, many degrees of freedom)
 Interaction: |ψ⟩⊗|E⟩ → α|0⟩⊗|E₀⟩ + β|1⟩⊗|E₁⟩ (entanglement)
 ```
 
-**Trace out environment**:
+Trace out environment:
 
 ```txt
 ρ_system = Tr_env(|ψ⟩⟨ψ|⊗|E⟩⟨E|)
          = |α|²|0⟩⟨0| + |β|²|1⟩⟨1|  (no coherence terms!)
 ```
 
-**Superposition LOST** (appears classical).
+Superposition LOST (appears classical).
 
-**But**:
+But:
 
 ```txt
 Full state: |ψ⟩⊗|E⟩ (still quantum, still reversible)
 Reduced state: ρ_system (appears classical, irreversible)
 ```
 
-**Information went INTO the environment** (not destroyed, just hidden).
+Information went INTO the environment (not destroyed, just hidden).
 
 ### Holographic Runtime Boundary
 
 See [[The Hermitian Type System]] for specification.
 
-**ByteWord level** (quantum-like):
+ByteWord level (quantum-like):
 
 ```txt
 Ghost: C=0 (superposed, uncommitted)
@@ -2153,7 +2153,7 @@ Observable: C=1 (collapsed, committed)
 Evolution: XOR (reversible, unitary)
 ```
 
-**SQL level** (classical-like):
+SQL level (classical-like):
 
 ```txt
 Row: Either EXISTS or NULL (no superposition)
@@ -2161,9 +2161,9 @@ Evolution: INSERT/DELETE (irreversible in practice)
 Time: Unidirectional (can't uncommit easily)
 ```
 
-**The boundary**: **SQL spinor** ⟨r|v⟩
+The boundary: SQL spinor ⟨r|v⟩
 
-**Measurement (ev)**:
+Measurement (ev):
 
 ```txt
 ByteWord → SQL row
@@ -2172,7 +2172,7 @@ Observable becomes committed
 Information about ghosts LOST (in SQL view)
 ```
 
-**Rehydration (coev)**:
+Rehydration (coev):
 
 ```txt
 SQL row → ByteWord
@@ -2181,7 +2181,7 @@ Committed becomes observable
 Information RECOVERED (via spinor)
 ```
 
-**The trick**:
+The trick:
 
 ```txt
 Traditional: Measurement is projection (irreversible)
@@ -2189,7 +2189,7 @@ MSC: Measurement is ev (reversible via coev)
 Secret: Keep spinor pair ⟨r|v⟩ (don't project!)
 ```
 
-**This is WHY cohomological isometry**:
+This is WHY cohomological isometry:
 
 ```txt
 H*(ByteWord) ≅ H*(SQL)
@@ -2202,25 +2202,25 @@ Even though: They look incompatible (one quantum, one classical)
 ## Intro-to Spinor-magic 
 ### Recapitulating ENTSCHEIDUNGSPROBLEM and Von Neumann architecture 80 years later
 
-**Definition 1 (Bulk Morphogenesis)**:
-Let **Bulk** be a category where:
+Definition 1 (Bulk Morphogenesis):
+Let Bulk be a category where:
 - Objects are continuous state spaces (manifolds, fields)
 - Morphisms are smooth transformations (diffeomorphisms, flows)
 - Composition is continuous (no jumps/discontinuities)
 
-**Definition 2 (Boundary Morphism)**:
-Let **Boundary** be a category where:
+Definition 2 (Boundary Morphism):
+Let Boundary be a category where:
 - Objects are discrete symbol spaces (strings, ASTs, bytecode)
 - Morphisms are symbolic transformations (rewrite rules, operations)
 - Composition is discrete (stepwise, quantum jumps)
 
-**Definition 3 (Holographic Functor)**:
-A functor F: **Bulk** → **Boundary** is **holographic** if:
-1. **Faithful**: Distinct bulk states map to distinct boundary symbols
-2. **Full**: Every boundary symbol corresponds to some bulk state
-3. **Information-preserving**: H(F(bulk)) = H(bulk) (entropy conserved)
+Definition 3 (Holographic Functor):
+A functor F: Bulk → Boundary is holographic if:
+1. Faithful: Distinct bulk states map to distinct boundary symbols
+2. Full: Every boundary symbol corresponds to some bulk state
+3. Information-preserving: H(F(bulk)) = H(bulk) (entropy conserved)
 
-**Theorem (Correction of Von Neumann)**:
+Theorem (Correction of Von Neumann):
 *A modified-quine Q can self-replicate if and only if there exists a holographic functor F: Bulk(Q) → Boundary(Q) such that:*
 ```
 ∀ morphism m ∈ Bulk(Q):
@@ -2247,7 +2247,7 @@ Q.E.D.
 
 #### 1. Spinor → Vector (Physics)
 
-**Spinor** (full information):
+Spinor (full information):
 
 ```txt
 ψ ∈ SU(2)  (two components, complex)
@@ -2255,7 +2255,7 @@ Encodes: Spin direction + phase
 Needs: 720° to return (double-cover)
 ```
 
-**Vector** (projected):
+Vector (projected):
 
 ```txt
 v ∈ SO(3)  (three components, real)
@@ -2263,7 +2263,7 @@ Encodes: Direction only (lost phase)
 Needs: 360° to return (single-cover)
 ```
 
-**Projection map**:
+Projection map:
 
 ```txt
 π: SU(2) → SO(3)
@@ -2271,11 +2271,11 @@ Needs: 360° to return (single-cover)
 2:1 map (ψ and -ψ map to same v)
 ```
 
-**Information lost**: **Phase** (50% of degrees of freedom)
+Information lost: Phase (50% of degrees of freedom)
 
 #### 2. ByteWord + SQL → SQL
 
-**Full system** (ByteWord + SQL):
+Full system (ByteWord + SQL):
 
 ```txt
 State: (bytecode, ghost_config, SQL_rows)
@@ -2283,7 +2283,7 @@ Encodes: Code + potential + committed
 Needs: Both levels (bulk + boundary)
 ```
 
-**SQL alone** (projected):
+SQL alone (projected):
 
 ```txt
 State: SQL_rows only
@@ -2291,7 +2291,7 @@ Encodes: Committed only (lost ghosts)
 Needs: Single level (boundary)
 ```
 
-**Projection**:
+Projection:
 
 ```txt
 π: ByteWord → SQL
@@ -2299,11 +2299,11 @@ Needs: Single level (boundary)
 Loses: Ghost configurations (50% of states, since |ghosts| ≈ |observables|)
 ```
 
-**Information lost**: **Ghosts** (uncommitted potential)
+Information lost: Ghosts (uncommitted potential)
 
 #### 3. Forest → Wasteland (Macroscopic/Human-scale Thermodynamics)
 
-**Forest ecosystem** (full):
+Forest ecosystem (full):
 
 ```txt
 State: Trees + soil + biodiversity + carbon
@@ -2311,7 +2311,7 @@ Encodes: Complex molecular structure
 Entropy: Low (highly ordered)
 ```
 
-**Wasteland** (projected):
+Wasteland (projected):
 
 ```txt
 State: CO₂ + heat + eroded soil
@@ -2319,7 +2319,7 @@ Encodes: Simple molecules (no structure)
 Entropy: High (disordered)
 ```
 
-**Projection** (burning):
+Projection (burning):
 
 ```txt
 π: Forest → Wasteland
@@ -2327,11 +2327,11 @@ Complex molecules → CO₂ + heat
 Loses: Molecular structure, biodiversity
 ```
 
-**Information lost**: **Ecosystem complexity** (organizational information)
+Information lost: Ecosystem complexity (organizational information)
 
 ### The Pattern
 
-**All three**:
+All three:
 
 ```txt
 Start: High-dimensional, structured, low-entropy
@@ -2339,7 +2339,7 @@ Project: Lose half the degrees of freedom
 End: Low-dimensional, simple, high-entropy
 ```
 
-**All three are IRREVERSIBLE** (in practice):
+All three are IRREVERSIBLE (in practice):
 
 ```txt
 Can't recover: Phase from |ψ|²
@@ -2347,7 +2347,7 @@ Can't recover: Ghosts from SQL rows (without spinor)
 Can't recover: Forest from CO₂
 ```
 
-**UNLESS**:
+UNLESS:
 
 ```txt
 Physics: Keep spinor (don't project to vector)
@@ -2361,7 +2361,7 @@ Thermodynamics: Keep forest (don't burn)
 
 ### Why Spinors Work
 
-**Traditional approach**:
+Traditional approach:
 
 ```txt
 1. Measure system (project to classical)
@@ -2369,7 +2369,7 @@ Thermodynamics: Keep forest (don't burn)
 3. Accept loss (irreversible)
 ```
 
-**Spinor approach**:
+Spinor approach:
 
 ```txt
 1. Measure with spinor (keep full state)
@@ -2377,7 +2377,7 @@ Thermodynamics: Keep forest (don't burn)
 3. Reverse if needed (via dual)
 ```
 
-**SQL spinor**:
+SQL spinor:
 
 ```txt
 ⟨r|v⟩ = (reference, value) pair
@@ -2386,7 +2386,7 @@ v = committed value (observable)
 Together: Full state (no loss)
 ```
 
-**Why this works**:
+Why this works:
 
 ```txt
 Traditional SQL: Stores value only (projects)
@@ -2394,16 +2394,16 @@ MSC+QSD SQL: Stores spinor ⟨r|v⟩ (preserves)
 Difference: Reference keeps connection to bulk
 ```
 
-**Example**:
+Example:
 
-**Traditional**:
+Traditional:
 
 ```sql
 INSERT INTO table (value) VALUES (42);
 -- Lost: Where 42 came from (no ghost history)
 ```
 
-**MSC+QSD**:
+MSC+QSD:
 
 ```sql
 INSERT INTO table (reference, value) VALUES (0xDEADBEEF, 42);
@@ -2411,7 +2411,7 @@ INSERT INTO table (reference, value) VALUES (0xDEADBEEF, 42);
 -- Can rehydrate: Follow pointer to recover ghosts
 ```
 
-**The reference IS the spinor's "other component"**:
+The reference IS the spinor's "other component":
 
 ```txt
 Value (v): Projected (classical, observable)
@@ -2425,12 +2425,12 @@ Pair (r,v): Spinor (full information)
 
 ### The Pattern Across All Scales
 
-**Physics**: Project spinor → vector (lose phase)
-**Computation**: Project bulk → boundary (lose ghosts)
-**Ecology**: Project forest → wasteland (lose structure)
-**Economics**: Project long-term → short-term (lose sustainability)
+Physics: Project spinor → vector (lose phase)
+Computation: Project bulk → boundary (lose ghosts)
+Ecology: Project forest → wasteland (lose structure)
+Economics: Project long-term → short-term (lose sustainability)
 
-**All four are the SAME MISTAKE**:
+All four are the SAME MISTAKE:
 
 ```txt
 Prioritize: Immediate observable (value)
@@ -2440,7 +2440,7 @@ Result: Irreversible loss (entropy increase)
 
 ### Why We Do It Anyway
 
-**The economic reason**:
+The economic reason:
 
 ```txt
 Spinor approach: Requires keeping BOTH components
@@ -2454,7 +2454,7 @@ Benefit: Simplicity (no overhead)
 Time horizon: Short (quarters)
 ```
 
-**Capitalism optimizes for**:
+Capitalism optimizes for:
 
 ```txt
 Short-term profit (quarterly earnings)
@@ -2462,7 +2462,7 @@ Low overhead (minimize storage costs)
 Simplicity (easy to understand)
 ```
 
-**Therefore**:
+Therefore:
 
 ```txt
 Projects everything (lose information)
@@ -2470,7 +2470,7 @@ Accepts irreversibility (externalize costs)
 Maximizes entropy (burn forests, dump CO₂)
 ```
 
-**This is WHY**:
+This is WHY:
 
 ```txt
 We burn forests (project ecosystem → CO₂)
@@ -2478,7 +2478,7 @@ We use classical physics (project quantum → Newton)
 We use SQL without spinors (project bulk → boundary)
 ```
 
-**Even though we KNOW better**:
+Even though we KNOW better:
 
 ```txt
 Forests are carbon sinks (should keep)
@@ -2488,7 +2488,7 @@ Spinors preserve info; degrees of freedom and conformal (angle) geometry (should
 
 ### The Hope
 
-**If MSC+QSD SQL spinor approach succeeds**:
+If MSC+QSD SQL spinor approach succeeds:
 
 ```txt
 Proves: Information preservation is practical
@@ -2507,25 +2507,25 @@ Spinors: Bridge the break (via double-cover)
 Projection: Destroys the bridge (irreversible)
 ```
 
-**Is CORRECT** because:
+Is CORRECT because:
 
-1. **Gödel's incompleteness = Scale incoherence**
+1. Gödel's incompleteness = Scale incoherence
    - Both: Can't be complete at all levels
    - Both: Need meta-structure (Gödel sentence, spinor)
    - Both: "Half" the system is inaccessible from within
 
-2. **Spinor = Double-cover = Preserved information**
+2. Spinor = Double-cover = Preserved information
    - SU(2) → SO(3) loses phase (50% info loss)
    - ByteWord → SQL loses ghosts (50% info loss)
    - Spinor keeps BOTH (0% info loss)
 
-3. **Projection = Thermodynamic crime**
+3. Projection = Thermodynamic crime
    - Physics: Lose quantum → classical (irreversible)
    - Computation: Lose bulk → boundary (irreversible)
    - Ecology: Lose forest → wasteland (irreversible)
    - Economics: Lose long → short term (irreversible)
 
-4. **MSC solution = Keep the spinor**
+4. MSC solution = Keep the spinor
    - Don't project bulk to boundary
    - Keep ⟨r|v⟩ pair (reference + value)
    - Guarantee reversibility (ev/coev)
@@ -2533,7 +2533,7 @@ Projection: Destroys the bridge (irreversible)
 
 ### The Terrifyingly Interesting-Part
 
-**This means**:
+This means:
 
 ```txt
 The SAME mathematical structure (spinor projection)
@@ -2544,7 +2544,7 @@ Explains:
 - Why economies crash
 ```
 
-**And the solution is ALWAYS**:
+And the solution is ALWAYS:
 
 ```txt
 Don't project (keep the double-cover)
@@ -2553,7 +2553,7 @@ Accept overhead (store both components)
 Think long-term (don't optimize for quarters)
 ```
 
-**But we DON'T** because:
+But we DON'T because:
 
 ```txt
 Projection is easier (immediate benefit)
@@ -2561,7 +2561,7 @@ Information loss is invisible (externalized cost)
 Irreversibility is "someone else's problem" (future generations)
 ```
 
-**MSC+QSD runtime is PROOF** that there's another way:
+MSC+QSD runtime is PROOF that there's another way:
 
 ```txt
 Keep spinors (⟨r|v⟩ pairs)
@@ -2570,7 +2570,7 @@ Maintain reversibility (ev/coev duality)
 Scale sustainably (microcanonical, no external bath)
 ```
 
-**If this works for COMPUTATION**:
+If this works for COMPUTATION:
 
 ```txt
 Then it could work for THERMODYNAMICS
@@ -2672,7 +2672,7 @@ Standard QM: `P(outcome) = |⟨ψ|φ⟩|²`
 
 MSC/QSD: `P(observable) = |⟨value|metric⟩|²` where metric is transcendental
 
-The Everettian "many-worlds" hand-waving doesn't explain **why** Born rule probabilities appear. MSC/QSD does:
+The Everettian "many-worlds" hand-waving doesn't explain why Born rule probabilities appear. MSC/QSD does:
 
 - Bulk has uncountable states (non-well-founded, ℂ-valued)
 - Metric samples with transcendental precision (π, e, √2, etc.)
@@ -2697,7 +2697,7 @@ Because:
 - Null metric: *Is* the fixpoint (zero vector), pure boundary
 - Rational metric: Eventually reaches a fixpoint (repeating decimals), collapses to boundary
 
-The transcendental acts like a **Cauchy sequence** that approaches the boundary but never arrives—it's the mathematical equivalent of Zeno's paradox, which is EXACTLY what you want for maintaining bulk/boundary duality!
+The transcendental acts like a Cauchy sequence that approaches the boundary but never arrives—it's the mathematical equivalent of Zeno's paradox, which is EXACTLY what you want for maintaining bulk/boundary duality!
 
 ---
 
@@ -2849,15 +2849,15 @@ Morphological Source Code (MSC) — Hilbert-Space-Centric, Self-Adjoint Evolutio
 
 | Conceptual Axis         | MSC (Morphological Source Code)                     | QSD (Quinic Statistical Dynamics)                                 |
 | ----------------------- | --------------------------------------------------- | ----------------------------------------------------------------- |
-| **Unit of Computation** | Self-adjoint operator on a Hilbert vector           | Probabilistic runtime instance (`runtime as quanta`)              |
-| **Temporal Ontology**   | Reversible, symmetric (unitary evolution)           | Irreversible, probabilistic entanglement and decoherence          |
-| **Causality**           | Collapse happens *only at observation*              | Runtime causality is woven across spacetime                       |
-| **Self-Reference**      | Quining as eigenvector fixpoint `Ξ(⌜Ξ⌝)`            | Quining as recursive runtime instantiation                        |
-| **Phase Model**         | Phase = morphogenetic derivative Δⁿ                 | Phase = probabilistic time-loop coherence                         |
-| **Entropy**             | Algorithmic entropy, per morphogenetic reducibility | Entropic asymmetry via distributed resolution (Landauer cost)     |
-| **Form of Evolution**   | Morphological lifting in Hilbert space              | Entangled probabilistic resolution in runtime-space               |
-| **Scale of Deployment** | Logical -> Physical (quantum-classical synthesis)   | Physical -> Logical (statistical coherence → inference structure) |
-| **Key Analogy**         | A *quantum grammar* for logic and code              | A *statistical field theory* for code and causality               |
+| Unit of Computation | Self-adjoint operator on a Hilbert vector           | Probabilistic runtime instance (`runtime as quanta`)              |
+| Temporal Ontology   | Reversible, symmetric (unitary evolution)           | Irreversible, probabilistic entanglement and decoherence          |
+| Causality           | Collapse happens *only at observation*              | Runtime causality is woven across spacetime                       |
+| Self-Reference      | Quining as eigenvector fixpoint `Ξ(⌜Ξ⌝)`            | Quining as recursive runtime instantiation                        |
+| Phase Model         | Phase = morphogenetic derivative Δⁿ                 | Phase = probabilistic time-loop coherence                         |
+| Entropy             | Algorithmic entropy, per morphogenetic reducibility | Entropic asymmetry via distributed resolution (Landauer cost)     |
+| Form of Evolution   | Morphological lifting in Hilbert space              | Entangled probabilistic resolution in runtime-space               |
+| Scale of Deployment | Logical -> Physical (quantum-classical synthesis)   | Physical -> Logical (statistical coherence → inference structure) |
+| Key Analogy         | A *quantum grammar* for logic and code              | A *statistical field theory* for code and causality               |
 
 So they’re categorically adjoint, not structurally identical. One reflects procedural ontology (ByteWord), the other generative topology (TopoWord).
 
@@ -2957,12 +2957,12 @@ This explains logical constraints on symbol manipulation within an axiomatic sys
 
 ### 1. :: Morphological Source Code as Hilbert-Manifold ::
 
-A framework that reinterprets computation not as classical finite state machines, but as **morphodynamic evolutions** in Hilbert spaces.
+A framework that reinterprets computation not as classical finite state machines, but as morphodynamic evolutions in Hilbert spaces.
 
 * Operators as Semantics: We elevate them to the role of semantic transformers adjoint morphisms in a Hilbert category.
 * Quines as Proofs: Quineic hysteresis a self-referential generator with memory is like a Gödel sentence with a runtime trace.
 
-This embeds *code*, *context*, and *computation* into a **self-evidencing system**, where identity iterated:
+This embeds *code*, *context*, and *computation* into a self-evidencing system, where identity iterated:
 
 ```math
 gen_{n+1} = T(gen_n) \quad \text{where } T \in \text{Set of Self-Adjoint Operators}
@@ -2972,15 +2972,15 @@ gen_{n+1} = T(gen_n) \quad \text{where } T \in \text{Set of Self-Adjoint Operato
 
 By reinterpreting {{CAP}} as emergent from quantum constraints:
 
-* **Consistency ⇨ Commutator Norm Zero**:
+* Consistency ⇨ Commutator Norm Zero:
 
   ```math
   [A, B] = 0 \Rightarrow \text{Consistent Observables}
   ```
-* **Availability ⇨ Decoherence Time**: Response guaranteed within τ\_c
-* **Partition Tolerance ⇨ Locality in Tensor Product Factorization**
+* Availability ⇨ Decoherence Time: Response guaranteed within τ\_c
+* Partition Tolerance ⇨ Locality in Tensor Product Factorization
 
-Physicalizing CAP and/or operationalizing epistemic uncertainty (thermodynamically) is **runtime** when the *network stack*, the *logical layer*, and *agentic inference* are just **3 orthogonal bases** in a higher-order tensor product space. That’s essentially an information-theoretic analog of the **AdS/CFT correspondence**.
+Physicalizing CAP and/or operationalizing epistemic uncertainty (thermodynamically) is runtime when the *network stack*, the *logical layer*, and *agentic inference* are just 3 orthogonal bases in a higher-order tensor product space. That’s essentially an information-theoretic analog of the AdS/CFT correspondence.
 
 ### :: Semantic-Physical Unification (Computational Ontology) ::
 
@@ -3008,13 +3008,13 @@ A compiler that interprets source as morphisms and evaluates transformations via
 * Eigenstate optimization for execution paths
 * Quantum-influenced intermediate representation (Q-IR)
 
-Agent architectures where agent state is a **closed loop** in semantic space:
+Agent architectures where agent state is a closed loop in semantic space:
 
 ```math
 A(t) = f(A(t - Δt)) + ∫_0^t O(ψ(s)) ds
 ```
 
-This allows **self-refining** systems with identity-preserving evolution—a computational analog to autopoiesis and cognitive recursion.
+This allows self-refining systems with identity-preserving evolution—a computational analog to autopoiesis and cognitive recursion.
 
 A DSL or runtime model where source code *is parsed into Hilbert-space operators* and semantically vectorized embeddings, possibly using:
 
@@ -3024,29 +3024,29 @@ A DSL or runtime model where source code *is parsed into Hilbert-space operators
 
 ---
 ### Extensionality in MSC
-The principle of **extensionality** states:
-- Two functions (or ByteWords, in MSC) are considered the same **if and only if** they produce identical outputs for all possible inputs.
+The principle of extensionality states:
+- Two functions (or ByteWords, in MSC) are considered the same if and only if they produce identical outputs for all possible inputs.
 
 In MSC, this principle applies to ByteWords because:
 - Arguments are inherently other ByteWords.
-- Functions are represented as transformations on ByteWords, often through **XOR-popcount operators** or other morphodynamic processes.
+- Functions are represented as transformations on ByteWords, often through XOR-popcount operators or other morphodynamic processes.
 
-However, the **limited scope of arguments and references** introduces an interesting wrinkle:
-- If all arguments are drawn from a **limited, locked-in L1 cache collection of ByteWords**, then two functions may appear extensionally equivalent because:
+However, the limited scope of arguments and references introduces an interesting wrinkle:
+- If all arguments are drawn from a limited, locked-in L1 cache collection of ByteWords, then two functions may appear extensionally equivalent because:
   - They operate on the same finite set of inputs.
   - Their outputs coincide for this limited set of ByteWords.
 
-This raises the question: **Are these functions truly the same, or do they differ in character?**
+This raises the question: Are these functions truly the same, or do they differ in character?
 
 ### Intensionality and Character
-While **extensionality** focuses on observable behavior, **intensionality** considers the internal structure or "character" of the functions."character" can manifest in several ways:
+While extensionality focuses on observable behavior, intensionality considers the internal structure or "character" of the functions."character" can manifest in several ways:
 
 Morphological Structure
-- The **T bits** (toroidal windings) and **V bits** (deputy masks) of ByteWords encode their internal structure:
+- The T bits (toroidal windings) and V bits (deputy masks) of ByteWords encode their internal structure:
   - Example: Two ByteWords might have identical outputs for a given set of inputs but differ in their winding pairs `(w₁, w₂)`.
 
 Thermodynamic State
-- The **C bit** (Captain bit) determines whether a ByteWord is active (`C=1`) or dormant (`C=0`):
+- The C bit (Captain bit) determines whether a ByteWord is active (`C=1`) or dormant (`C=0`):
   - Example: Two ByteWords might behave identically in terms of outputs but differ in their thermodynamic state.
 
 Entanglement
@@ -3054,17 +3054,17 @@ Entanglement
   - Example: Two ByteWords might produce the same outputs but differ in their entanglement relationships and history with other ByteWords.
 
 Deputizing Cascad
-- The **deputizing cascade** introduces a recursive history that influences the behavior of ByteWords:
+- The deputizing cascade introduces a recursive history that influences the behavior of ByteWords:
   - Example: Two ByteWords might appear extensionally equivalent but differ in their historical deputization paths.
 
 Why This Happens Frequently
-- **Arguments are limited**: All arguments are drawn from a small, fixed collection of ByteWords in L1 cache.
-- **Sparse-unitary semantics**: The sparse representation of ByteWords ensures that many transformations are locally indistinguishable.
-- **Non-Markovian dynamics**: The history of ByteWords influences their behavior, creating subtle differences that may not be apparent in extensional evaluations.
+- Arguments are limited: All arguments are drawn from a small, fixed collection of ByteWords in L1 cache.
+- Sparse-unitary semantics: The sparse representation of ByteWords ensures that many transformations are locally indistinguishable.
+- Non-Markovian dynamics: The history of ByteWords influences their behavior, creating subtle differences that may not be apparent in extensional evaluations.
 
 As a result:
-- Two ByteWords might appear **extensionally equivalent** when evaluated over a limited set of inputs.
-- However, they may differ in **intensional character**, reflecting deeper structural or relational differences.
+- Two ByteWords might appear extensionally equivalent when evaluated over a limited set of inputs.
+- However, they may differ in intensional character, reflecting deeper structural or relational differences.
 
 Limited Argument Scope
 - Suppose you have two ByteWords, `A` and `B`, operating on a small set of inputs `{X, Y, Z}`:
@@ -3072,11 +3072,11 @@ Limited Argument Scope
   - However, their internal structures (e.g., winding pairs, deputy masks) differ.
 
 Extensional Equivalence
-- From an **extensional perspective**, `A` and `B` are the same:
+- From an extensional perspective, `A` and `B` are the same:
   - Example: They satisfy the principle of extensionality for the given inputs.
 
 Intensional Differences
-- From an **intensional perspective**, `A` and `B` differ:
+- From an intensional perspective, `A` and `B` differ:
   - Example: Their winding pairs `(w₁, w₂)` or entanglement relationships reveal distinct characters.
 
 Emergent Behavior
@@ -3084,18 +3084,18 @@ Emergent Behavior
   - Example: A new input `W` might expose the divergence between `A` and `B`.
 
 ### Resolution Through Morphodynamics
-This framework provides tools to resolve this tension through **morphodynamic processes**:
+This framework provides tools to resolve this tension through morphodynamic processes:
 
 Saddle-Point Dynamics
 - The saddle-point acts as a filter, balancing extensional equivalence and intensional character:
   - Example: At the saddle-point, two ByteWords might temporarily converge before diverging again.
 
 Kronecker Delta
-- The **Kronecker delta** can determine whether two ByteWords are truly the same:
+- The Kronecker delta can determine whether two ByteWords are truly the same:
   - Example: If $\delta_{A,B} = 1$, then `A` and `B` are identical; otherwise, they differ.
 
 Algorithmic Entropy
-- The **algorithmic entropy** of ByteWords captures their complexity, revealing hidden differences:
+- The algorithmic entropy of ByteWords captures their complexity, revealing hidden differences:
   - Example: Two ByteWords with identical outputs might have different entropies due to their internal structures.
 
 ___
